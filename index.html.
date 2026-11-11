@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102c46">
+<title>الشفاء | حجز المواعيد الطبية</title>
+
+<style>
+:root {
+    --navy:#102c46;
+    --navy2:#174567;
+    --teal:#15a99a;
+    --teal-dark:#108b80;
+    --light:#e8f7f4;
+    --bg:#f3f7fa;
+    --white:#fff;
+    --text:#20394d;
+    --muted:#8293a0;
+    --border:#e5edf2;
+    --red:#d95665;
+    --green:#168b6b;
+    --orange:#e6a43a;
+    --shadow:0 12px 35px rgba(16,44,70,.07);
+    --radius:20px;
+}
+
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Tahoma,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.7;
+}
+
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{
+    outline:3px solid #15a99a55;
+    outline-offset:2px;
+}
+
+.shell{
+    max-width:1250px;
+    margin:auto;
+    padding:0 25px;
+}
+
+/* HEADER */
+
+.topbar{
+    height:82px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    position:relative;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:var(--navy);
+    text-decoration:none;
+    font-size:20px;
+    font-weight:900;
+}
+
+.brand-mark{
+    width:46px;
+    height:46px;
+    background:linear-gradient(135deg,var(--navy),#1e6680);
+    border-radius:15px;
+    display:grid;
+    place-items:center;
+    color:white;
+    font-size:27px;
+    box-shadow:0 7px 15px #102c4625;
+}
+
+.brand small{
+    display:block;
+    font-size:10px;
+    color:var(--muted);
+    font-weight:500;
+}
+
+.nav{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.nav button{
+    border:0;
+    background:transparent;
+    padding:10px 15px;
+    border-radius:11px;
+    color:#526b7e;
+    transition:.2s;
+}
+
+.nav button:hover,
+.nav button.active{
+    background:#e5f1f5;
+    color:var(--navy);
+}
+
+.menu{position:relative}
+
+.drop{
+    display:none;
+    position:absolute;
+    z-index:20;
+    top:calc(100% + 10px);
+    right:0;
+    min-width:210px;
+    padding:8px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    box-shadow:var(--shadow);
+}
+
+.drop.show{display:block}
+
+.drop button{
+    width:100%;
+    text-align:right;
+    display:block;
+}
+
+.drop button:hover{background:#f0f7f8}
+
+.mobile-menu{
+    display:none;
+    background:white;
+    border:1px solid var(--border);
+    padding:9px 13px;
+    border-radius:11px;
+    color:var(--navy);
+}
+
+.mobile-dropdown{
+    display:none;
+    position:absolute;
+    z-index:25;
+    top:65px;
+    left:0;
+    right:0;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    box-shadow:var(--shadow);
+    padding:8px;
+}
+
+.mobile-dropdown.open{display:grid}
+
+.mobile-dropdown button{
+    border:0;
+    background:transparent;
+    text-align:right;
+    padding:12px;
+    color:var(--navy);
+    border-radius:10px;
+}
+
+.mobile-dropdown button:hover{background:#eef6f7}
+
+.user-chip{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    background:#e6f4f1;
+    color:var(--navy);
+    padding:8px 13px;
+    border-radius:30px;
+    font-size:12px;
+}
+
+.user-chip button{
+    border:0;
+    background:transparent;
+    color:var(--red);
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    background:var(--teal);
+    border-radius:50%;
+}
+
+/* HERO */
+
+.hero{
+    background:linear-gradient(115deg,#102c46,#174c6a 65%,#147a7b);
+    color:white;
+    border-radius:27px;
+    padding:45px 48px;
+    min-height:255px;
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    align-items:center;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 15px 35px #102c4620;
+}
+
+.hero:before,
+.hero:after{
+    content:"";
+    position:absolute;
+    border:1px solid #ffffff17;
+    border-radius:50%;
+    width:350px;
+    height:350px;
+    left:-100px;
+    top:-200px;
+}
+
+.hero:after{
+    width:260px;
+    height:260px;
+    left:35px;
+    top:-150px;
+}
+
+.hero-copy{position:relative;z-index:2}
+
+.eyebrow{
+    color:#85e5d2;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.hero h1{
+    font-size:34px;
+    line-height:1.4;
+    margin:10px 0;
+}
+
+.hero p{
+    color:#d7e9ee;
+    max-width:570px;
+    margin:0;
+}
+
+.hero-art{
+    display:flex;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+}
+
+.medical-card{
+    width:225px;
+    padding:20px;
+    border-radius:23px;
+    background:#ffffff17;
+    border:1px solid #ffffff35;
+    backdrop-filter:blur(10px);
+    transform:rotate(-5deg);
+    box-shadow:0 20px 40px #071d3030;
+}
+
+.medical-card-top{
+    display:flex;
+    justify-content:space-between;
+    color:#d9efef;
+    font-size:11px;
+}
+
+.pulse{
+    height:55px;
+    margin:10px 0;
+    border-bottom:1px solid #ffffff55;
+}
+
+.pulse svg{width:100%;height:100%}
+
+.pills{display:flex;gap:7px}
+.pills i{
+    width:30px;
+    height:6px;
+    background:#7be0ca;
+    border-radius:10px;
+}
+.pills i:nth-child(2){width:45px;opacity:.6}
+.pills i:nth-child(3){width:20px;opacity:.4}
+
+/* TITLES */
+
+.section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    margin:30px 0 17px;
+    gap:15px;
+}
+
+.section-head h2{
+    color:var(--navy);
+    font-size:21px;
+    margin:0;
+}
+
+.section-head p{
+    margin:3px 0 0;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.secure-label{
+    background:#e4f6f0;
+    color:#13846d;
+    border-radius:30px;
+    padding:8px 13px;
+    font-size:11px;
+}
+
+/* LAYOUT */
+
+.layout{
+    display:grid;
+    grid-template-columns:minmax(0,1.4fr) minmax(290px,.8fr);
+    gap:20px;
+    align-items:start;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:25px;
+    box-shadow:var(--shadow);
+}
+
+.card-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.iconbox{
+    width:43px;
+    height:43px;
+    display:grid;
+    place-items:center;
+    background:#e4f6f1;
+    color:#118879;
+    border-radius:14px;
+    font-size:21px;
+}
+
+.card-title h3{
+    color:var(--navy);
+    margin:0;
+    font-size:16px;
+}
+
+.card-title p{
+    color:var(--muted);
+    font-size:11px;
+    margin:2px 0 0;
+}
+
+/* BANK */
+
+.bank-box{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:16px;
+    background:#f0faf7;
+    border:1px solid #d8eee7;
+    border-radius:15px;
+    margin-bottom:20px;
+}
+
+.bank-box strong{
+    color:var(--navy);
+    display:block;
+}
+
+.bank-box small{
+    color:var(--muted);
+    font-size:10px;
+}
+
+.bank-number{
+    color:#118879;
+    font-weight:900;
+    font-size:19px;
+    letter-spacing:2px;
+    direction:ltr;
+    text-align:right;
+}
+
+.copy-btn{
+    border:0;
+    border-radius:10px;
+    background:white;
+    color:#118879;
+    padding:9px 13px;
+    font-size:11px;
+}
+
+/* FORM */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.field.full{grid-column:1/-1}
+
+.field label{
+    color:#425e73;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.field input,
+.field select{
+    width:100%;
+    padding:13px;
+    border:1px solid #dce6eb;
+    border-radius:12px;
+    background:white;
+    color:var(--text);
+    outline:none;
+    transition:.2s;
+}
+
+.field input:focus,
+.field select:focus{
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px #15a99a18;
+}
+
+.hint{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.upload{
+    border:1px dashed #b8d1da;
+    border-radius:13px;
+    padding:15px;
+    background:#fbfdfe;
+}
+
+.upload input{
+    border:0;
+    padding:5px 0;
+}
+
+.file-name{
+    color:var(--green);
+    font-size:10px;
+}
+
+.checkline{
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    margin:17px 0;
+    color:#70818e;
+    font-size:11px;
+}
+
+.checkline input{
+    accent-color:var(--teal);
+    margin-top:5px;
+}
+
+.primary{
+    background:linear-gradient(135deg,var(--teal),#108e83);
+    color:white;
+    border:0;
+    border-radius:12px;
+    padding:14px 18px;
+    font-weight:bold;
+    box-shadow:0 7px 18px #15a99a30;
+    transition:.2s;
+}
+
+.primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px #15a99a45;
+}
+
+.wide{width:100%}
+
+.secondary{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--navy);
+    padding:9px 13px;
+}
+
+/* STATUS */
+
+.status-card{min-height:250px}
+
+.status-empty{
+    text-align:center;
+    border:1px dashed #dce7eb;
+    background:#fbfdfe;
+    border-radius:16px;
+    padding:25px 15px;
+    color:var(--muted);
+}
+
+.empty-illustration{
+    width:55px;
+    height:55px;
+    display:grid;
+    place-items:center;
+    background:#edf5f8;
+    color:#63889b;
+    border-radius:18px;
+    margin:0 auto 10px;
+    font-size:24px;
+}
+
+.status-empty strong{
+    display:block;
+    color:#385368;
+    font-size:13px;
+}
+
+.status-entry{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:16px;
+}
+
+.status-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.status-top strong{color:var(--navy)}
+
+.badge{
+    display:inline-block;
+    font-size:10px;
+    padding:5px 10px;
+    border-radius:30px;
+    background:#fff3dc;
+    color:#a96a05;
+    white-space:nowrap;
+}
+
+.badge.ok{
+    background:#e3f6f1;
+    color:#087c68;
+}
+
+.badge.blue{
+    background:#e9f3fb;
+    color:#356c9a;
+}
+
+.status-details{
+    color:var(--muted);
+    font-size:11px;
+    margin:12px 0;
+}
+
+.ticket{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:#f1f8f7;
+    padding:13px;
+    border-radius:13px;
+}
+
+.ticket-num{
+    color:#138d81;
+    font-size:25px;
+    font-weight:900;
+}
+
+.ticket small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.notice{
+    background:#fff8e9;
+    color:#94611b;
+    padding:11px;
+    border-radius:11px;
+    font-size:10px;
+    margin-top:13px;
+}
+
+/* TRUST */
+
+.trust-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:13px;
+    margin:25px 0 40px;
+}
+
+.trust-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+}
+
+.trust-icon{
+    color:var(--teal);
+    font-size:22px;
+}
+
+.trust-item strong{
+    display:block;
+    color:#27475d;
+    font-size:11px;
+}
+
+.trust-item small{
+    color:var(--muted);
+    font-size:10px;
+}
+
+/* ADMIN DASHBOARD */
+
+.panel{margin:25px 0 40px}
+
+.panel-header{
+    background:linear-gradient(110deg,#102c46,#1a506a);
+    border-radius:20px;
+    padding:24px;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.panel-header h2{
+    margin:0 0 5px;
+    font-size:20px;
+}
+
+.panel-header p{
+    color:#c5dbe4;
+    font-size:11px;
+    margin:0;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.stat{
+    min-width:100px;
+    padding:12px 15px;
+    border:1px solid #ffffff25;
+    background:#ffffff13;
+    border-radius:13px;
+}
+
+.stat b{
+    display:block;
+    font-size:22px;
+}
+
+.stat small{
+    color:#d6e5eb;
+    font-size:10px;
+}
+
+.panel-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 300px;
+    gap:18px;
+    margin-top:18px;
+}
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:15px;
+}
+
+.toolbar h3{
+    color:var(--navy);
+    margin:0;
+    font-size:15px;
+}
+
+.table-wrap{overflow:auto}
+
+.table{
+    width:100%;
+    min-width:690px;
+    border-collapse:collapse;
+}
+
+.table th{
+    background:#f5f9fa;
+    color:#8293a0;
+    text-align:right;
+    padding:13px 10px;
+    font-size:10px;
+}
+
+.table td{
+    border-bottom:1px solid #edf1f4;
+    padding:13px 10px;
+    font-size:11px;
+}
+
+.patient{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    white-space:nowrap;
+}
+
+.avatar{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    border-radius:11px;
+    background:#e4f4f1;
+    color:#148c7c;
+    font-weight:bold;
+}
+
+.action{
+    border:0;
+    border-radius:9px;
+    padding:8px 10px;
+    font-size:10px;
+    font-weight:bold;
+    white-space:nowrap;
+    margin:2px;
+}
+
+.action.green{background:#e4f6ef;color:#0b7c5d}
+.action.red{background:#fff0f0;color:#bc4e58}
+.action.blue{background:#edf5fb;color:#316d98}
+
+.action:hover{filter:brightness(.96)}
+
+.side-note{
+    background:#f5f9fa;
+    border-radius:13px;
+    padding:14px;
+    margin-top:12px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.side-note b{
+    display:block;
+    color:var(--navy);
+    margin-bottom:5px;
+}
+
+/* MODAL */
+
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:18px;
+    background:#0c2239b0;
+    backdrop-filter:blur(4px);
+}
+
+.modal-backdrop.open{display:flex}
+
+.modal{
+    background:white;
+    width:min(430px,100%);
+    padding:27px;
+    border-radius:22px;
+    box-shadow:0 25px 80px #06192d66;
+    position:relative;
+    animation:modalIn .2s ease;
+}
+
+@keyframes modalIn{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+.modal h2{
+    margin:0;
+    color:var(--navy);
+}
+
+.modal p{
+    color:var(--muted);
+    font-size:12px;
+    margin:5px 0 20px;
+}
+
+.modal-close{
+    position:absolute;
+    left:16px;
+    top:15px;
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:10px;
+    background:#f0f5f7;
+    color:var(--navy);
+    font-size:20px;
+}
+
+.role-icon{
+    width:55px;
+    height:55px;
+    border-radius:17px;
+    background:#e7f6f3;
+    color:#168b7c;
+    display:grid;
+    place-items:center;
+    font-size:24px;
+    margin-bottom:14px;
+}
+
+.modal .field{margin-bottom:13px}
+
+.demo-note{
+    padding:11px;
+    background:#f4f8fa;
+    border-radius:11px;
+    color:#718391;
+    font-size:10px;
+    margin:12px 0;
+}
+
+.alert{
+    display:none;
+    padding:10px;
+    border-radius:10px;
+    margin:12px 0;
+    font-size:11px;
+}
+
+.alert.show{display:block}
+.alert.error{background:#fff0ef;color:#ae4349}
+
+/* FOOTER AND TOAST */
+
+.footer{
+    border-top:1px solid var(--border);
+    padding:20px 0 28px;
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.security-footnote{
+    border-right:3px solid #f0bb5a;
+    padding:7px 12px;
+    color:#798a95;
+    font-size:10px;
+    margin-top:20px;
+}
+
+.toast{
+    position:fixed;
+    bottom:22px;
+    left:50%;
+    transform:translate(-50%,30px);
+    opacity:0;
+    pointer-events:none;
+    z-index:100;
+    background:#153d55;
+    color:white;
+    padding:12px 19px;
+    border-radius:13px;
+    font-size:12px;
+    box-shadow:var(--shadow);
+    transition:.25s;
+    max-width:90%;
+    text-align:center;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+.hide{display:none!important}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+    .hero{grid-template-columns:1.3fr .7fr;padding:35px}
+    .hero h1{font-size:28px}
+    .layout{grid-template-columns:1fr}
+    .panel-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:650px){
+    .shell{padding:0 15px}
+    .topbar{height:72px}
+    .brand{font-size:17px}
+    .brand-mark{width:40px;height:40px}
+    .nav{display:none}
+    .mobile-menu{display:block}
+    .hero{
+        grid-template-columns:1fr;
+        padding:28px 23px;
+        min-height:0;
+    }
+    .hero h1{font-size:25px}
+    .hero-art{display:none}
+    .section-head{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    .card{padding:18px}
+    .form-grid{grid-template-columns:1fr}
+    .field.full{grid-column:auto}
+    .trust-row{grid-template-columns:1fr}
+    .footer{flex-direction:column;gap:5px}
+    .panel-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    .stats{width:100%}
+    .stat{min-width:0;padding:9px}
+    .stat b{font-size:18px}
+    .panel-grid{display:block}
+    .panel-grid>.card+ .card{margin-top:14px}
+    .toolbar{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+
+<header class="topbar">
+
+<a class="brand" href="#" onclick="showBooking();return false">
+    <span class="brand-mark">✚</span>
+    <span>الشفاء<small>نظام المواعيد الطبية</small></span>
+</a>
+
+<nav class="nav">
+    <button onclick="showBooking()">الرئيسية</button>
+
+    <div class="menu">
+        <button onclick="toggleDrop('regDrop',event)">التسجيل⌄</button>
+        <div class="drop" id="regDrop">
+            <button onclick="showBooking();closeDrops()">＋ حجز موعد جديد</button>
+            <button onclick="focusStatus();closeDrops()">◷ متابعة حالة الحجز</button>
+        </div>
+    </div>
+
+    <div class="menu">
+        <button onclick="toggleDrop('adminDrop',event)">الإدارة⌄</button>
+        <div class="drop" id="adminDrop">
+            <button onclick="openLogin('accountant');closeDrops()">▣ دخول المحاسب</button>
+            <button onclick="openLogin('doctor');closeDrops()">✚ دخول الطبيب</button>
+        </div>
+    </div>
+</nav>
+
+<button class="mobile-menu" onclick="toggleMobileMenu()">القائمة ☰</button>
+
+<div class="mobile-dropdown" id="mobileDropdown">
+    <button onclick="showBooking();closeMobileMenu()">حجز موعد جديد</button>
+    <button onclick="focusStatus();closeMobileMenu()">متابعة حالة الحجز</button>
+    <button onclick="openLogin('accountant');closeMobileMenu()">دخول المحاسب</button>
+    <button onclick="openLogin('doctor');closeMobileMenu()">دخول الطبيب</button>
+</div>
+
+<div id="userChip" class="user-chip hide">
+    <span class="dot"></span>
+    <span id="userName"></span>
+    <button onclick="logout()">خروج</button>
+</div>
+
+</header>
+
+<main id="bookingView">
+
+<section class="hero">
+
+<div class="hero-copy">
+    <div class="eyebrow">رعاية أقرب.. وانتظار أقل</div>
+    <h1>احجز موعدك الطبي<br>بخطوات بسيطة</h1>
+    <p>أرسل طلبك وسند الدفع من مكانك، وتابع حالة الحجز ورقم دورك حتى يحين موعدك.</p>
+</div>
+
+<div class="hero-art">
+    <div class="medical-card">
+        <div class="medical-card-top">
+            <span>مواعيدك الصحية</span>
+            <span>● متاح</span>
+        </div>
+        <div class="pulse">
+            <svg viewBox="0 0 220 48" fill="none">
+                <path d="M0 28h49l11-1 8-17 12 33 13-24 8 9h33l11-1 9-18 13 32 12-13h41"
+                stroke="#94e8d6" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="pills"><i></i><i></i><i></i></div>
+    </div>
+</div>
+
+</section>
+
+<div class="section-head">
+    <div>
+        <h2>طلب حجز موعد</h2>
+        <p>املأ البيانات التالية لإرسال طلبك إلى العيادة</p>
+    </div>
+    <div class="secure-label">⌑ بياناتك محفوظة بأمان</div>
+</div>
+
+<div class="layout">
+
+<section class="card">
+
+<div class="card-title">
+    <span class="iconbox">▦</span>
+    <div>
+        <h3>بيانات الحجز</h3>
+        <p>الحقول التي عليها نجمة مطلوبة</p>
+    </div>
+</div>
+
+<div class="bank-box">
+    <div>
+        <strong>بيانات التحويل البنكي</strong>
+        <small>بنك الكريمي الإسلامي · مستشفى الشفاء الطبي الموحد</small>
+        <div class="bank-number">30155444</div>
+    </div>
+    <button class="copy-btn" onclick="copyAccount()">نسخ الرقم</button>
+</div>
+
+<form id="bookingForm" novalidate>
+
+<div class="form-grid">
+
+<div class="field">
+    <label for="patientName">اسم المريض الكامل *</label>
+    <input id="patientName" maxlength="90" autocomplete="name"
+    placeholder="مثال: عبدالله محمد" required>
+</div>
+
+<div class="field">
+    <label for="phone">رقم الهاتف *</label>
+    <input id="phone" inputmode="tel" maxlength="18"
+    placeholder="77xxxxxxx" required>
+    <span class="hint">يستخدم لمطابقة طلبك</span>
+</div>
+
+<div class="field">
+    <label for="doctorSelect">الطبيب / العيادة *</label>
+    <select id="doctorSelect" required>
+        <option value="">اختر العيادة المناسبة</option>
+        <option value="د. أحمد — عيادة الباطنية">د. أحمد — عيادة الباطنية</option>
+        <option value="د. سارة — عيادة الأطفال">د. سارة — عيادة الأطفال</option>
+        <option value="د. محمد — عيادة القلب">د. محمد — عيادة القلب</option>
+        <option value="د. ليلى — عيادة الجلدية">د. ليلى — عيادة الجلدية</option>
+    </select>
+</div>
+
+<div class="field">
+    <label for="visitDate">التاريخ المفضل *</label>
+    <input type="date" id="visitDate" required>
+    <span class="hint">يؤكد الموعد بعد مراجعة الدفع</span>
+</div>
+
+<div class="field full">
+    <label for="receipt">صورة سند التحويل *</label>
+    <div class="upload">
+        <input type="file" id="receipt"
+        accept="image/jpeg,image/png,image/webp">
+        <div class="hint">PNG أو JPG أو WEBP · الحد الأقصى 5 ميجابايت</div>
+        <div class="file-name" id="fileName"></div>
+    </div>
+</div>
+
+</div>
+
+<label class="checkline">
+    <input type="checkbox" id="agree">
+    <span>أقر بصحة البيانات وأفهم أن الحجز يبقى قيد مراجعة الدفع حتى اعتماده من المحاسب.</span>
+</label>
+
+<button class="primary wide" type="submit">إرسال طلب الحجز ←</button>
+
+</form>
+
+<div class="security-footnote">
+    هذا نموذج تجريبي يعمل داخل المتصفح. يجب ربطه بباك إند وقاعدة بيانات لحماية البيانات والتحقق من المدفوعات فعليًا.
+</div>
+
+</section>
+
+<aside class="card status-card" id="statusCard">
+
+<div class="card-title">
+    <span class="iconbox">◷</span>
+    <div>
+        <h3>حالة موعدك</h3>
+        <p>تابع آخر تحديث لطلبك من هذا المتصفح</p>
+    </div>
+</div>
+
+<div id="statusContent"></div>
+
+<div class="notice">
+    بعد اعتماد الدفع سيظهر رقم الدور. يرجى الحضور قبل الموعد بـ 10 دقائق.
+</div>
+
+</aside>
+
+</div>
+
+<div class="trust-row">
+
+<div class="trust-item">
+    <span class="trust-icon">◉</span>
+    <div>
+        <strong>حجز من أي مكان</strong>
+        <small>أرسل طلبك دون انتظار</small>
+    </div>
+</div>
+
+<div class="trust-item">
+    <span class="trust-icon">▤</span>
+    <div>
+        <strong>مراجعة مالية منظمة</strong>
+        <small>تدقيق سند الدفع قبل الاعتماد</small>
+    </div>
+</div>
+
+<div class="trust-item">
+    <span class="trust-icon">◷</span>
+    <div>
+        <strong>دور واضح ومنصف</strong>
+        <small>تابع رقمك وحالة الانتظار</small>
+    </div>
+</div>
+
+</div>
+
+</main>
+
+<main id="dashboardView" class="hide"></main>
+
+<footer class="footer">
+    <span>© 2026 مستشفى الشفاء الطبي الموحد</span>
+    <span>نظام حجز المواعيد الطبية</span>
+</footer>
+
+</div>
+
+<!-- LOGIN MODAL -->
+
+<div class="modal-backdrop" id="loginBackdrop"
+onclick="backdropClose(event)">
+
+<section class="modal" role="dialog" aria-modal="true">
+
+<button class="modal-close" onclick="closeLogin()">×</button>
+
+<div class="role-icon" id="loginIcon">▣</div>
+
+<h2 id="loginTitle">دخول المحاسب</h2>
+<p id="loginDescription">أدخل كلمة المرور للمتابعة.</p>
+
+<form id="loginForm">
+
+<div class="field">
+    <label for="loginPassword">كلمة المرور</label>
+    <input type="password" id="loginPassword"
+    autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
+</div>
+
+<div class="alert error" id="loginError"></div>
+
+<div class="demo-note" id="demoNote"></div>
+
+<button class="primary wide" type="submit">تسجيل الدخول ←</button>
+
+</form>
+</section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+/* إعدادات النموذج التجريبي */
+
+const STORE_KEY='alshifa_demo_appointments_v1';
+
+const DEMO_PASSWORDS={
+    accountant:'2468',
+    doctor:'1357'
+};
+
+let currentRole=null;
+
+/* التاريخ */
+
+const today=new Date();
+
+document.getElementById('visitDate').min=
+new Date(today.getTime()-today.getTimezoneOffset()*60000)
+.toISOString().slice(0,10);
+
+/* التخزين المحلي */
+
+function loadAppointments(){
+    try{
+        const data=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+        return Array.isArray(data)?data:[];
+    }catch{
+        return [];
+    }
+}
+
+function saveAppointments(rows){
+    localStorage.setItem(STORE_KEY,JSON.stringify(rows));
+}
+
+/* حماية عرض النصوص */
+
+function safeText(value){
+    return String(value??'').replace(/[&<>"']/g,c=>({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+    }[c]));
+}
+
+/* الإشعارات */
+
+function toast(message){
+    const element=document.getElementById('toast');
+    element.textContent=message;
+    element.classList.add('show');
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer=setTimeout(()=>{
+        element.classList.remove('show');
+    },3000);
+}
+
+/* التنقل */
+
+function closeDrops(){
+    document.querySelectorAll('.drop').forEach(x=>{
+        x.classList.remove('show');
+    });
+}
+
+function toggleDrop(id,event){
+    event.stopPropagation();
+
+    document.querySelectorAll('.drop').forEach(x=>{
+        if(x.id!==id)x.classList.remove('show');
+    });
+
+    document.getElementById(id).classList.toggle('show');
+}
+
+document.addEventListener('click',event=>{
+    if(!event.target.closest('.menu'))closeDrops();
+});
+
+function toggleMobileMenu(){
+    document.getElementById('mobileDropdown').classList.toggle('open');
+}
+
+function closeMobileMenu(){
+    document.getElementById('mobileDropdown').classList.remove('open');
+}
+
+function showBooking(){
+    document.getElementById('bookingView').classList.remove('hide');
+    document.getElementById('dashboardView').classList.add('hide');
+    document.getElementById('userChip').classList.add('hide');
+
+    currentRole=null;
+
+    renderStatus();
+
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function focusStatus(){
+    showBooking();
+
+    document.getElementById('statusCard')
+    .scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* تسجيل الدخول */
+
+function openLogin(role){
+
+    currentRole=role;
+
+    const accountant=role==='accountant';
+
+    document.getElementById('loginTitle').textContent=
+    accountant?'دخول المحاسب':'دخول الطبيب';
+
+    document.getElementById('loginDescription').textContent=
+    accountant
+    ?'أدخل كلمة المرور لمراجعة سندات الدفع.'
+    :'أدخل كلمة المرور لإدارة طابور العيادة.';
+
+    document.getElementById('loginIcon').textContent=
+    accountant?'▣':'✚';
+
+    document.getElementById('demoNote').innerHTML=
+    accountant
+    ?'كلمة المرور التجريبية: <b>2468</b>'
+    :'كلمة المرور التجريبية: <b>1357</b>';
+
+    document.getElementById('loginError').classList.remove('show');
+
+    document.getElementById('loginPassword').value='';
+
+    document.getElementById('loginBackdrop').classList.add('open');
+
+    setTimeout(()=>{
+        document.getElementById('loginPassword').focus();
+    },100);
+}
+
+function closeLogin(){
+    document.getElementById('loginBackdrop').classList.remove('open');
+}
+
+function backdropClose(event){
+    if(event.target.id==='loginBackdrop')closeLogin();
+}
+
+document.getElementById('loginForm').addEventListener('submit',event=>{
+
+    event.preventDefault();
+
+    const password=document.getElementById('loginPassword').value;
+
+    if(password!==DEMO_PASSWORDS[currentRole]){
+
+        const error=document.getElementById('loginError');
+
+        error.textContent='كلمة المرور غير صحيحة. حاول مرة أخرى.';
+        error.classList.add('show');
+
+        return;
+    }
+
+    closeLogin();
+
+    renderDashboard(currentRole);
+});
+
+function logout(){
+
+    currentRole=null;
+
+    document.getElementById('userChip').classList.add('hide');
+
+    showBooking();
+
+    toast('تم تسجيل الخروج');
+}
+
+/* نموذج الحجز */
+
+function normalizedPhone(value){
+    return value.replace(/[\s()+-]/g,'');
+}
+
+function validPhone(value){
+    return /^\d{8,15}$/.test(normalizedPhone(value));
+}
+
+const form=document.getElementById('bookingForm');
+const receiptInput=document.getElementById('receipt');
+
+receiptInput.addEventListener('change',()=>{
+
+    const file=receiptInput.files[0];
+
+    document.getElementById('fileName').textContent=
+    file?`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`:'';
+});
+
+form.addEventListener('submit',event=>{
+
+    event.preventDefault();
+
+    const name=document.getElementById('patientName').value.trim();
+
+    const phone=normalizedPhone(
+        document.getElementById('phone').value
+    );
+
+    const doctor=document.getElementById('doctorSelect').value;
+
+    const date=document.getElementById('visitDate').value;
+
+    const file=receiptInput.files[0];
+
+    if(name.length<3){
+        toast('يرجى كتابة الاسم الكامل');
+        return;
+    }
+
+    if(!validPhone(phone)){
+        toast('أدخل رقم هاتف صحيحًا');
+        return;
+    }
+
+    if(!doctor||!date){
+        toast('يرجى اختيار العيادة والتاريخ');
+        return;
+    }
+
+    if(date<document.getElementById('visitDate').min){
+        toast('لا يمكن اختيار تاريخ سابق');
+        return;
+    }
+
+    if(!file){
+        toast('يرجى إرفاق صورة سند التحويل');
+        return;
+    }
+
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+        toast('نوع الملف غير مسموح');
+        return;
+    }
+
+    if(file.size>5*1024*1024){
+        toast('حجم الصورة أكبر من 5 ميجابايت');
+        return;
+    }
+
+    if(!document.getElementById('agree').checked){
+        toast('يرجى الموافقة على الإقرار');
+        return;
+    }
+
+    const rows=loadAppointments();
+
+    const duplicate=rows.find(row=>
+        row.phone===phone&&
+        row.doctor===doctor&&
+        row.date===date&&
+        !['skipped','completed'].includes(row.status)
+    );
+
+    if(duplicate){
+        toast('لديك طلب قائم لنفس الطبيب والتاريخ');
+        return;
+    }
+
+    const row={
+        id:crypto.randomUUID?
+        crypto.randomUUID():
+        'appt-'+Date.now(),
+
+        name,
+        phone,
+        doctor,
+        date,
+
+        createdAt:new Date().toISOString(),
+
+        status:'pending',
+        queue:null,
+
+        receiptName:file.name
+    };
+
+    rows.unshift(row);
+
+    saveAppointments(rows);
+
+    form.reset();
+
+    document.getElementById('fileName').textContent='';
+
+    renderStatus();
+
+    toast('تم تسجيل الطلب محليًا وبانتظار مراجعة الدفع');
+
+    document.getElementById('statusCard')
+    .scrollIntoView({behavior:'smooth',block:'center'});
+
+});
+
+/* عرض حالة الحجز */
+
+function renderStatus(){
+
+    const content=document.getElementById('statusContent');
+
+    const rows=loadAppointments();
+
+    const row=rows[0];
+
+    if(!row){
+
+        content.innerHTML=`
+        <div class="status-empty">
+            <div class="empty-illustration">◷</div>
+            <strong>لا يوجد حجز نشط حتى الآن</strong>
+            <span style="font-size:11px">سيظهر طلبك هنا بعد إرساله</span>
+        </div>`;
+
+        return;
+    }
+
+    let badge='<span class="badge">قيد مراجعة الدفع</span>';
+
+    let extra='طلبك بانتظار مراجعة سند التحويل.';
+
+    if(row.status==='approved'){
+        badge='<span class="badge ok">معتمد · قيد الانتظار</span>';
+        extra='تم اعتماد الدفع. تابع رقم دورك.';
+    }
+
+    if(row.status==='in_progress'){
+        badge='<span class="badge blue">بدأ الكشف</span>';
+        extra='الطبيب بدأ استقبال حالتك.';
+    }
+
+    if(row.status==='skipped'){
+        badge='<span class="badge" style="background:#fde9eb;color:#ae4653">تم تجاوز الدور</span>';
+        extra='يرجى التواصل مع الاستقبال.';
+    }
+
+    if(row.status==='completed'){
+        badge='<span class="badge ok">اكتمل الكشف</span>';
+        extra='نتمنى لك دوام الصحة والعافية.';
+    }
+
+    content.innerHTML=`
+    <div class="status-entry">
+
+        <div class="status-top">
+            <strong>${safeText(row.name)}</strong>
+            ${badge}
+        </div>
+
+        <div class="status-details">
+            ${safeText(row.doctor)}
+            <br>
+            التاريخ المفضل: ${safeText(row.date)}
+            <br>
+            ${extra}
+        </div>
+
+        ${row.queue?`
+        <div class="ticket">
+            <div class="ticket-num">#${safeText(row.queue)}</div>
+            <div>
+                <b>رقم دورك</b>
+                <small>تابع تعليمات الطبيب</small>
+            </div>
+        </div>`:''}
+
+    </div>`;
+}
+
+/* لوحة الإدارة */
+
+function renderDashboard(role){
+
+    document.getElementById('bookingView').classList.add('hide');
+
+    const view=document.getElementById('dashboardView');
+
+    view.classList.remove('hide');
+
+    document.getElementById('userChip').classList.remove('hide');
+
+    document.getElementById('userName').textContent=
+    role==='accountant'?'المحاسب':'الطبيب';
+
+    const rows=loadAppointments();
+
+    const waiting=rows.filter(x=>x.status==='pending');
+
+    const approved=rows.filter(x=>x.status==='approved');
+
+    const active=rows.filter(x=>
+        ['approved','in_progress'].includes(x.status)
+    );
+
+    const admin=role==='accountant';
+
+    const visibleRows=admin?waiting:active;
+
+    let tableRows=visibleRows.map((row,index)=>`
+
+    <tr>
+
+        <td>${admin?'—':`#${safeText(row.queue||index+1)}`}</td>
+
+        <td>
+            <div class="patient">
+                <span class="avatar">${safeText(row.name.slice(0,1))}</span>
+                <span>
+                    ${safeText(row.name)}
+                    <small style="display:block;color:#8999a4">
+                        ${safeText(row.phone)}
+                    </small>
+                </span>
+            </div>
+        </td>
+
+        <td>${safeText(row.doctor)}</td>
+
+        <td>${safeText(row.date)}</td>
+
+        <td>
+            ${admin
+            ?'<span class="badge">قيد مراجعة الدفع</span>'
+            :`<span class="badge ${row.status==='in_progress'?'blue':'ok'}">
+                ${row.status==='in_progress'?'بدأ الكشف':'قيد الانتظار'}
+              </span>`}
+        </td>
+
+        <td>
+            ${admin
+            ?`
+                <button class="action blue"
+                onclick="viewReceipt('${safeText(row.id)}')">
+                استعراض السند
+                </button>
+
+                <button class="action green"
+                onclick="approve('${safeText(row.id)}')">
+                اعتماد مالي
+                </button>
+            `
+            :`
+                <button class="action green"
+                onclick="doctorAction('${safeText(row.id)}','in_progress')">
+                حضر · بدء الكشف
+                </button>
+
+                <button class="action red"
+                onclick="doctorAction('${safeText(row.id)}','skipped')">
+                تأخر · تجاوز
+                </button>
+
+                <button class="action blue"
+                onclick="doctorAction('${safeText(row.id)}','completed')">
+                إنهاء الكشف
+                </button>
+            `}
+        </td>
+
+    </tr>
+
+    `).join('');
+
+    if(!tableRows){
+
+        tableRows=`
+        <tr>
+            <td colspan="6" style="text-align:center;padding:30px;color:#81919d">
+                ${admin?'لا توجد طلبات معلقة للمراجعة.':'لا يوجد مرضى في الطابور حاليًا.'}
+            </td>
+        </tr>`;
+    }
+
+    view.innerHTML=`
+
+    <section class="panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>${admin?'لوحة مراجعة المدفوعات':'لوحة إدارة طابور العيادة'}</h2>
+
+                <p>
+                    ${admin
+                    ?'راجع سندات التحويل واعتمد الطلبات.'
+                    :'إدارة المرضى المعتمدين ماليًا.'}
+                </p>
+            </div>
+
+            <div class="stats">
+
+                <div class="stat">
+                    <b>${admin?waiting.length:active.length}</b>
+                    <small>${admin?'طلبات للمراجعة':'في العيادة الآن'}</small>
+                </div>
+
+                <div class="stat">
+                    <b>${approved.length}</b>
+                    <small>بانتظار الطبيب</small>
+                </div>
+
+                <div class="stat">
+                    <b>${rows.length}</b>
+                    <small>إجمالي الطلبات</small>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="panel-grid">
+
+            <section class="card">
+
+                <div class="toolbar">
+
+                    <div>
+                        <h3>${admin?'طلبات بانتظار مراجعة الدفع':'الطابور الحالي'}</h3>
+                        <span class="hint">بيانات تجريبية من هذا المتصفح</span>
+                    </div>
+
+                    <button class="secondary"
+                    onclick="renderDashboard('${role}')">
+                    ⟳ تحديث
+                    </button>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table class="table">
+
+                        <thead>
+                            <tr>
+                                <th>${admin?'رقم':'الدور'}</th>
+                                <th>اسم المريض</th>
+                                <th>العيادة</th>
+                                <th>موعد الزيارة</th>
+                                <th>الحالة</th>
+                                <th>الإجراء</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>${tableRows}</tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+            <aside class="card">
+
+                <div class="card-title">
+                    <span class="iconbox">${admin?'▣':'✚'}</span>
+
+                    <div>
+                        <h3>${admin?'مهام المحاسب':'مهام الطبيب'}</h3>
+                        <p>صلاحيات منفصلة حسب نوع الحساب</p>
+                    </div>
+                </div>
+
+                <div class="side-note">
+                    <b>${admin?'تدقيق السندات':'تنظيم أدوار المرضى'}</b>
+
+                    ${admin
+                    ?'افتح بيانات السند وتحقق منها قبل اعتماد الطلب.'
+                    :'سجل حضور المريض وبدء الكشف أو تجاوزه أو إنهاء الكشف.'}
+                </div>
+
+                <div class="side-note">
+                    <b>ملاحظة مهمة</b>
+                    هذه نسخة تجريبية. يجب ربط النظام بقاعدة بيانات وخادم حقيقي قبل الاستخدام الفعلي.
+                </div>
+
+            </aside>
+
+        </div>
+
+    </section>`;
+
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* اعتماد الدفع */
+
+function approve(id){
+
+    const rows=loadAppointments();
+
+    const row=rows.find(x=>x.id===id);
+
+    if(!row)return;
+
+    row.status='approved';
+
+    row.queue=rows.filter(x=>
+        x.status==='approved'||x.status==='in_progress'
+    ).length+1;
+
+    saveAppointments(rows);
+
+    renderDashboard('accountant');
+
+    toast('تم اعتماد الطلب وإضافته إلى طابور الطبيب');
+}
+
+/* إجراءات الطبيب */
+
+function doctorAction(id,status){
+
+    const rows=loadAppointments();
+
+    const row=rows.find(x=>x.id===id);
+
+    if(!row)return;
+
+    row.status=status;
+
+    saveAppointments(rows);
+
+    renderDashboard('doctor');
+
+    if(status==='in_progress'){
+        toast('تم تسجيل حضور المريض وبدء الكشف');
+    }else if(status==='skipped'){
+        toast('تم تسجيل تجاوز الدور');
+    }else{
+        toast('تم إنهاء الكشف');
+    }
+}
+
+/* سند التحويل */
+
+function viewReceipt(id){
+
+    const row=loadAppointments().find(x=>x.id===id);
+
+    if(!row)return;
+
+    alert(
+        'اسم الملف المرفق: '+row.receiptName+
+        '\n\nهذه النسخة تحفظ اسم الملف فقط ولا ترفع الصورة إلى خادم.'
+    );
+}
+
+/* نسخ رقم الحساب */
+
+function copyAccount(){
+
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+
+        navigator.clipboard.writeText('30155444')
+        .then(()=>toast('تم نسخ رقم الحساب'))
+        .catch(()=>toast('رقم الحساب: 30155444'));
+
+    }else{
+
+        toast('رقم الحساب: 30155444');
+
+    }
+}
+
+/* التشغيل الأول */
+
+renderStatus();
+
+</script>
+
+</body>
+</html>

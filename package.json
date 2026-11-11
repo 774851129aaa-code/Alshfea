@@ -1,0 +1,13 @@
+{
+  "name": "alshifa-booking-system",
+  "version": "1.0.0",
+  "description": "Alshifa Medical Appointment Booking System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}

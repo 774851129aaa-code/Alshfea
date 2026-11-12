@@ -27,6 +27,10 @@ if (!fs.existsSync(DB_FILE)) {
     fs.writeFileSync(DB_FILE, '[]\n', 'utf8');
 }
 
+// إعداد البروكسي للحصول على IP الزائر عند النشر خلف Render.
+// يجب أن تتوافق قيمة الثقة مع إعداد البروكسي الفعلي.
+app.set('trust proxy', 1);
+
 app.use(express.json({ limit: '100kb' }));
 
 /* =====================================
@@ -244,14 +248,37 @@ function writeAppointments(rows) {
    أدوات عامة
 ===================================== */
 
+// إخفاء البيانات الداخلية عن المستخدمين
 function publicAppointment(row) {
-    const { receiptFile, ...safeRow } = row;
+    const {
+        receiptFile,
+        clientIP,
+        ...safeRow
+    } = row;
 
     return safeRow;
 }
 
+// توحيد شكل رقم الهاتف
 function normalizePhone(value) {
-    return String(value || '').replace(/[\s()+-]/g, '');
+    return String(value || '')
+        .replace(/[\s()+-]/g, '');
+}
+
+// استخراج عنوان IP للزائر
+function getClientIP(req) {
+    return String(req.ip || '')
+        .replace(/^::ffff:/, '')
+        .trim();
+}
+
+// الحجوزات التي تمنع إنشاء حجز جديد
+function isBlockingBooking(row) {
+    return [
+        'pending',
+        'approved',
+        'in_progress'
+    ].includes(row.status);
 }
 
 function isActiveBooking(row) {
@@ -583,37 +610,118 @@ function rebuildAllQueues(rows) {
 }
 
 /* =====================================
-   التحقق من تعارض الحجوزات
+   نظام الحماية ومنع تكرار الحجوزات
 ===================================== */
+
+/*
+   الحماية تعتمد على:
+
+   1- عنوان IP:
+      يمنع إرسال حجز آخر من نفس الاتصال
+      إذا كان هناك حجز قائم.
+
+   2- رقم الهاتف:
+      يمنع تكرار رقم الهاتف حتى لو تغير الاسم
+      أو الطبيب أو التاريخ أو صورة السند.
+
+   3- الطبيب والتاريخ:
+      يحافظ على منع التعارض في جدول الطبيب.
+
+   الحالات التي تمنع الحجز:
+   pending
+   approved
+   in_progress
+
+   مواعيد العودة:
+   scheduled
+   attended
+
+   الحالات المنتهية أو الملغاة لا تمنع الحجز الجديد.
+*/
 
 function hasBookingConflict(
     rows,
     phone,
     doctor,
     date,
-    excludeId = null
+    excludeId = null,
+    clientIP = null
 ) {
+
+    const normalizedPhone = normalizePhone(phone);
+
+    const normalizedDoctor = String(doctor || '').trim();
+
+    const normalizedIP = String(clientIP || '').trim();
 
     return rows.some(row => {
 
-        if (row.id === excludeId) {
+        // استثناء السجل الحالي عند تحديد موعد العودة
+        if (excludeId && row.id === excludeId) {
             return false;
         }
+
+        const blockingStatus = isBlockingBooking(row);
+
+        const blockingReturn = isScheduledReturn(row);
+
+        // تجاهل الحجوزات المنتهية والملغاة
+        if (!blockingStatus && !blockingReturn) {
+            return false;
+        }
+
+        /*
+           أولاً:
+           منع أي حجز آخر من نفس عنوان IP.
+        */
+
+        const existingIP = String(row.clientIP || '').trim();
 
         if (
-            row.phone !== phone ||
-            row.doctor !== doctor
+            normalizedIP &&
+            existingIP &&
+            normalizedIP === existingIP
         ) {
-            return false;
+            return true;
         }
 
+        /*
+           ثانياً:
+           منع استخدام رقم الهاتف نفسه
+           حتى لو تغير الاسم أو الطبيب أو التاريخ.
+        */
+
+        const existingPhone = normalizePhone(row.phone);
+
+        if (
+            normalizedPhone &&
+            existingPhone &&
+            normalizedPhone === existingPhone
+        ) {
+            return true;
+        }
+
+        /*
+           ثالثاً:
+           منع تعارض الحجوزات لدى الطبيب نفسه.
+        */
+
+        const existingDoctor = String(row.doctor || '').trim();
+
         const normalConflict =
+            existingDoctor === normalizedDoctor &&
             row.date === date &&
-            isActiveBooking(row);
+            blockingStatus;
+
+        /*
+           رابعاً:
+           منع التعارض مع موعد العودة.
+        */
 
         const returnConflict =
+            existingDoctor === normalizedDoctor &&
             row.returnDate === date &&
-            isScheduledReturn(row);
+            blockingReturn;
 
         return normalConflict || returnConflict;
     });
@@ -670,6 +778,9 @@ app.post(
 
             const date = String(req.body.date || '').trim();
 
+            // استخراج عنوان IP للزائر
+            const clientIP = getClientIP(req);
+
             if (name.length < 3 || name.length > 90) {
                 cleanupUpload();
 
@@ -711,8 +822,10 @@ app.post(
             rebuildAllQueues(rows);
 
             /*
-               منع تكرار الحجز لنفس المريض
-               لدى الطبيب في نفس اليوم.
+               فحص الحماية قبل إنشاء الحجز.
+
+               يتم الفحص باستخدام:
+               IP + رقم الهاتف + الطبيب + التاريخ.
             */
 
             if (
@@ -720,16 +833,21 @@ app.post(
                     rows,
                     phone,
                     doctor,
-                    date
+                    date,
+                    null,
+                    clientIP
                 )
             ) {
 
+                // حذف صورة السند المرفقة بالطلب المرفوض
                 cleanupUpload();
 
                 return res.status(409).json({
-                    error: 'يوجد لديك حجز أو موعد عودة مع نفس الطبيب في هذا التاريخ'
+                    error: 'تم رفض الطلب. يوجد لديك حجز سابق أو طلب قائم من جهازك أو باستخدام رقم الهاتف نفسه. لا يمكنك إرسال حجز آخر حاليًا.'
                 });
             }
+
+            const now = new Date().toISOString();
 
             const row = {
 
@@ -740,7 +858,10 @@ app.post(
                 doctor,
                 date,
 
-                createdAt: new Date().toISOString(),
+                // حفظ IP داخلياً للحماية
+                clientIP,
+
+                createdAt: now,
 
                 approvedAt: null,
 
@@ -1041,9 +1162,10 @@ app.post('/api/appointments/:id/return', (req, res) => {
                 });
             }
 
-            if (row.returnStatus === 'scheduled' ||
-                row.returnStatus === 'attended') {
-
+            if (
+                row.returnStatus === 'scheduled' ||
+                row.returnStatus === 'attended'
+            ) {
                 return res.status(409).json({
                     error: 'لدى المريض موعد عودة قائم بالفعل'
                 });
@@ -1116,8 +1238,6 @@ app.post('/api/appointments/:id/return', (req, res) => {
             row.returnStatus = 'attended';
 
             row.returnAttendedAt = new Date().toISOString();
-
-            row.returnQueue = null;
 
             row.updatedAt = new Date().toISOString();
 

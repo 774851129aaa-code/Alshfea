@@ -9,6 +9,14 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 
+/* =====================================
+   إعدادات النظام
+===================================== */
+
+const TIME_ZONE = process.env.APP_TIME_ZONE || 'Asia/Aden';
+const CLINIC_START_TIME = process.env.CLINIC_START_TIME || '09:00';
+const APPOINTMENT_DURATION = 20;
+
 const DATA_DIR = path.join(__dirname, 'data');
 const RECEIPTS_DIR = path.join(DATA_DIR, 'receipts');
 const DB_FILE = path.join(DATA_DIR, 'appointments.json');
@@ -20,6 +28,142 @@ if (!fs.existsSync(DB_FILE)) {
 }
 
 app.use(express.json({ limit: '100kb' }));
+
+/* =====================================
+   إعدادات الوقت
+===================================== */
+
+function getDateParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: TIME_ZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(date);
+
+    const result = {};
+
+    for (const part of parts) {
+        if (part.type !== 'literal') {
+            result[part.type] = part.value;
+        }
+    }
+
+    return result;
+}
+
+function getTimeParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: TIME_ZONE,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+    }).formatToParts(date);
+
+    const result = {};
+
+    for (const part of parts) {
+        if (part.type !== 'literal') {
+            result[part.type] = part.value;
+        }
+    }
+
+    return result;
+}
+
+function localDateString(date = new Date()) {
+    const p = getDateParts(date);
+
+    return `${p.year}-${p.month}-${p.day}`;
+}
+
+function currentMinutes(date = new Date()) {
+    const p = getTimeParts(date);
+
+    return Number(p.hour) * 60 + Number(p.minute);
+}
+
+function dateFromMinutes(minutes) {
+    const normalized = Math.max(0, minutes);
+
+    const hours = Math.floor(normalized / 60) % 24;
+    const mins = normalized % 60;
+
+    return (
+        String(hours).padStart(2, '0') +
+        ':' +
+        String(mins).padStart(2, '0')
+    );
+}
+
+function minutesFromTime(value) {
+    const match = /^(\d{2}):(\d{2})$/.exec(String(value || ''));
+
+    if (!match) {
+        return null;
+    }
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+
+    if (hours > 23 || minutes > 59) {
+        return null;
+    }
+
+    return hours * 60 + minutes;
+}
+
+function minutesFromISO(value) {
+    if (!value) {
+        return null;
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return currentMinutes(date);
+}
+
+function dateOfISO(value) {
+    if (!value) {
+        return null;
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return localDateString(date);
+}
+
+function validDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) {
+        return false;
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+
+    return (
+        parsed.getUTCFullYear() === year &&
+        parsed.getUTCMonth() === month - 1 &&
+        parsed.getUTCDate() === day
+    );
+}
+
+function validClinicStartTime() {
+    return minutesFromTime(CLINIC_START_TIME) !== null;
+}
+
+if (!validClinicStartTime()) {
+    throw new Error('CLINIC_START_TIME غير صحيح. استخدم الصيغة 09:00');
+}
 
 /* =====================================
    إعدادات الملفات
@@ -66,7 +210,7 @@ const upload = multer({
 });
 
 /* =====================================
-   أدوات قاعدة البيانات JSON
+   قاعدة البيانات JSON
 ===================================== */
 
 function readAppointments() {
@@ -106,19 +250,6 @@ function publicAppointment(row) {
     return safeRow;
 }
 
-function validDate(date) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        return false;
-    }
-
-    const parsed = new Date(`${date}T00:00:00`);
-
-    return (
-        !Number.isNaN(parsed.getTime()) &&
-        parsed.toISOString().slice(0, 10) === date
-    );
-}
-
 function normalizePhone(value) {
     return String(value || '').replace(/[\s()+-]/g, '');
 }
@@ -128,7 +259,11 @@ function isActiveBooking(row) {
 }
 
 function isScheduledReturn(row) {
-    return row.returnStatus === 'scheduled';
+    return ['scheduled', 'attended'].includes(row.returnStatus);
+}
+
+function getAppointmentCreatedTime(row) {
+    return row.approvedAt || row.createdAt || '';
 }
 
 /* =====================================
@@ -136,7 +271,7 @@ function isScheduledReturn(row) {
 ===================================== */
 
 function updateMissedReturns(rows) {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
 
     let changed = false;
 
@@ -148,31 +283,36 @@ function updateMissedReturns(rows) {
         ) {
             row.returnStatus = 'missed';
             row.returnMissedAt = new Date().toISOString();
+            row.returnQueue = null;
+            row.returnTime = null;
 
             changed = true;
         }
     }
 
-    if (changed) {
-        writeAppointments(rows);
-    }
-
-    return rows;
+    return changed;
 }
 
 /* =====================================
-   ترتيب الطابور
+   ترتيب المرضى وحساب أوقات الحضور
 ===================================== */
 
 /*
+   لكل طبيب ولكل يوم جدول مستقل.
+
    الأولوية:
-   1- مرضى العودة.
+   1- مواعيد العودة.
    2- الحجوزات العادية.
 
-   داخل كل مجموعة:
-   الأسبق في التسجيل أو الاعتماد أولاً.
+   مدة كل موعد: 20 دقيقة.
 
-   الترقيم يبدأ من 1 لكل طبيب ولكل تاريخ.
+   إذا انتهى الكشف قبل الوقت المتوقع:
+   يُعاد حساب أوقات المرضى المنتظرين
+   ويُقدّم الموعد التالي تلقائيًا.
+
+   أوقات الحضور:
+   appointmentTime = وقت الحجز العادي
+   returnTime      = وقت موعد العودة
 */
 
 function rebuildQueues(rows, doctor, date) {
@@ -190,23 +330,255 @@ function rebuildQueues(rows, doctor, date) {
     );
 
     returns.sort((a, b) => {
-        return new Date(a.returnScheduledAt || a.createdAt) -
-               new Date(b.returnScheduledAt || b.createdAt);
+        return new Date(
+            a.returnScheduledAt || a.createdAt
+        ) - new Date(
+            b.returnScheduledAt || b.createdAt
+        );
     });
 
     normalBookings.sort((a, b) => {
-        return new Date(a.approvedAt || a.createdAt) -
-               new Date(b.approvedAt || b.createdAt);
+        return new Date(
+            getAppointmentCreatedTime(a)
+        ) - new Date(
+            getAppointmentCreatedTime(b)
+        );
     });
+
+    const schedule = [
+        ...returns.map(row => ({
+            row,
+            type: 'return'
+        })),
+
+        ...normalBookings.map(row => ({
+            row,
+            type: 'normal'
+        }))
+    ];
+
+    const startMinutes = minutesFromTime(CLINIC_START_TIME);
+
+    let pointer = startMinutes;
+
+    /*
+       إذا كان اليوم هو اليوم الحالي:
+       لا نعطي المريض موعدًا في وقت مضى.
+    */
+
+    if (date === localDateString()) {
+        pointer = Math.max(pointer, currentMinutes());
+    }
+
+    /*
+       آخر مريض أنهى الكشف بنجاح.
+       نستخدم وقت انتهائه لتقديم المنتظرين.
+    */
+
+    const completedRows = rows.filter(row => {
+
+        if (row.doctor !== doctor) {
+            return false;
+        }
+
+        const normalCompleted =
+            row.date === date &&
+            row.status === 'completed' &&
+            row.completedAt;
+
+        const returnCompleted =
+            row.returnDate === date &&
+            row.returnStatus === 'completed' &&
+            row.returnCompletedAt;
+
+        return normalCompleted || returnCompleted;
+    });
+
+    for (const row of completedRows) {
+
+        const completedAt =
+            row.returnStatus === 'completed'
+                ? row.returnCompletedAt
+                : row.completedAt;
+
+        if (dateOfISO(completedAt) !== date) {
+            continue;
+        }
+
+        const completedMinute = minutesFromISO(completedAt);
+
+        if (completedMinute !== null) {
+            pointer = Math.max(pointer, completedMinute);
+        }
+    }
 
     let number = 1;
 
-    for (const row of returns) {
-        row.returnQueue = number++;
+    for (const item of schedule) {
+
+        const row = item.row;
+
+        if (item.type === 'return') {
+
+            row.returnQueue = number++;
+
+            /*
+               إذا بدأ الطبيب مراجعة العودة بالفعل،
+               نستخدم وقت البداية.
+            */
+
+            if (row.returnStartedAt) {
+
+                const startedMinute =
+                    minutesFromISO(row.returnStartedAt);
+
+                row.returnTime = dateFromMinutes(startedMinute);
+
+                pointer = Math.max(
+                    pointer,
+                    startedMinute + APPOINTMENT_DURATION
+                );
+
+            } else {
+
+                row.returnTime = dateFromMinutes(pointer);
+
+                pointer += APPOINTMENT_DURATION;
+            }
+
+            continue;
+        }
+
+        row.queue = number++;
+
+        /*
+           المريض الذي بدأ الطبيب الكشف عليه:
+           نحتفظ بوقت البداية الحقيقي.
+        */
+
+        if (row.status === 'in_progress' && row.startedAt) {
+
+            const startedMinute =
+                minutesFromISO(row.startedAt);
+
+            row.appointmentTime = dateFromMinutes(startedMinute);
+
+            pointer = Math.max(
+                pointer,
+                startedMinute + APPOINTMENT_DURATION
+            );
+
+        } else {
+
+            row.appointmentTime = dateFromMinutes(pointer);
+
+            pointer += APPOINTMENT_DURATION;
+        }
     }
 
-    for (const row of normalBookings) {
-        row.queue = number++;
+    /*
+       إزالة أرقام وأوقات المرضى غير النشطين.
+    */
+
+    for (const row of rows) {
+
+        if (
+            row.doctor === doctor &&
+            row.date === date &&
+            !isActiveBooking(row)
+        ) {
+            row.queue = null;
+            row.appointmentTime = null;
+        }
+
+        if (
+            row.doctor === doctor &&
+            row.returnDate === date &&
+            !isScheduledReturn(row)
+        ) {
+            row.returnQueue = null;
+            row.returnTime = null;
+        }
+    }
+}
+
+/* =====================================
+   إعادة بناء جميع الجداول
+===================================== */
+
+function rebuildAllQueues(rows) {
+
+    const groups = new Map();
+
+    for (const row of rows) {
+
+        if (
+            row.doctor &&
+            row.date &&
+            isActiveBooking(row)
+        ) {
+            const key = `${row.doctor}|||${row.date}`;
+
+            groups.set(key, {
+                doctor: row.doctor,
+                date: row.date
+            });
+        }
+
+        if (
+            row.doctor &&
+            row.returnDate &&
+            isScheduledReturn(row)
+        ) {
+            const key = `${row.doctor}|||${row.returnDate}`;
+
+            groups.set(key, {
+                doctor: row.doctor,
+                date: row.returnDate
+            });
+        }
+    }
+
+    /*
+       نضيف الأيام التي تحتوي على مرضى أنهوا الكشف،
+       لأن وقت انتهائهم يؤثر على الجدول.
+    */
+
+    for (const row of rows) {
+
+        if (
+            row.doctor &&
+            row.date &&
+            row.status === 'completed'
+        ) {
+            const key = `${row.doctor}|||${row.date}`;
+
+            groups.set(key, {
+                doctor: row.doctor,
+                date: row.date
+            });
+        }
+
+        if (
+            row.doctor &&
+            row.returnDate &&
+            row.returnStatus === 'completed'
+        ) {
+            const key = `${row.doctor}|||${row.returnDate}`;
+
+            groups.set(key, {
+                doctor: row.doctor,
+                date: row.returnDate
+            });
+        }
+    }
+
+    for (const group of groups.values()) {
+        rebuildQueues(
+            rows,
+            group.doctor,
+            group.date
+        );
     }
 }
 
@@ -214,7 +586,13 @@ function rebuildQueues(rows, doctor, date) {
    التحقق من تعارض الحجوزات
 ===================================== */
 
-function hasBookingConflict(rows, phone, doctor, date, excludeId = null) {
+function hasBookingConflict(
+    rows,
+    phone,
+    doctor,
+    date,
+    excludeId = null
+) {
 
     return rows.some(row => {
 
@@ -229,12 +607,10 @@ function hasBookingConflict(rows, phone, doctor, date, excludeId = null) {
             return false;
         }
 
-        // حجز عادي قائم في نفس التاريخ
         const normalConflict =
             row.date === date &&
             isActiveBooking(row);
 
-        // موعد عودة قائم في نفس التاريخ
         const returnConflict =
             row.returnDate === date &&
             isScheduledReturn(row);
@@ -250,11 +626,19 @@ function hasBookingConflict(rows, phone, doctor, date, excludeId = null) {
 app.get('/api/appointments', (_req, res) => {
 
     try {
-        const rows = updateMissedReturns(readAppointments());
+
+        const rows = readAppointments();
+
+        updateMissedReturns(rows);
+
+        rebuildAllQueues(rows);
+
+        writeAppointments(rows);
 
         res.json(rows.map(publicAppointment));
 
     } catch (error) {
+
         res.status(500).json({
             error: error.message
         });
@@ -320,22 +704,25 @@ app.post(
                 });
             }
 
-            const rows = updateMissedReturns(readAppointments());
+            const rows = readAppointments();
+
+            updateMissedReturns(rows);
+
+            rebuildAllQueues(rows);
 
             /*
-              منع التعارض مع:
-              - حجز عادي قائم.
-              - موعد عودة مجدول.
+               منع تكرار الحجز لنفس المريض
+               لدى الطبيب في نفس اليوم.
             */
 
-            const conflict = hasBookingConflict(
-                rows,
-                phone,
-                doctor,
-                date
-            );
-
-            if (conflict) {
+            if (
+                hasBookingConflict(
+                    rows,
+                    phone,
+                    doctor,
+                    date
+                )
+            ) {
 
                 cleanupUpload();
 
@@ -357,9 +744,21 @@ app.post(
 
                 approvedAt: null,
 
+                startedAt: null,
+
+                completedAt: null,
+
+                skippedAt: null,
+
+                cancelledAt: null,
+
+                updatedAt: null,
+
                 status: 'pending',
 
                 queue: null,
+
+                appointmentTime: null,
 
                 receiptName: path
                     .basename(req.file.originalname)
@@ -367,17 +766,21 @@ app.post(
 
                 receiptFile: req.file.filename,
 
-                // بيانات العودة
-
                 returnDate: null,
 
                 returnQueue: null,
+
+                returnTime: null,
 
                 returnStatus: 'not_scheduled',
 
                 returnScheduledAt: null,
 
+                returnStartedAt: null,
+
                 returnAttendedAt: null,
+
+                returnCompletedAt: null,
 
                 returnCancelledAt: null,
 
@@ -404,14 +807,30 @@ app.post(
 );
 
 /* =====================================
-   اعتماد الدفع وتخصيص رقم الدور
+   تحديث حالة الحجز
 ===================================== */
+
+/*
+   الحالات المدعومة:
+
+   approved
+   in_progress
+   skipped
+   completed
+   cancelled
+
+   cancelled:
+   للمحاسب عند رفض السند،
+   ويسمح بها فقط إذا كان الحجز pending.
+*/
 
 app.patch('/api/appointments/:id', (req, res) => {
 
     try {
 
-        const rows = updateMissedReturns(readAppointments());
+        const rows = readAppointments();
+
+        updateMissedReturns(rows);
 
         const row = rows.find(item => item.id === req.params.id);
 
@@ -422,6 +841,8 @@ app.patch('/api/appointments/:id', (req, res) => {
         }
 
         const { status } = req.body || {};
+
+        /* اعتماد الدفع */
 
         if (status === 'approved') {
 
@@ -435,40 +856,87 @@ app.patch('/api/appointments/:id', (req, res) => {
 
             row.approvedAt = new Date().toISOString();
 
-            /*
-              إعادة ترتيب الطابور.
-              يبدأ من رقم 1.
-            */
+            row.appointmentTime = null;
+        }
 
-            rebuildQueues(
-                rows,
-                row.doctor,
-                row.date
-            );
+        /* بدء الكشف */
 
-        } else if (
-            ['in_progress', 'skipped', 'completed'].includes(status)
-        ) {
+        else if (status === 'in_progress') {
 
-            if (!['approved', 'in_progress'].includes(row.status)) {
+            if (row.status !== 'approved') {
                 return res.status(409).json({
-                    error: 'الطلب غير موجود في طابور الطبيب'
+                    error: 'لا يمكن بدء الكشف لهذا الطلب'
                 });
             }
 
-            row.status = status;
+            row.status = 'in_progress';
 
-            if (status === 'skipped' || status === 'completed') {
-                row.queue = null;
+            row.startedAt = new Date().toISOString();
+        }
+
+        /* تجاوز الدور */
+
+        else if (status === 'skipped') {
+
+            if (!['approved', 'in_progress'].includes(row.status)) {
+                return res.status(409).json({
+                    error: 'لا يمكن تجاوز هذا الطلب بحالته الحالية'
+                });
             }
 
-            rebuildQueues(
-                rows,
-                row.doctor,
-                row.date
-            );
+            row.status = 'skipped';
 
-        } else {
+            row.skippedAt = new Date().toISOString();
+
+            row.queue = null;
+
+            row.appointmentTime = null;
+        }
+
+        /* إنهاء الكشف */
+
+        else if (status === 'completed') {
+
+            if (row.status !== 'in_progress') {
+                return res.status(409).json({
+                    error: 'يجب بدء الكشف قبل إنهائه'
+                });
+            }
+
+            row.status = 'completed';
+
+            row.completedAt = new Date().toISOString();
+
+            row.queue = null;
+
+            row.appointmentTime = null;
+        }
+
+        /* رفض السند وإلغاء الحجز */
+
+        else if (status === 'cancelled') {
+
+            if (row.status !== 'pending') {
+                return res.status(409).json({
+                    error: 'يمكن إلغاء الحجز فقط قبل اعتماد السند'
+                });
+            }
+
+            row.status = 'cancelled';
+
+            row.cancelledAt = new Date().toISOString();
+
+            row.queue = null;
+
+            row.appointmentTime = null;
+
+            /*
+               لا نحذف صورة السند.
+               نحتفظ بها في الملفات كسجل للمراجعة.
+            */
+        }
+
+        else {
 
             return res.status(400).json({
                 error: 'الحالة المطلوبة غير مسموحة'
@@ -476,6 +944,13 @@ app.patch('/api/appointments/:id', (req, res) => {
         }
 
         row.updatedAt = new Date().toISOString();
+
+        /*
+           إعادة حساب أرقام وأوقات المرضى.
+           إذا انتهى الكشف مبكرًا يتقدم التالي تلقائيًا.
+        */
+
+        rebuildAllQueues(rows);
 
         writeAppointments(rows);
 
@@ -496,20 +971,25 @@ app.patch('/api/appointments/:id', (req, res) => {
 ===================================== */
 
 /*
-   تحديد موعد عودة:
+   تحديد العودة:
 
    POST /api/appointments/:id/return
 
-   body:
    {
       "action": "schedule",
       "date": "2026-11-19"
    }
 
-   حضور المريض:
+   تسجيل الحضور:
 
    {
       "action": "attended"
+   }
+
+   إنهاء كشف العودة:
+
+   {
+      "action": "completed"
    }
 
    إلغاء العودة:
@@ -523,7 +1003,9 @@ app.post('/api/appointments/:id/return', (req, res) => {
 
     try {
 
-        const rows = updateMissedReturns(readAppointments());
+        const rows = readAppointments();
+
+        updateMissedReturns(rows);
 
         const row = rows.find(item => item.id === req.params.id);
 
@@ -551,7 +1033,7 @@ app.post('/api/appointments/:id/return', (req, res) => {
                 });
             }
 
-            const today = new Date().toISOString().slice(0, 10);
+            const today = localDateString();
 
             if (date < today) {
                 return res.status(400).json({
@@ -559,16 +1041,13 @@ app.post('/api/appointments/:id/return', (req, res) => {
                 });
             }
 
-            if (row.returnStatus === 'scheduled') {
+            if (row.returnStatus === 'scheduled' ||
+                row.returnStatus === 'attended') {
+
                 return res.status(409).json({
-                    error: 'لدى المريض موعد عودة مجدول بالفعل'
+                    error: 'لدى المريض موعد عودة قائم بالفعل'
                 });
             }
-
-            /*
-              منع تعارض العودة مع حجز عادي
-              أو موعد عودة آخر لنفس المريض والطبيب.
-            */
 
             if (
                 hasBookingConflict(
@@ -590,23 +1069,23 @@ app.post('/api/appointments/:id/return', (req, res) => {
 
             row.returnScheduledAt = new Date().toISOString();
 
+            row.returnStartedAt = null;
+
             row.returnAttendedAt = null;
+
+            row.returnCompletedAt = null;
 
             row.returnCancelledAt = null;
 
             row.returnMissedAt = null;
 
-            /*
-              إعطاء العودة الأولوية في الطابور.
-            */
+            row.returnQueue = null;
 
-            rebuildQueues(
-                rows,
-                row.doctor,
-                date
-            );
+            row.returnTime = null;
 
             row.updatedAt = new Date().toISOString();
+
+            rebuildAllQueues(rows);
 
             writeAppointments(rows);
 
@@ -626,7 +1105,7 @@ app.post('/api/appointments/:id/return', (req, res) => {
                 });
             }
 
-            const today = new Date().toISOString().slice(0, 10);
+            const today = localDateString();
 
             if (row.returnDate !== today) {
                 return res.status(409).json({
@@ -638,25 +1117,56 @@ app.post('/api/appointments/:id/return', (req, res) => {
 
             row.returnAttendedAt = new Date().toISOString();
 
+            row.returnQueue = null;
+
             row.updatedAt = new Date().toISOString();
 
             /*
-              بعد الحضور يصبح الموعد مكتملًا،
-              ولا يعود يحجز مكانًا في الطابور.
+               يبقى المريض ضمن طابور العودة
+               بعد تسجيل حضوره.
             */
 
-            row.returnQueue = null;
-
-            rebuildQueues(
-                rows,
-                row.doctor,
-                row.returnDate
-            );
+            rebuildAllQueues(rows);
 
             writeAppointments(rows);
 
             return res.json({
                 message: 'تم تسجيل حضور المريض للمراجعة',
+                appointment: publicAppointment(row)
+            });
+        }
+
+        /* إنهاء كشف العودة */
+
+        if (action === 'completed') {
+
+            if (row.returnStatus !== 'attended') {
+                return res.status(409).json({
+                    error: 'يجب تسجيل حضور المريض قبل إنهاء مراجعة العودة'
+                });
+            }
+
+            row.returnStatus = 'completed';
+
+            row.returnCompletedAt = new Date().toISOString();
+
+            row.returnQueue = null;
+
+            row.returnTime = null;
+
+            row.updatedAt = new Date().toISOString();
+
+            /*
+               عند إنهاء العودة:
+               يعاد حساب أوقات بقية المرضى.
+            */
+
+            rebuildAllQueues(rows);
+
+            writeAppointments(rows);
+
+            return res.json({
+                message: 'تم إنهاء مراجعة العودة بنجاح',
                 appointment: publicAppointment(row)
             });
         }
@@ -671,21 +1181,17 @@ app.post('/api/appointments/:id/return', (req, res) => {
                 });
             }
 
-            const oldDate = row.returnDate;
-
             row.returnStatus = 'cancelled';
 
             row.returnCancelledAt = new Date().toISOString();
 
             row.returnQueue = null;
 
+            row.returnTime = null;
+
             row.updatedAt = new Date().toISOString();
 
-            rebuildQueues(
-                rows,
-                row.doctor,
-                oldDate
-            );
+            rebuildAllQueues(rows);
 
             writeAppointments(rows);
 
@@ -712,14 +1218,6 @@ app.post('/api/appointments/:id/return', (req, res) => {
 /* =====================================
    جلب صورة سند التحويل
 ===================================== */
-
-/*
-   يفتح المحاسب هذا الرابط في المتصفح:
-
-   /api/appointments/ID/receipt
-
-   وتظهر الصورة مباشرة.
-*/
 
 app.get('/api/appointments/:id/receipt', (req, res) => {
 
@@ -784,7 +1282,6 @@ app.get('/', (_req, res) => {
     res.sendFile(
         path.join(__dirname, 'index.html')
     );
-
 });
 
 /* =====================================
@@ -827,4 +1324,15 @@ app.listen(PORT, HOST, () => {
         `Receipts folder: ${RECEIPTS_DIR}`
     );
 
+    console.log(
+        `Clinic time zone: ${TIME_ZONE}`
+    );
+
+    console.log(
+        `Clinic starts at: ${CLINIC_START_TIME}`
+    );
+
+    console.log(
+        `Appointment duration: ${APPOINTMENT_DURATION} minutes`
+    );
 });

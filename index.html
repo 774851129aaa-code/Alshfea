@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1215,7 +1215,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{
 </form>
 
 <div class="security-footnote">
-    هذا نموذج تجريبي يعمل داخل المتصفح. يجب ربطه بباك إند وقاعدة بيانات لحماية البيانات والتحقق من المدفوعات فعليًا.
+    يتم إرسال طلب الحجز وصورة السند إلى الخادم. يلزم إضافة مصادقة وصلاحيات للخادم قبل النشر العام.
 </div>
 
 </section>
@@ -1226,7 +1226,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{
     <span class="iconbox">◷</span>
     <div>
         <h3>حالة موعدك</h3>
-        <p>تابع آخر تحديث لطلبك من هذا المتصفح</p>
+        <p>تابع حالة طلبك من هذا المتصفح بعد إرسال الحجز</p>
     </div>
 </div>
 
@@ -1315,16 +1315,39 @@ onclick="backdropClose(event)">
 
 <script>
 
-/* إعدادات النموذج التجريبي */
+/* إعدادات الاتصال بالباك إند */
 
-const STORE_KEY='alshifa_demo_appointments_v1';
+const API_BASE='';
+const LAST_APPOINTMENT_KEY='alshifa_last_appointment_id';
 
+/* ملاحظة: كلمات مرور الدخول أدناه تجريبية فقط؛ الباك إند الحالي لا يوفر مصادقة. */
 const DEMO_PASSWORDS={
     accountant:'2468',
     doctor:'1357'
 };
 
 let currentRole=null;
+
+async function apiRequest(path,options={}){
+    const response=await fetch(API_BASE+path,options);
+    const contentType=response.headers.get('content-type')||'';
+    const data=contentType.includes('application/json')
+        ?await response.json()
+        :await response.text();
+
+    if(!response.ok){
+        const message=typeof data==='object'&&data
+            ?data.error||data.message
+            :data;
+        throw new Error(message||`حدث خطأ في الاتصال (${response.status})`);
+    }
+
+    return data;
+}
+
+function loadAppointments(){
+    return apiRequest('/api/appointments');
+}
 
 /* التاريخ */
 
@@ -1343,48 +1366,10 @@ function addDays(dateString,days){
 
 document.getElementById('visitDate').min=localDateString();
 
-/* التخزين المحلي */
+/* تتم قراءة المواعيد وتحديث حالات العودة من الباك إند */
 
-function loadAppointments(){
-    try{
-        const data=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
-        return Array.isArray(data)?data:[];
-    }catch{
-        return [];
-    }
-}
-
-function saveAppointments(rows){
-    localStorage.setItem(STORE_KEY,JSON.stringify(rows));
-}
-
-/* تحديث حالات العودة تلقائيًا */
-
-function updateReturnStatuses(){
-
-    const rows=loadAppointments();
-    const today=localDateString();
-    let changed=false;
-
-    rows.forEach(row=>{
-
-        if(!row.returnStatus)return;
-
-        if(
-            row.returnStatus==='scheduled' &&
-            row.returnDate &&
-            row.returnDate<today
-        ){
-            row.returnStatus='missed';
-            row.returnMissedAt=new Date().toISOString();
-            changed=true;
-        }
-
-    });
-
-    if(changed)saveAppointments(rows);
-
-    return rows;
+async function updateReturnStatuses(){
+    return loadAppointments();
 }
 
 /* حماية عرض النصوص */
@@ -1483,8 +1468,8 @@ function openLogin(role){
 
     document.getElementById('demoNote').innerHTML=
     accountant
-    ?'كلمة المرور التجريبية: <b>2468</b>'
-    :'كلمة المرور التجريبية: <b>1357</b>';
+    ?'رمز تجريبي فقط: <b>2468</b> — ليس تسجيل دخول آمنًا'
+    :'رمز تجريبي فقط: <b>1357</b> — ليس تسجيل دخول آمنًا';
 
     document.getElementById('loginError').classList.remove('show');
 
@@ -1584,135 +1569,75 @@ receiptInput.addEventListener('change',()=>{
     file?`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`:'';
 });
 
-form.addEventListener('submit',event=>{
+form.addEventListener('submit',async event=>{
 
     event.preventDefault();
 
     const name=document.getElementById('patientName').value.trim();
-
-    const phone=normalizedPhone(
-        document.getElementById('phone').value
-    );
-
+    const phone=normalizedPhone(document.getElementById('phone').value);
     const doctor=document.getElementById('doctorSelect').value;
-
     const date=document.getElementById('visitDate').value;
-
     const file=receiptInput.files[0];
 
-    if(name.length<3){
-        toast('يرجى كتابة الاسم الكامل');
-        return;
-    }
-
-    if(!validPhone(phone)){
-        toast('أدخل رقم هاتف صحيحًا');
-        return;
-    }
-
-    if(!doctor||!date){
-        toast('يرجى اختيار العيادة والتاريخ');
-        return;
-    }
-
-    if(date<localDateString()){
-        toast('لا يمكن اختيار تاريخ سابق');
-        return;
-    }
-
-    if(!file){
-        toast('يرجى إرفاق صورة سند التحويل');
-        return;
-    }
-
+    if(name.length<3){toast('يرجى كتابة الاسم الكامل');return;}
+    if(!validPhone(phone)){toast('أدخل رقم هاتف صحيحًا');return;}
+    if(!doctor||!date){toast('يرجى اختيار العيادة والتاريخ');return;}
+    if(date<localDateString()){toast('لا يمكن اختيار تاريخ سابق');return;}
+    if(!file){toast('يرجى إرفاق صورة سند التحويل');return;}
     if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
-        toast('نوع الملف غير مسموح');
-        return;
+        toast('نوع الملف غير مسموح');return;
     }
+    if(file.size>5*1024*1024){toast('حجم الصورة أكبر من 5 ميجابايت');return;}
+    if(!document.getElementById('agree').checked){toast('يرجى الموافقة على الإقرار');return;}
 
-    if(file.size>5*1024*1024){
-        toast('حجم الصورة أكبر من 5 ميجابايت');
-        return;
+    const submitButton=form.querySelector('button[type="submit"]');
+    submitButton.disabled=true;
+    submitButton.textContent='جارٍ إرسال الطلب...';
+
+    try{
+        const body=new FormData();
+        body.append('name',name);
+        body.append('phone',phone);
+        body.append('doctor',doctor);
+        body.append('date',date);
+        body.append('receipt',file);
+
+        const created=await apiRequest('/api/appointments',{
+            method:'POST',
+            body
+        });
+
+        localStorage.setItem(LAST_APPOINTMENT_KEY,created.id);
+        form.reset();
+        document.getElementById('fileName').textContent='';
+        await renderStatus();
+        toast('تم إرسال طلبك إلى الخادم وبانتظار مراجعة الدفع');
+        document.getElementById('statusCard')
+            .scrollIntoView({behavior:'smooth',block:'center'});
+    }catch(error){
+        toast(error.message||'تعذر إرسال طلب الحجز');
+    }finally{
+        submitButton.disabled=false;
+        submitButton.textContent='إرسال طلب الحجز ←';
     }
-
-    if(!document.getElementById('agree').checked){
-        toast('يرجى الموافقة على الإقرار');
-        return;
-    }
-
-    const rows=updateReturnStatuses();
-
-    const duplicate=rows.find(row=>
-        row.phone===phone &&
-        row.doctor===doctor &&
-        (
-            (
-                row.date===date &&
-                !['skipped','completed','cancelled'].includes(row.status)
-            ) ||
-            (
-                row.returnStatus==='scheduled' &&
-                row.returnDate===date
-            )
-        )
-    );
-
-    if(duplicate){
-        toast('يوجد لديك حجز أو موعد عودة في هذا التاريخ لدى الطبيب نفسه');
-        return;
-    }
-
-    const row={
-        id:crypto.randomUUID?
-        crypto.randomUUID():
-        'appt-'+Date.now(),
-
-        name,
-        phone,
-        doctor,
-        date,
-
-        createdAt:new Date().toISOString(),
-
-        status:'pending',
-        queue:null,
-
-        receiptName:file.name,
-
-        returnStatus:'not_scheduled',
-        returnDate:null,
-        returnScheduledAt:null,
-        returnAttendedAt:null,
-        returnCancelledAt:null,
-        returnMissedAt:null
-    };
-
-    rows.unshift(row);
-
-    saveAppointments(rows);
-
-    form.reset();
-
-    document.getElementById('fileName').textContent='';
-
-    renderStatus();
-
-    toast('تم تسجيل الطلب محليًا وبانتظار مراجعة الدفع');
-
-    document.getElementById('statusCard')
-    .scrollIntoView({behavior:'smooth',block:'center'});
-
 });
 
 /* عرض حالة الحجز */
 
-function renderStatus(){
+async function renderStatus(){
 
     const content=document.getElementById('statusContent');
 
-    const rows=updateReturnStatuses();
+    let rows=[];
+    try{
+        rows=await loadAppointments();
+    }catch(error){
+        content.innerHTML=`<div class="status-empty"><strong>تعذر الاتصال بالخادم</strong><span style="font-size:11px">${safeText(error.message)}</span></div>`;
+        return;
+    }
 
-    const row=rows[0];
+    const selectedId=localStorage.getItem(LAST_APPOINTMENT_KEY);
+    const row=rows.find(item=>item.id===selectedId);
 
     if(!row){
 
@@ -1813,9 +1738,15 @@ function renderStatus(){
 
 /* لوحة الإدارة */
 
-function renderDashboard(role){
+async function renderDashboard(role){
 
-    const rows=updateReturnStatuses();
+    let rows;
+    try{
+        rows=await loadAppointments();
+    }catch(error){
+        toast(error.message||'تعذر تحميل بيانات الخادم');
+        return;
+    }
 
     document.getElementById('bookingView').classList.add('hide');
 
@@ -2065,7 +1996,7 @@ function renderDashboard(role){
 
                     <div>
                         <h3>${admin?'طلبات بانتظار مراجعة الدفع':'الطابور الحالي'}</h3>
-                        <span class="hint">بيانات تجريبية من هذا المتصفح</span>
+                        <span class="hint">بيانات مباشرة من الخادم</span>
                     </div>
 
                     <button class="secondary"
@@ -2119,7 +2050,7 @@ function renderDashboard(role){
 
                 <div class="side-note">
                     <b>ملاحظة مهمة</b>
-                    هذه نسخة تجريبية. يجب ربط النظام بقاعدة بيانات وخادم حقيقي قبل الاستخدام الفعلي.
+                    تنبيه أمني: لا توجد مصادقة في الباك إند الحالي؛ لا تنشر النظام قبل إضافة تسجيل دخول وصلاحيات للخادم.
                 </div>
 
             </aside>
@@ -2198,205 +2129,124 @@ function renderDashboard(role){
 
 /* اعتماد الدفع */
 
-function approve(id){
-
-    const rows=loadAppointments();
-
-    const row=rows.find(x=>x.id===id);
-
-    if(!row)return;
-
-    row.status='approved';
-
-    row.queue=rows.filter(x=>
-        x.status==='approved'||x.status==='in_progress'
-    ).length+1;
-
-    saveAppointments(rows);
-
-    renderDashboard('accountant');
-
-    toast('تم اعتماد الطلب وإضافته إلى طابور الطبيب');
+async function approve(id){
+    try{
+        await apiRequest(`/api/appointments/${encodeURIComponent(id)}`,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({status:'approved'})
+        });
+        await renderDashboard('accountant');
+        toast('تم اعتماد الطلب وإضافته إلى طابور الطبيب');
+    }catch(error){toast(error.message||'تعذر اعتماد الطلب');}
 }
 
 /* إجراءات الطبيب */
 
-function doctorAction(id,status){
-
-    const rows=loadAppointments();
-
-    const row=rows.find(x=>x.id===id);
-
-    if(!row)return;
-
-    if(!['approved','in_progress'].includes(row.status)){
-        toast('لا يمكن تغيير حالة هذا الطلب');
-        return;
-    }
-
-    row.status=status;
-
-    saveAppointments(rows);
-
-    renderDashboard('doctor');
-
-    if(status==='in_progress'){
-        toast('تم تسجيل حضور المريض وبدء الكشف');
-    }else if(status==='skipped'){
-        toast('تم تسجيل تجاوز الدور');
-    }else{
-        toast('تم إنهاء الكشف');
-    }
+async function doctorAction(id,status){
+    try{
+        await apiRequest(`/api/appointments/${encodeURIComponent(id)}`,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({status})
+        });
+        await renderDashboard('doctor');
+        if(status==='in_progress')toast('تم تسجيل حضور المريض وبدء الكشف');
+        else if(status==='skipped')toast('تم تسجيل تجاوز الدور');
+        else toast('تم إنهاء الكشف');
+    }catch(error){toast(error.message||'تعذر تحديث حالة المريض');}
 }
 
 /* تحديد موعد العودة */
 
-function scheduleReturn(id){
+async function scheduleReturn(id){
+    let rows;
+    try{rows=await loadAppointments();}
+    catch(error){toast(error.message||'تعذر تحميل البيانات');return;}
 
-    const rows=updateReturnStatuses();
-
-    const row=rows.find(x=>x.id===id);
-
-    if(!row){
-        toast('لم يتم العثور على الحجز');
-        return;
-    }
-
+    const row=rows.find(item=>item.id===id);
+    if(!row){toast('لم يتم العثور على الحجز');return;}
     if(!['in_progress','completed'].includes(row.status)){
-        toast('يمكن تحديد العودة بعد حضور المريض وبدء الكشف');
-        return;
+        toast('يمكن تحديد العودة بعد حضور المريض وبدء الكشف');return;
     }
 
     const suggestedDate=addDays(row.date,7);
-
     const input=prompt(
         'أدخل تاريخ موعد العودة للمريض:\nالتاريخ المقترح بعد 7 أيام: '+suggestedDate+'\n\nاكتب التاريخ بهذا الشكل: YYYY-MM-DD',
         suggestedDate
     );
-
     if(input===null)return;
 
     const returnDate=input.trim();
-
     if(!/^\d{4}-\d{2}-\d{2}$/.test(returnDate)){
-        toast('صيغة التاريخ غير صحيحة');
-        return;
+        toast('صيغة التاريخ غير صحيحة');return;
     }
-
     const parsedDate=new Date(returnDate+'T12:00:00');
-
     if(isNaN(parsedDate.getTime())||localDateString(parsedDate)!==returnDate){
-        toast('التاريخ الذي أدخلته غير صالح');
-        return;
+        toast('التاريخ الذي أدخلته غير صالح');return;
     }
-
     if(returnDate<localDateString()){
-        toast('لا يمكن تحديد موعد عودة في تاريخ سابق');
-        return;
+        toast('لا يمكن تحديد موعد عودة في تاريخ سابق');return;
     }
-
     if(returnDate<=row.date){
-        toast('يجب أن يكون موعد العودة بعد تاريخ الزيارة الأصلية');
-        return;
+        toast('يجب أن يكون موعد العودة بعد تاريخ الزيارة الأصلية');return;
     }
 
-    /* منع تعارض العودة مع حجز عادي للمريض نفسه والطبيب نفسه */
-
-    if(hasBookingConflict(rows,row.phone,row.doctor,returnDate,row.id)){
-        toast('يوجد لهذا المريض حجز عادي مع الطبيب نفسه في هذا التاريخ');
-        return;
-    }
-
-    /* منع وجود عودة أخرى للمريض نفسه في التاريخ نفسه */
-
-    if(hasReturnConflict(rows,row.phone,row.doctor,returnDate,row.id)){
-        toast('لدى المريض موعد عودة آخر في هذا التاريخ');
-        return;
-    }
-
-    row.returnDate=returnDate;
-    row.returnStatus='scheduled';
-    row.returnScheduledAt=new Date().toISOString();
-
-    row.returnAttendedAt=null;
-    row.returnCancelledAt=null;
-    row.returnMissedAt=null;
-
-    saveAppointments(rows);
-
-    renderDashboard('doctor');
-
-    toast('تم تحديد موعد العودة بنجاح');
+    try{
+        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({action:'schedule',date:returnDate})
+        });
+        await renderDashboard('doctor');
+        toast('تم تحديد موعد العودة بنجاح');
+    }catch(error){toast(error.message||'تعذر تحديد موعد العودة');}
 }
 
 /* تسجيل حضور المريض للعودة */
 
-function markReturnAttended(id){
-
-    const rows=updateReturnStatuses();
-
-    const row=rows.find(x=>x.id===id);
-
+async function markReturnAttended(id){
+    let rows;
+    try{rows=await loadAppointments();}
+    catch(error){toast(error.message||'تعذر تحميل البيانات');return;}
+    const row=rows.find(item=>item.id===id);
     if(!row||row.returnStatus!=='scheduled'){
-        toast('موعد العودة غير متاح للتسجيل');
-        return;
+        toast('موعد العودة غير متاح للتسجيل');return;
     }
-
-    if(row.returnDate>localDateString()){
-        if(!confirm('موعد العودة لم يحن بعد. هل تريد تسجيل حضوره الآن؟')){
-            return;
-        }
+    if(row.returnDate!==localDateString()){
+        toast('لا يمكن تسجيل الحضور إلا في تاريخ موعد العودة');return;
     }
-
-    row.returnStatus='attended';
-    row.returnAttendedAt=new Date().toISOString();
-
-    saveAppointments(rows);
-
-    renderDashboard('doctor');
-
-    toast('تم تسجيل حضور المريض للمراجعة');
+    try{
+        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({action:'attended'})
+        });
+        await renderDashboard('doctor');
+        toast('تم تسجيل حضور المريض للمراجعة');
+    }catch(error){toast(error.message||'تعذر تسجيل الحضور');}
 }
 
 /* إلغاء موعد العودة */
 
-function cancelReturn(id){
-
-    const rows=updateReturnStatuses();
-
-    const row=rows.find(x=>x.id===id);
-
-    if(!row||row.returnStatus!=='scheduled'){
-        toast('لا يوجد موعد عودة قابل للإلغاء');
-        return;
-    }
-
-    if(!confirm('هل أنت متأكد من إلغاء موعد العودة؟')){
-        return;
-    }
-
-    row.returnStatus='cancelled';
-    row.returnCancelledAt=new Date().toISOString();
-
-    saveAppointments(rows);
-
-    renderDashboard('doctor');
-
-    toast('تم إلغاء موعد العودة دون إلغاء الحجز الأصلي');
+async function cancelReturn(id){
+    if(!confirm('هل أنت متأكد من إلغاء موعد العودة؟'))return;
+    try{
+        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({action:'cancel'})
+        });
+        await renderDashboard('doctor');
+        toast('تم إلغاء موعد العودة دون إلغاء الحجز الأصلي');
+    }catch(error){toast(error.message||'تعذر إلغاء موعد العودة');}
 }
 
 /* سند التحويل */
 
 function viewReceipt(id){
-
-    const row=loadAppointments().find(x=>x.id===id);
-
-    if(!row)return;
-
-    alert(
-        'اسم الملف المرفق: '+row.receiptName+
-        '\n\nهذه النسخة تحفظ اسم الملف فقط ولا ترفع الصورة إلى خادم.'
-    );
+    const url=`/api/appointments/${encodeURIComponent(id)}/receipt`;
+    window.open(url,'_blank','noopener');
 }
 
 /* نسخ رقم الحساب */
@@ -2418,18 +2268,15 @@ function copyAccount(){
 
 /* التشغيل الأول */
 
-updateReturnStatuses();
 renderStatus();
 
-/* تحديث حالات العودة عند الرجوع للصفحة */
+/* تحديث البيانات عند الرجوع للصفحة */
 
 document.addEventListener('visibilitychange',()=>{
     if(!document.hidden){
-        updateReturnStatuses();
         renderStatus();
-
-        if(currentRole==='doctor'){
-            renderDashboard('doctor');
+        if(currentRole==='doctor'||currentRole==='accountant'){
+            renderDashboard(currentRole);
         }
     }
 });

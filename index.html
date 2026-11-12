@@ -581,6 +581,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{
     color:#356c9a;
 }
 
+.badge.red{
+    background:#fde9eb;
+    color:#ae4653;
+}
+
+.badge.gray{
+    background:#edf1f4;
+    color:#667784;
+}
+
 .status-details{
     color:var(--muted);
     font-size:11px;
@@ -776,6 +786,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{
 .action.green{background:#e4f6ef;color:#0b7c5d}
 .action.red{background:#fff0f0;color:#bc4e58}
 .action.blue{background:#edf5fb;color:#316d98}
+.action.orange{background:#fff5df;color:#9b6a12}
+.action.gray{background:#edf1f4;color:#667784}
 
 .action:hover{filter:brightness(.96)}
 
@@ -792,6 +804,71 @@ button:focus-visible,input:focus-visible,select:focus-visible{
     display:block;
     color:var(--navy);
     margin-bottom:5px;
+}
+
+/* RETURN SECTION */
+
+.return-section{
+    margin-top:20px;
+}
+
+.return-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.return-heading h3{
+    color:var(--navy);
+    margin:0;
+    font-size:16px;
+}
+
+.return-heading p{
+    color:var(--muted);
+    margin:3px 0 0;
+    font-size:11px;
+}
+
+.return-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.return-stat{
+    padding:13px;
+    border-radius:13px;
+    background:#f5f9fa;
+    border:1px solid var(--border);
+}
+
+.return-stat b{
+    display:block;
+    color:var(--navy);
+    font-size:21px;
+}
+
+.return-stat small{
+    color:var(--muted);
+    font-size:10px;
+}
+
+.return-table{
+    min-width:760px;
+}
+
+.return-help{
+    margin-top:12px;
+    padding:12px;
+    background:#f0faf7;
+    border:1px solid #d8eee7;
+    border-radius:12px;
+    color:#53776d;
+    font-size:11px;
 }
 
 /* MODAL */
@@ -969,8 +1046,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{
     .stat{min-width:0;padding:9px}
     .stat b{font-size:18px}
     .panel-grid{display:block}
-    .panel-grid>.card+ .card{margin-top:14px}
+    .panel-grid>.card+.card{margin-top:14px}
     .toolbar{align-items:flex-start;flex-direction:column}
+    .return-stats{grid-template-columns:repeat(2,1fr)}
+    .return-heading{align-items:flex-start;flex-direction:column}
 }
 </style>
 </head>
@@ -1249,11 +1328,20 @@ let currentRole=null;
 
 /* التاريخ */
 
-const today=new Date();
+function localDateString(date=new Date()){
+    const year=date.getFullYear();
+    const month=String(date.getMonth()+1).padStart(2,'0');
+    const day=String(date.getDate()).padStart(2,'0');
+    return `${year}-${month}-${day}`;
+}
 
-document.getElementById('visitDate').min=
-new Date(today.getTime()-today.getTimezoneOffset()*60000)
-.toISOString().slice(0,10);
+function addDays(dateString,days){
+    const date=new Date(dateString+'T12:00:00');
+    date.setDate(date.getDate()+days);
+    return localDateString(date);
+}
+
+document.getElementById('visitDate').min=localDateString();
 
 /* التخزين المحلي */
 
@@ -1268,6 +1356,35 @@ function loadAppointments(){
 
 function saveAppointments(rows){
     localStorage.setItem(STORE_KEY,JSON.stringify(rows));
+}
+
+/* تحديث حالات العودة تلقائيًا */
+
+function updateReturnStatuses(){
+
+    const rows=loadAppointments();
+    const today=localDateString();
+    let changed=false;
+
+    rows.forEach(row=>{
+
+        if(!row.returnStatus)return;
+
+        if(
+            row.returnStatus==='scheduled' &&
+            row.returnDate &&
+            row.returnDate<today
+        ){
+            row.returnStatus='missed';
+            row.returnMissedAt=new Date().toISOString();
+            changed=true;
+        }
+
+    });
+
+    if(changed)saveAppointments(rows);
+
+    return rows;
 }
 
 /* حماية عرض النصوص */
@@ -1404,9 +1521,11 @@ document.getElementById('loginForm').addEventListener('submit',event=>{
         return;
     }
 
+    const role=currentRole;
+
     closeLogin();
 
-    renderDashboard(currentRole);
+    renderDashboard(role);
 });
 
 function logout(){
@@ -1418,6 +1537,30 @@ function logout(){
     showBooking();
 
     toast('تم تسجيل الخروج');
+}
+
+/* التحقق من تعارض الحجز والعودة */
+
+function hasReturnConflict(rows,phone,doctor,date,excludeId=null){
+
+    return rows.some(row=>
+        row.id!==excludeId &&
+        row.phone===phone &&
+        row.doctor===doctor &&
+        row.returnStatus==='scheduled' &&
+        row.returnDate===date
+    );
+}
+
+function hasBookingConflict(rows,phone,doctor,date,excludeId=null){
+
+    return rows.some(row=>
+        row.id!==excludeId &&
+        row.phone===phone &&
+        row.doctor===doctor &&
+        row.date===date &&
+        !['skipped','completed','cancelled'].includes(row.status)
+    );
 }
 
 /* نموذج الحجز */
@@ -1472,7 +1615,7 @@ form.addEventListener('submit',event=>{
         return;
     }
 
-    if(date<document.getElementById('visitDate').min){
+    if(date<localDateString()){
         toast('لا يمكن اختيار تاريخ سابق');
         return;
     }
@@ -1497,17 +1640,25 @@ form.addEventListener('submit',event=>{
         return;
     }
 
-    const rows=loadAppointments();
+    const rows=updateReturnStatuses();
 
     const duplicate=rows.find(row=>
-        row.phone===phone&&
-        row.doctor===doctor&&
-        row.date===date&&
-        !['skipped','completed'].includes(row.status)
+        row.phone===phone &&
+        row.doctor===doctor &&
+        (
+            (
+                row.date===date &&
+                !['skipped','completed','cancelled'].includes(row.status)
+            ) ||
+            (
+                row.returnStatus==='scheduled' &&
+                row.returnDate===date
+            )
+        )
     );
 
     if(duplicate){
-        toast('لديك طلب قائم لنفس الطبيب والتاريخ');
+        toast('يوجد لديك حجز أو موعد عودة في هذا التاريخ لدى الطبيب نفسه');
         return;
     }
 
@@ -1526,7 +1677,14 @@ form.addEventListener('submit',event=>{
         status:'pending',
         queue:null,
 
-        receiptName:file.name
+        receiptName:file.name,
+
+        returnStatus:'not_scheduled',
+        returnDate:null,
+        returnScheduledAt:null,
+        returnAttendedAt:null,
+        returnCancelledAt:null,
+        returnMissedAt:null
     };
 
     rows.unshift(row);
@@ -1552,7 +1710,7 @@ function renderStatus(){
 
     const content=document.getElementById('statusContent');
 
-    const rows=loadAppointments();
+    const rows=updateReturnStatuses();
 
     const row=rows[0];
 
@@ -1583,13 +1741,44 @@ function renderStatus(){
     }
 
     if(row.status==='skipped'){
-        badge='<span class="badge" style="background:#fde9eb;color:#ae4653">تم تجاوز الدور</span>';
+        badge='<span class="badge red">تم تجاوز الدور</span>';
         extra='يرجى التواصل مع الاستقبال.';
     }
 
     if(row.status==='completed'){
         badge='<span class="badge ok">اكتمل الكشف</span>';
         extra='نتمنى لك دوام الصحة والعافية.';
+    }
+
+    let returnInfo='';
+
+    if(row.returnStatus==='scheduled'){
+        returnInfo=`
+        <div class="notice">
+            موعد العودة: <b>${safeText(row.returnDate)}</b>
+            <br>يرجى الحضور في التاريخ المحدد للمراجعة.
+        </div>`;
+    }
+
+    if(row.returnStatus==='attended'){
+        returnInfo=`
+        <div class="notice" style="background:#e4f6ef;color:#087c68">
+            تم تسجيل حضورك لموعد العودة بتاريخ ${safeText(row.returnDate)}.
+        </div>`;
+    }
+
+    if(row.returnStatus==='missed'){
+        returnInfo=`
+        <div class="notice" style="background:#fde9eb;color:#ae4653">
+            لم يتم تسجيل حضورك في موعد العودة بتاريخ ${safeText(row.returnDate)}.
+        </div>`;
+    }
+
+    if(row.returnStatus==='cancelled'){
+        returnInfo=`
+        <div class="notice">
+            تم إلغاء موعد العودة السابق.
+        </div>`;
     }
 
     content.innerHTML=`
@@ -1617,12 +1806,16 @@ function renderStatus(){
             </div>
         </div>`:''}
 
+        ${returnInfo}
+
     </div>`;
 }
 
 /* لوحة الإدارة */
 
 function renderDashboard(role){
+
+    const rows=updateReturnStatuses();
 
     document.getElementById('bookingView').classList.add('hide');
 
@@ -1634,8 +1827,6 @@ function renderDashboard(role){
 
     document.getElementById('userName').textContent=
     role==='accountant'?'المحاسب':'الطبيب';
-
-    const rows=loadAppointments();
 
     const waiting=rows.filter(x=>x.status==='pending');
 
@@ -1707,6 +1898,11 @@ function renderDashboard(role){
                 onclick="doctorAction('${safeText(row.id)}','completed')">
                 إنهاء الكشف
                 </button>
+
+                <button class="action orange"
+                onclick="scheduleReturn('${safeText(row.id)}')">
+                تحديد موعد عودة
+                </button>
             `}
         </td>
 
@@ -1724,6 +1920,106 @@ function renderDashboard(role){
         </tr>`;
     }
 
+    /* جدول متابعة العودة */
+
+    const returnRows=rows.filter(row=>
+        ['scheduled','attended','missed','cancelled'].includes(row.returnStatus)
+    ).sort((a,b)=>
+        String(a.returnDate||'').localeCompare(String(b.returnDate||''))
+    );
+
+    let returnTableRows=returnRows.map(row=>{
+
+        let statusBadge='';
+
+        if(row.returnStatus==='scheduled'){
+            statusBadge='<span class="badge blue">موعد محدد</span>';
+        }
+
+        if(row.returnStatus==='attended'){
+            statusBadge='<span class="badge ok">حضر للمراجعة</span>';
+        }
+
+        if(row.returnStatus==='missed'){
+            statusBadge='<span class="badge red">لم يحضر</span>';
+        }
+
+        if(row.returnStatus==='cancelled'){
+            statusBadge='<span class="badge gray">ملغى</span>';
+        }
+
+        let actions='—';
+
+        if(row.returnStatus==='scheduled'){
+            actions=`
+                <button class="action green"
+                onclick="markReturnAttended('${safeText(row.id)}')">
+                حضر للمراجعة
+                </button>
+
+                <button class="action red"
+                onclick="cancelReturn('${safeText(row.id)}')">
+                إلغاء العودة
+                </button>
+            `;
+        }
+
+        if(row.returnStatus==='missed'){
+            actions=`
+                <button class="action orange"
+                onclick="scheduleReturn('${safeText(row.id)}')">
+                تحديد موعد جديد
+                </button>
+            `;
+        }
+
+        if(row.returnStatus==='cancelled'){
+            actions=`
+                <button class="action orange"
+                onclick="scheduleReturn('${safeText(row.id)}')">
+                تحديد موعد جديد
+                </button>
+            `;
+        }
+
+        return `
+        <tr>
+            <td>
+                <div class="patient">
+                    <span class="avatar">${safeText(row.name.slice(0,1))}</span>
+                    <span>
+                        ${safeText(row.name)}
+                        <small style="display:block;color:#8999a4">
+                            ${safeText(row.phone)}
+                        </small>
+                    </span>
+                </div>
+            </td>
+
+            <td>${safeText(row.doctor)}</td>
+            <td>${safeText(row.date)}</td>
+            <td><b>${safeText(row.returnDate||'—')}</b></td>
+            <td>${statusBadge}</td>
+            <td>${actions}</td>
+        </tr>
+        `;
+
+    }).join('');
+
+    if(!returnTableRows){
+        returnTableRows=`
+        <tr>
+            <td colspan="6" style="text-align:center;padding:25px;color:#81919d">
+                لا توجد مواعيد عودة مسجلة حتى الآن.
+            </td>
+        </tr>`;
+    }
+
+    const scheduledReturns=rows.filter(x=>x.returnStatus==='scheduled').length;
+    const attendedReturns=rows.filter(x=>x.returnStatus==='attended').length;
+    const missedReturns=rows.filter(x=>x.returnStatus==='missed').length;
+    const cancelledReturns=rows.filter(x=>x.returnStatus==='cancelled').length;
+
     view.innerHTML=`
 
     <section class="panel">
@@ -1736,7 +2032,7 @@ function renderDashboard(role){
                 <p>
                     ${admin
                     ?'راجع سندات التحويل واعتمد الطلبات.'
-                    :'إدارة المرضى المعتمدين ماليًا.'}
+                    :'إدارة المرضى المعتمدين ماليًا ومتابعة مواعيد العودة.'}
                 </p>
             </div>
 
@@ -1818,7 +2114,7 @@ function renderDashboard(role){
 
                     ${admin
                     ?'افتح بيانات السند وتحقق منها قبل اعتماد الطلب.'
-                    :'سجل حضور المريض وبدء الكشف أو تجاوزه أو إنهاء الكشف.'}
+                    :'سجل حضور المريض وبدء الكشف أو تجاوزه أو إنهاء الكشف، وحدد موعد العودة عند الحاجة.'}
                 </div>
 
                 <div class="side-note">
@@ -1829,6 +2125,71 @@ function renderDashboard(role){
             </aside>
 
         </div>
+
+        ${!admin?`
+
+        <section class="card return-section">
+
+            <div class="return-heading">
+                <div>
+                    <h3>◷ متابعة مواعيد العودة</h3>
+                    <p>متابعة المرضى الذين حدد الطبيب لهم موعد مراجعة بعد الزيارة.</p>
+                </div>
+                <span class="badge blue">متابعة العودة</span>
+            </div>
+
+            <div class="return-stats">
+
+                <div class="return-stat">
+                    <b>${scheduledReturns}</b>
+                    <small>مواعيد عودة قادمة</small>
+                </div>
+
+                <div class="return-stat">
+                    <b>${attendedReturns}</b>
+                    <small>حضروا للمراجعة</small>
+                </div>
+
+                <div class="return-stat">
+                    <b>${missedReturns}</b>
+                    <small>لم يحضروا</small>
+                </div>
+
+                <div class="return-stat">
+                    <b>${cancelledReturns}</b>
+                    <small>مواعيد ملغاة</small>
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table class="table return-table">
+
+                    <thead>
+                        <tr>
+                            <th>المريض</th>
+                            <th>العيادة</th>
+                            <th>تاريخ الزيارة</th>
+                            <th>موعد العودة</th>
+                            <th>حالة العودة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>${returnTableRows}</tbody>
+
+                </table>
+
+            </div>
+
+            <div class="return-help">
+                ملاحظة: يقترح النظام موعد العودة بعد 7 أيام من تاريخ الزيارة، ويمكن للطبيب تغييره. إذا مر الموعد دون تسجيل الحضور، تتحول الحالة تلقائيًا إلى «لم يحضر».
+            </div>
+
+        </section>
+
+        `:''}
 
     </section>`;
 
@@ -1868,6 +2229,11 @@ function doctorAction(id,status){
 
     if(!row)return;
 
+    if(!['approved','in_progress'].includes(row.status)){
+        toast('لا يمكن تغيير حالة هذا الطلب');
+        return;
+    }
+
     row.status=status;
 
     saveAppointments(rows);
@@ -1881,6 +2247,142 @@ function doctorAction(id,status){
     }else{
         toast('تم إنهاء الكشف');
     }
+}
+
+/* تحديد موعد العودة */
+
+function scheduleReturn(id){
+
+    const rows=updateReturnStatuses();
+
+    const row=rows.find(x=>x.id===id);
+
+    if(!row){
+        toast('لم يتم العثور على الحجز');
+        return;
+    }
+
+    if(!['in_progress','completed'].includes(row.status)){
+        toast('يمكن تحديد العودة بعد حضور المريض وبدء الكشف');
+        return;
+    }
+
+    const suggestedDate=addDays(row.date,7);
+
+    const input=prompt(
+        'أدخل تاريخ موعد العودة للمريض:\nالتاريخ المقترح بعد 7 أيام: '+suggestedDate+'\n\nاكتب التاريخ بهذا الشكل: YYYY-MM-DD',
+        suggestedDate
+    );
+
+    if(input===null)return;
+
+    const returnDate=input.trim();
+
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(returnDate)){
+        toast('صيغة التاريخ غير صحيحة');
+        return;
+    }
+
+    const parsedDate=new Date(returnDate+'T12:00:00');
+
+    if(isNaN(parsedDate.getTime())||localDateString(parsedDate)!==returnDate){
+        toast('التاريخ الذي أدخلته غير صالح');
+        return;
+    }
+
+    if(returnDate<localDateString()){
+        toast('لا يمكن تحديد موعد عودة في تاريخ سابق');
+        return;
+    }
+
+    if(returnDate<=row.date){
+        toast('يجب أن يكون موعد العودة بعد تاريخ الزيارة الأصلية');
+        return;
+    }
+
+    /* منع تعارض العودة مع حجز عادي للمريض نفسه والطبيب نفسه */
+
+    if(hasBookingConflict(rows,row.phone,row.doctor,returnDate,row.id)){
+        toast('يوجد لهذا المريض حجز عادي مع الطبيب نفسه في هذا التاريخ');
+        return;
+    }
+
+    /* منع وجود عودة أخرى للمريض نفسه في التاريخ نفسه */
+
+    if(hasReturnConflict(rows,row.phone,row.doctor,returnDate,row.id)){
+        toast('لدى المريض موعد عودة آخر في هذا التاريخ');
+        return;
+    }
+
+    row.returnDate=returnDate;
+    row.returnStatus='scheduled';
+    row.returnScheduledAt=new Date().toISOString();
+
+    row.returnAttendedAt=null;
+    row.returnCancelledAt=null;
+    row.returnMissedAt=null;
+
+    saveAppointments(rows);
+
+    renderDashboard('doctor');
+
+    toast('تم تحديد موعد العودة بنجاح');
+}
+
+/* تسجيل حضور المريض للعودة */
+
+function markReturnAttended(id){
+
+    const rows=updateReturnStatuses();
+
+    const row=rows.find(x=>x.id===id);
+
+    if(!row||row.returnStatus!=='scheduled'){
+        toast('موعد العودة غير متاح للتسجيل');
+        return;
+    }
+
+    if(row.returnDate>localDateString()){
+        if(!confirm('موعد العودة لم يحن بعد. هل تريد تسجيل حضوره الآن؟')){
+            return;
+        }
+    }
+
+    row.returnStatus='attended';
+    row.returnAttendedAt=new Date().toISOString();
+
+    saveAppointments(rows);
+
+    renderDashboard('doctor');
+
+    toast('تم تسجيل حضور المريض للمراجعة');
+}
+
+/* إلغاء موعد العودة */
+
+function cancelReturn(id){
+
+    const rows=updateReturnStatuses();
+
+    const row=rows.find(x=>x.id===id);
+
+    if(!row||row.returnStatus!=='scheduled'){
+        toast('لا يوجد موعد عودة قابل للإلغاء');
+        return;
+    }
+
+    if(!confirm('هل أنت متأكد من إلغاء موعد العودة؟')){
+        return;
+    }
+
+    row.returnStatus='cancelled';
+    row.returnCancelledAt=new Date().toISOString();
+
+    saveAppointments(rows);
+
+    renderDashboard('doctor');
+
+    toast('تم إلغاء موعد العودة دون إلغاء الحجز الأصلي');
 }
 
 /* سند التحويل */
@@ -1916,7 +2418,21 @@ function copyAccount(){
 
 /* التشغيل الأول */
 
+updateReturnStatuses();
 renderStatus();
+
+/* تحديث حالات العودة عند الرجوع للصفحة */
+
+document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden){
+        updateReturnStatuses();
+        renderStatus();
+
+        if(currentRole==='doctor'){
+            renderDashboard('doctor');
+        }
+    }
+});
 
 </script>
 

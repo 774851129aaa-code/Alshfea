@@ -1,4 +1,3 @@
-const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -87,11 +86,14 @@ function dateFromMinutes(minutes) {
     const normalized = Math.max(0, minutes);
     const hours = Math.floor(normalized / 60) % 24;
     const mins = normalized % 60;
+    const hour12 = hours % 12 || 12;
+    const period = hours < 12 ? 'ص' : 'م';
 
     return (
-        String(hours).padStart(2, '0') +
+        String(hour12).padStart(2, '0') +
         ':' +
-        String(mins).padStart(2, '0')
+        String(mins).padStart(2, '0') +
+        ' ' + period
     );
 }
 
@@ -4605,9 +4607,18 @@ app.post(
 
             if (action === 'start') {
 
-                if (row.returnStatus !== 'attended') {
+                if (!['scheduled', 'attended'].includes(row.returnStatus)) {
                     return res.status(409).json({
-                        error: 'يجب تسجيل حضور المريض قبل بدء كشف العودة'
+                        error: 'لا يوجد موعد عودة مجدول وقابل للبدء'
+                    });
+                }
+
+                if (
+                    row.returnStatus === 'scheduled' &&
+                    row.returnDate !== localDateString()
+                ) {
+                    return res.status(409).json({
+                        error: 'يمكن بدء كشف العودة في تاريخ العودة المحدد فقط'
                     });
                 }
 
@@ -4617,6 +4628,8 @@ app.post(
                     });
                 }
 
+                row.returnStatus = 'attended';
+                row.returnAttendedAt = row.returnAttendedAt || new Date().toISOString();
                 row.returnStartedAt = new Date().toISOString();
 
                 row.updatedAt = new Date().toISOString();

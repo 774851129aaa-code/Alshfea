@@ -1,4 +1,3 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -697,8 +696,9 @@ td .btn {
     </form>
 
     <div class="notice warning">
-        بيانات الدخول الأولية: اسم المستخدم <strong>admin</strong> وكلمة المرور <strong>admin</strong>.
-        غيّر كلمة المرور قبل نشر النظام للعامة.
+        حساب المدير: <strong>admin / admin</strong>؛ المحاسب: <strong>accountant / admin</strong>؛
+        حسابات الأطباء: <strong>doctor1</strong> إلى <strong>doctor6</strong> وكلمة المرور <strong>admin</strong>.
+        هذه حسابات تجريبية، واسم المستخدم مختلف لكل دور حتى تعمل الصلاحيات وسجل العمليات.
     </div>
 
     <div id="loginResult"></div>
@@ -729,7 +729,20 @@ td .btn {
     <div id="bootstrapResult"></div>
 </div>
 
-</div><script>
+</div>
+
+<div class="modal" id="receiptModal">
+    <div class="modal-card" style="width:min(900px,100%)">
+        <div class="modal-head">
+            <h3>صورة سند التحويل</h3>
+            <button class="close" onclick="closeReceiptPreview()">إغلاق</button>
+        </div>
+        <img id="receiptPreviewImage" alt="صورة سند التحويل"
+            style="display:block;max-width:100%;max-height:70vh;margin:auto;object-fit:contain;border-radius:10px">
+    </div>
+</div>
+
+<script>
 /* =========================================
    إعدادات الاتصال
 ========================================= */
@@ -745,10 +758,12 @@ let currentUser = null;
 let activeTab = '';
 let doctorsCache = [];
 let appointmentsCache = [];
+let appointmentsDoctorFilterName = '';
 let patientsCache = [];
 let invoicesCache = [];
 let paymentsCache = [];
 let waitingEventSource = null;
+let receiptPreviewUrl = '';
 
 /* =========================================
    أدوات عامة
@@ -778,7 +793,7 @@ function formatDate(value) {
 function statusName(status) {
     const names = {
         pending:'بانتظار المراجعة',
-        approved:'تم الاعتماد',
+        approved:'تم قبول الحجز',
         in_progress:'قيد الكشف',
         skipped:'تم تجاوز الدور',
         completed:'مكتمل',
@@ -1464,6 +1479,45 @@ async function loadDashboard() {
             </div>
         `).join('');
 
+        const doctorStatsSection = currentUser.role === 'manager' && Array.isArray(data.doctorStats)
+            ? `
+                <div class="section">
+                    <div class="section-title">
+                        <h3>إحصائيات الأطباء</h3>
+                        <span class="badge blue">الحالات المكتملة والمبالغ المحصلة</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="doctorStatsTable">
+                            <thead>
+                                <tr>
+                                    <th>الطبيب</th>
+                                    <th>التخصص</th>
+                                    <th>حالات اليوم</th>
+                                    <th>حالات الشهر</th>
+                                    <th>المبلغ اليوم</th>
+                                    <th>المبلغ الشهري</th>
+                                    <th>المرضى</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.doctorStats.map(item => `
+                                    <tr>
+                                        <td>${escapeHTML(item.name)}</td>
+                                        <td>${escapeHTML(item.specialty || '—')}</td>
+                                        <td>${Number(item.casesToday || 0)}</td>
+                                        <td>${Number(item.casesMonth || 0)}</td>
+                                        <td>${money(item.amountToday)}</td>
+                                        <td>${money(item.amountMonth)}</td>
+                                        <td><button class="btn btn-primary" data-doctor-name="${escapeHTML(item.name)}">عرض مرضاه المقبولين</button></td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="7">لا يوجد أطباء</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `
+            : '';
+
         $('#panel-dashboard').innerHTML = `
             <div class="section">
                 <h3>ملخص النظام</h3>
@@ -1482,11 +1536,26 @@ async function loadDashboard() {
                     </div>
                 </div>
             </div>
+            ${doctorStatsSection}
         `;
+
+        document.querySelectorAll('#doctorStatsTable [data-doctor-name]').forEach(button => {
+            button.addEventListener('click', () => showDoctorAppointments(button.dataset.doctorName));
+        });
 
     } catch (error) {
         panelError('dashboard',error);
     }
+}
+
+function showDoctorAppointments(doctorName) {
+    appointmentsDoctorFilterName = doctorName;
+    switchTab('appointments');
+}
+
+function clearDoctorAppointmentsFilter() {
+    appointmentsDoctorFilterName = '';
+    loadAppointments();
 }
 
 /* =========================================
@@ -1498,40 +1567,39 @@ async function loadAppointments() {
         appointmentsCache = await apiRequest('/api/appointments');
 
         const role = currentUser.role;
+        const visibleAppointments = appointmentsDoctorFilterName
+            ? appointmentsCache.filter(row =>
+                row.doctor === appointmentsDoctorFilterName &&
+                ['approved','in_progress','completed','skipped'].includes(row.status)
+            )
+            : appointmentsCache;
 
-        const rows = appointmentsCache.map(row => {
+        const rows = visibleAppointments.map(row => {
             let actions = '';
 
-            if (role === 'accountant' || role === 'manager') {
-                if (row.status === 'pending') {
-                    actions += `
-                        <button class="btn btn-success"
-                            onclick="changeAppointment('${row.id}','approved')">
-                            اعتماد
-                        </button>
-                        <button class="btn btn-danger"
-                            onclick="changeAppointment('${row.id}','cancelled')">
-                            رفض
-                        </button>
-                    `;
-                }
-
+            if (['accountant','manager'].includes(role) && row.status === 'pending') {
                 actions += `
-                    <button class="btn btn-light"
-                        onclick="viewReceipt('${row.id}')">
-                        السند
+                    <button class="btn btn-success"
+                        onclick="changeAppointment('${row.id}','approved')">
+                        قبول الحجز
                     </button>
-                `;
-
-                actions += `
-                    <button class="btn btn-light"
-                        onclick="rescheduleAppointment('${row.id}')">
-                        إعادة جدولة
+                    <button class="btn btn-danger"
+                        onclick="changeAppointment('${row.id}','cancelled')">
+                        رفض
                     </button>
                 `;
             }
 
-            if (role === 'doctor' || role === 'manager') {
+            if (['accountant','manager'].includes(role) && ['approved','in_progress'].includes(row.status)) {
+                actions += `
+                    <button class="btn btn-danger"
+                        onclick="cancelAppointment('${row.id}')">
+                        إلغاء / حذف الطلب
+                    </button>
+                `;
+            }
+
+            if (['doctor','manager'].includes(role)) {
                 if (row.status === 'approved') {
                     actions += `
                         <button class="btn btn-primary"
@@ -1549,7 +1617,7 @@ async function loadAppointments() {
                     actions += `
                         <button class="btn btn-success"
                             onclick="changeAppointment('${row.id}','completed')">
-                            إنهاء الكشف
+                            تم الكشف
                         </button>
                     `;
                 }
@@ -1591,14 +1659,20 @@ async function loadAppointments() {
                 }
             }
 
-            if (['manager','receptionist'].includes(role)) {
+            if (['manager','receptionist'].includes(role) && ['pending','approved'].includes(row.status)) {
                 actions += `
                     <button class="btn btn-warning"
                         onclick="rescheduleAppointment('${row.id}')">
-                        تعديل الموعد
+                        إعادة جدولة
                     </button>
                 `;
             }
+
+            const receiptCell = ['accountant','manager'].includes(role)
+                ? (row.receiptName
+                    ? `<button class="btn btn-light" onclick="viewReceipt('${row.id}')">عرض صورة السند</button>`
+                    : '<span class="muted">لا يوجد سند</span>')
+                : '—';
 
             return `
                 <tr>
@@ -1608,6 +1682,7 @@ async function loadAppointments() {
                     <td>${formatDate(row.date)}</td>
                     <td>${badge(row.status)}</td>
                     <td>${escapeHTML(row.appointmentTime || '—')}</td>
+                    <td>${receiptCell}</td>
                     <td>${badge(row.returnStatus)}</td>
                     <td>${actions || '—'}</td>
                 </tr>
@@ -1617,25 +1692,29 @@ async function loadAppointments() {
         $('#panel-appointments').innerHTML = `
             <div class="section">
                 <div class="section-title">
-                    <h3>إدارة الحجوزات</h3>
-                    <span class="badge blue">${appointmentsCache.length} حجز</span>
+                    <h3>إدارة الحجوزات${appointmentsDoctorFilterName ? ' - ' + escapeHTML(appointmentsDoctorFilterName) : ''}</h3>
+                    <div class="top-actions">
+                        ${appointmentsDoctorFilterName ? '<button class="btn btn-light" onclick="clearDoctorAppointmentsFilter()">عرض كل الحجوزات</button>' : ''}
+                        <span class="badge blue">${visibleAppointments.length} حجز</span>
+                    </div>
                 </div>
 
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
-                                <th>المريض</th>
+                                <th>اسم المريض</th>
                                 <th>الهاتف</th>
                                 <th>الطبيب</th>
                                 <th>التاريخ</th>
                                 <th>الحالة</th>
                                 <th>الوقت</th>
+                                <th>سند التحويل</th>
                                 <th>العودة</th>
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
-                        <tbody>${rows || '<tr><td colspan="8">لا توجد حجوزات</td></tr>'}</tbody>
+                        <tbody>${rows || '<tr><td colspan="9">لا توجد حجوزات</td></tr>'}</tbody>
                     </table>
                 </div>
             </div>
@@ -1643,6 +1722,20 @@ async function loadAppointments() {
 
     } catch (error) {
         panelError('appointments',error);
+    }
+}
+
+async function cancelAppointment(id) {
+    if (!confirm('سيتم إلغاء الحجز وإخفاؤه من قائمة الحالات النشطة مع الاحتفاظ بسجله. هل تريد المتابعة؟')) return;
+
+    try {
+        await apiRequest('/api/appointments/' + id + '/cancel', {
+            method:'POST'
+        });
+        alert('تم إلغاء الحجز مع الاحتفاظ بالسجل.');
+        await loadAppointments();
+    } catch (error) {
+        alert(error.message);
     }
 }
 
@@ -1731,30 +1824,27 @@ async function viewReceipt(id) {
         );
 
         if (!response.ok) {
-            throw new Error('تعذر فتح سند التحويل');
+            const message = await response.text();
+            throw new Error(message || 'تعذر فتح سند التحويل');
         }
 
         const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-
-        const win = window.open();
-
-        if (!win) {
-            URL.revokeObjectURL(url);
-            throw new Error('يرجى السماح بالنوافذ المنبثقة');
-        }
-
-        win.document.write(`
-            <html>
-            <head><title>سند التحويل</title></head>
-            <body style="margin:0;background:#111;display:grid;place-items:center">
-            <img src="${url}" style="max-width:100%;max-height:100vh">
-            </body>
-            </html>
-        `);
+        if (receiptPreviewUrl) URL.revokeObjectURL(receiptPreviewUrl);
+        receiptPreviewUrl = URL.createObjectURL(blob);
+        $('#receiptPreviewImage').src = receiptPreviewUrl;
+        $('#receiptModal').classList.add('show');
 
     } catch (error) {
         alert(error.message);
+    }
+}
+
+function closeReceiptPreview() {
+    $('#receiptModal').classList.remove('show');
+    $('#receiptPreviewImage').removeAttribute('src');
+    if (receiptPreviewUrl) {
+        URL.revokeObjectURL(receiptPreviewUrl);
+        receiptPreviewUrl = '';
     }
 }
 

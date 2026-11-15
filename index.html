@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -576,7 +576,13 @@ td .btn {
         <div class="field">
             <label>اختر الطبيب</label>
             <select name="doctor" id="bookingDoctorSelect" required>
-                <option value="">جاري تحميل الأطباء...</option>
+                <option value="">اختر الطبيب</option>
+                <option value="د. أحمد السقاف">د. أحمد السقاف — طب عام</option>
+                <option value="د. سارة العريقي">د. سارة العريقي — طب الأطفال</option>
+                <option value="د. محمد الحكيمي">د. محمد الحكيمي — الأمراض الباطنية</option>
+                <option value="د. ليلى اليافعي">د. ليلى اليافعي — أمراض النساء والولادة</option>
+                <option value="د. خالد الحضرمي">د. خالد الحضرمي — جراحة العظام</option>
+                <option value="د. نور القيسي">د. نور القيسي — طب الأسنان</option>
             </select>
         </div>
 
@@ -2351,7 +2357,18 @@ if (patient) patientForm(patient);
 ========================================= */
 
 async function loadMedical() {
-$('#panel-medical').innerHTML = "<div class="section"> <h3>الملفات الطبية</h3> <p class="muted">اختر مريضًا لعرض ملفه الطبي أو إضافة سجل زيارة.</p> <div class="field"> <label>البحث عن مريض</label> <input id="medicalSearch" placeholder="اسم المريض أو رقم الهاتف"> </div> <br> <div id="medicalPatients"></div> </div>";
+$('#panel-medical').innerHTML = `
+    <div class="section">
+        <h3>الملفات الطبية</h3>
+        <p class="muted">اختر مريضًا لعرض ملفه الطبي أو إضافة سجل زيارة.</p>
+        <div class="field">
+            <label>البحث عن مريض</label>
+            <input id="medicalSearch" placeholder="اسم المريض أو رقم الهاتف">
+        </div>
+        <br>
+        <div id="medicalPatients"></div>
+    </div>
+`;
 
 try {
     patientsCache = await apiRequest('/api/patients');
@@ -2375,7 +2392,15 @@ try {
 }
 
 function renderMedicalPatients(rows) {
-$('#medicalPatients').innerHTML = rows.map(p => "<div class="waiting-card"> <div> <strong>${escapeHTML(p.name)}</strong> <div class="muted">${escapeHTML(p.phone)}</div> </div> <button class="btn btn-primary" onclick="openMedical('${p.id}')">فتح الملف</button> </div>").join('') || '<div class="empty">لا يوجد مرضى</div>';
+$('#medicalPatients').innerHTML = rows.map(p => `
+    <div class="waiting-card">
+        <div>
+            <strong>${escapeHTML(p.name)}</strong>
+            <div class="muted">${escapeHTML(p.phone)}</div>
+        </div>
+        <button class="btn btn-primary" onclick="openMedical('${p.id}')">فتح الملف</button>
+    </div>
+`).join('') || '<div class="empty">لا يوجد مرضى</div>';
 }
 
 async function openMedical(id) {

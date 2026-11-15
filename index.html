@@ -1,4 +1,3 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -498,6 +497,18 @@ td .btn {
     color:var(--teal);
 }
 
+.copy-booking-id {
+    direction:ltr;
+    unicode-bidi:embed;
+    background:transparent;
+    color:var(--teal2);
+    text-decoration:underline;
+    font-weight:bold;
+    padding:3px 0;
+    cursor:pointer;
+    overflow-wrap:anywhere;
+}
+
 @media(max-width:800px) {
     .hero{grid-template-columns:1fr}
     .hero-icon{display:none}
@@ -555,6 +566,7 @@ td .btn {
     <div class="payment-box full" style="margin-bottom:16px">
         <h3>💳 مبلغ الحجز وبيانات التحويل</h3>
         <div><strong>مبلغ الحجز: 3000 ريال يمني</strong></div>
+        <div class="muted">يُسجل من كل سند 1000 ريال للمستشفى و2000 ريال حصة للطبيب تلقائيًا بعد اعتماد السند.</div>
         <div class="payment-account"><span>حساب بنك الكريمي</span><strong dir="ltr">30000000</strong></div>
         <div class="payment-account"><span>حساب بنك القطيبي</span><strong dir="ltr">35555555</strong></div>
         <div class="payment-account"><span>حساب البنك المركزي</span><strong dir="ltr">34444444</strong></div>
@@ -781,6 +793,43 @@ function escapeHTML(value) {
         "'":'&#039;'
     })[char]);
 }
+
+function copyBookingIdMarkup(value) {
+    const id = String(value || '');
+    return `<button type="button" class="copy-booking-id" data-copy-booking-id="${escapeHTML(id)}" title="اضغط لنسخ رقم الحجز">${escapeHTML(id)}</button>`;
+}
+
+async function copyBookingId(button) {
+    const id = button?.dataset.copyBookingId || '';
+    if (!id) return;
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(id);
+        } else {
+            const input = document.createElement('textarea');
+            input.value = id;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            const copied = document.execCommand('copy');
+            input.remove();
+            if (!copied) throw new Error('تعذر نسخ الرقم');
+        }
+
+        const original = button.textContent;
+        button.textContent = 'تم النسخ';
+        setTimeout(() => { button.textContent = original; }, 1200);
+    } catch (error) {
+        alert('تعذر النسخ تلقائيًا؛ اضغط مطولًا على رقم الحجز لنسخه.');
+    }
+}
+
+document.addEventListener('click', event => {
+    const button = event.target.closest('[data-copy-booking-id]');
+    if (button) copyBookingId(button);
+});
 
 function money(value) {
     return Number(value || 0).toLocaleString('en-US') + ' ر.ي';
@@ -1118,12 +1167,13 @@ $('#bookingForm').addEventListener('submit', async event => {
                 'info'
             );
         } else {
-            showResult(
-                '#bookingResult',
-                'تم إرسال طلب الحجز بنجاح. رقم الطلب: ' + result.id +
-                '. الطلب الآن بانتظار مراجعة السند.',
-                'success'
-            );
+            $('#bookingResult').innerHTML = `
+                <div class="result success">
+                    تم إرسال طلب الحجز بنجاح. رقم الحجز:
+                    ${copyBookingIdMarkup(result.id)}.
+                    الطلب الآن بانتظار مراجعة السند.
+                </div>
+            `;
         }
 
         form.reset();
@@ -1155,7 +1205,7 @@ function renderLastBooking() {
         <div class="notice success">
             تم العثور على رقم آخر حجز محفوظ على هذا الجهاز:
             <br>
-            <strong dir="ltr">${escapeHTML(id)}</strong>
+            ${copyBookingIdMarkup(id)}
         </div>
     `;
 }
@@ -1213,7 +1263,7 @@ $('#trackBookingForm').addEventListener('submit', async event => {
                     <div class="notice">
                         <strong>رقم الحجز</strong>
                         <br>
-                        <span dir="ltr">${escapeHTML(appointment.id || id)}</span>
+                        ${copyBookingIdMarkup(appointment.id || id)}
                     </div>
 
                     <div class="notice">
@@ -1496,11 +1546,20 @@ async function loadDashboard() {
             ['🆕','مرضى جدد اليوم',data.patients.newToday],
             ['📅','حجوزات اليوم',data.appointments.today],
             ['⏳','طلبات معلقة',data.appointments.pending],
-            ['💰','إيرادات اليوم',money(data.revenue.today)],
-            ['📈','إيرادات الشهر',money(data.revenue.month)],
+            ['💰',currentUser.role === 'doctor' ? 'حصتي اليوم من السندات' : 'إجمالي إيرادات اليوم',money(data.revenue.today)],
+            ['📈',currentUser.role === 'doctor' ? 'حصتي هذا الشهر من السندات' : 'إجمالي إيرادات الشهر',money(data.revenue.month)],
             ['🧾','المبالغ المستحقة',money(data.payments.due)],
             ['📆','حجوزات الشهر',data.appointments.month]
         ];
+
+        if (currentUser.role !== 'doctor') {
+            cards.push(
+                ['🏥','حصة المستشفى اليوم',money(data.revenue.hospitalToday)],
+                ['🩺','حصص الأطباء اليوم',money(data.revenue.doctorShareToday)],
+                ['🏥','حصة المستشفى هذا الشهر',money(data.revenue.hospitalMonth)],
+                ['🩺','حصص الأطباء هذا الشهر',money(data.revenue.doctorShareMonth)]
+            );
+        }
 
         $('#statsArea').innerHTML = cards.map(card => `
             <div class="stat">
@@ -1525,8 +1584,8 @@ async function loadDashboard() {
                                     <th>التخصص</th>
                                     <th>حالات اليوم</th>
                                     <th>حالات الشهر</th>
-                                    <th>المبلغ اليوم</th>
-                                    <th>المبلغ الشهري</th>
+                                    <th>حصة الطبيب اليوم</th>
+                                    <th>حصة الطبيب هذا الشهر</th>
                                     <th>المرضى</th>
                                 </tr>
                             </thead>
@@ -1567,6 +1626,7 @@ async function loadDashboard() {
                     </div>
                 </div>
             </div>
+            ${currentUser.role === 'doctor' ? '<div class="notice success">تُضاف حصتك تلقائيًا بمقدار 2000 ريال عن كل سند معتمد مرتبط بمواعيدك.</div>' : ''}
             ${doctorStatsSection}
         `;
 

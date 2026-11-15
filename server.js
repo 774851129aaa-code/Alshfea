@@ -1,4 +1,3 @@
-const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -259,6 +258,10 @@ function isBlockingBooking(row) {
 
 function isActiveBooking(row) {
     return ['approved', 'in_progress'].includes(row.status);
+}
+
+function isDoctorAccessibleAppointment(row) {
+    return ['approved', 'in_progress', 'completed', 'skipped'].includes(row.status);
 }
 
 function isScheduledReturn(row) {
@@ -922,6 +925,66 @@ function passwordMatches(password, user) {
         crypto.timingSafeEqual(actual, expected)
     );
 }
+
+/*
+   حساب الدخول الأولي للتجربة فقط.
+   يُنشأ فقط إذا لم توجد أي حسابات مستخدمين، ولا يغيّر الحسابات الموجودة.
+   غيّر كلمة المرور مباشرة قبل إتاحة النظام للعامة.
+*/
+function seedDefaultAdmin() {
+    const users = readCollection('users');
+
+    if (users.length > 0) return;
+
+    const credentials = hashPassword('admin');
+
+    const admin = {
+        id: makeId(),
+        username: 'admin',
+        name: 'مدير النظام',
+        role: 'manager',
+        active: true,
+        createdAt: nowISO(),
+        passwordSalt: credentials.salt,
+        passwordHash: credentials.hash
+    };
+
+    writeCollection('users', [admin]);
+    console.warn('تم إنشاء حساب المدير الافتراضي admin/admin. غيّر كلمة المرور قبل نشر النظام للعامة.');
+}
+
+seedDefaultAdmin();
+
+/* Demo-role accounts are created only while the initial admin/admin login remains active. */
+function seedDemoRoleUsers() {
+    const users = readCollection('users');
+    const admin = users.find(user => user.username === 'admin' && user.role === 'manager');
+    if (!admin || !passwordMatches('admin', admin)) return;
+
+    const doctors = readCollection('doctors');
+    const demoUsers = [
+        { username: 'accountant', name: 'المحاسب التجريبي', role: 'accountant', doctorId: null },
+        ...doctors.map((doctor, index) => ({
+            username: `doctor${index + 1}`,
+            name: `طبيب تجريبي ${index + 1} - ${doctor.name}`,
+            role: 'doctor',
+            doctorId: doctor.id
+        }))
+    ];
+    let changed = false;
+    for (const item of demoUsers) {
+        if (users.some(user => user.username === item.username)) continue;
+        const credentials = hashPassword('admin');
+        users.push({
+            id: makeId(), ...item, active: true, createdAt: nowISO(),
+            passwordSalt: credentials.salt, passwordHash: credentials.hash
+        });
+        changed = true;
+    }
+    if (changed) writeCollection('users', users);
+}
+
+seedDemoRoleUsers();
 
 function auditEntry(req, outcome) {
 
@@ -2061,7 +2124,8 @@ app.get(
                         a =>
                             normalizePhone(a.phone) ===
                             normalizePhone(p.phone) &&
-                            withinDoctorScope(req, a)
+                            withinDoctorScope(req, a) &&
+                            isDoctorAccessibleAppointment(a)
                     )
             );
         }
@@ -2281,7 +2345,8 @@ app.get(
         const appointments = readAppointments().filter(
             a =>
                 normalizePhone(a.phone) ===
-                normalizePhone(patient.phone)
+                normalizePhone(patient.phone) &&
+                (req.user.role !== 'doctor' || isDoctorAccessibleAppointment(a))
         );
 
         if (
@@ -2347,7 +2412,8 @@ app.post(
             const appointments = readAppointments().filter(
                 a =>
                     normalizePhone(a.phone) ===
-                    normalizePhone(patient.phone)
+                    normalizePhone(patient.phone) &&
+                    (req.user.role !== 'doctor' || isDoctorAccessibleAppointment(a))
             );
 
             if (
@@ -2732,7 +2798,7 @@ app.get(
             const scope =
                 req.user.role === 'doctor'
                     ? appointments.filter(
-                        a => withinDoctorScope(req, a)
+                        a => withinDoctorScope(req, a) && isDoctorAccessibleAppointment(a)
                     )
                     : appointments;
 
@@ -2808,6 +2874,44 @@ app.get(
                 )
                 : 0;
 
+            const doctorStats = req.user.role === 'manager'
+                ? readCollection('doctors').map(doctor => {
+                    const doctorRows = appointments.filter(
+                        appointment =>
+                            appointment.doctorId === doctor.id ||
+                            String(appointment.doctor || '').trim() === String(doctor.name || '').trim()
+                    );
+                    const appointmentIds = new Set(doctorRows.map(row => row.id));
+                    const doctorPayments = payments.filter(
+                        payment => appointmentIds.has(payment.appointmentId) &&
+                            ['paid', 'refunded'].includes(payment.status)
+                    );
+                    const amountInPeriod = predicate => doctorPayments.reduce(
+                        (sum, payment) => {
+                            const paymentDate = dateOfISO(payment.createdAt);
+                            if (!paymentDate || !predicate(paymentDate)) return sum;
+                            const amount = Number(payment.amount || 0);
+                            return sum + (payment.status === 'refunded' ? -amount : amount);
+                        },
+                        0
+                    );
+
+                    return {
+                        id: doctor.id,
+                        name: doctor.name,
+                        specialty: doctor.specialty || '',
+                        casesToday: doctorRows.filter(
+                            row => row.date === today && row.status === 'completed'
+                        ).length,
+                        casesMonth: doctorRows.filter(
+                            row => String(row.date || '').startsWith(month) && row.status === 'completed'
+                        ).length,
+                        amountToday: amountInPeriod(date => date === today),
+                        amountMonth: amountInPeriod(date => date.startsWith(month))
+                    };
+                })
+                : undefined;
+
             res.json({
 
                 date: today,
@@ -2866,7 +2970,9 @@ app.get(
                     due: outstanding,
 
                     remaining: outstanding
-                }
+                },
+
+                doctorStats
             });
 
         } catch (error) {
@@ -3579,7 +3685,7 @@ app.get('/api/appointments/track', (req, res) => {
 
         const statusMessages = {
             pending: 'طلب الحجز قيد المراجعة والتحقق من سند التحويل',
-            approved: 'تم تأكيد الحجز بنجاح',
+            approved: 'تم قبول حجزك بنجاح بعد مراجعة سند التحويل',
             in_progress: 'أنت الآن قيد الكشف',
             completed: 'تم إكمال الكشف',
             skipped: 'تم تجاوز الموعد',
@@ -3625,7 +3731,7 @@ app.get(
             const visibleRows =
                 req.user.role === 'doctor'
                     ? rows.filter(
-                        row => withinDoctorScope(req, row)
+                        row => withinDoctorScope(req, row) && isDoctorAccessibleAppointment(row)
                     )
                     : rows;
 

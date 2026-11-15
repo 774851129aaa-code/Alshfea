@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#102c46">
-<title>الشفاء | النظام الطبي المتكامل</title>
-
-<style>
+<title>الشفاء | النظام الطبي المتكامل</title><style>
 :root {
     --navy:#102c46;
     --navy2:#183e5c;
@@ -98,6 +95,12 @@ button {
 }
 
 .btn:hover{transform:translateY(-1px)}
+
+.btn:disabled {
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+}
 
 .btn-primary {
     background:var(--teal);
@@ -487,207 +490,200 @@ td .btn {
     .topbar{padding:14px}
     .brand h1{font-size:18px}
 }
-</style>
-</head>
-
-<body>
-
-<header class="topbar">
+</style></head><body><header class="topbar">
     <div class="brand">
         <div class="logo">✚</div>
         <div>
             <h1>الشفاء</h1>
             <small>نظام إدارة العيادات الطبية</small>
         </div>
-    </div>
+    </div><div class="top-actions">
+    <div id="userInfo" class="user-info hidden"></div>
+    <button class="btn btn-light" onclick="showPublic()">الرئيسية</button>
+    <button class="btn btn-primary" id="loginButton" onclick="openLogin()">دخول النظام</button>
+    <button class="btn btn-danger hidden" id="logoutButton" onclick="logout()">خروج</button>
+</div>
 
-    <div class="top-actions">
-        <div id="userInfo" class="user-info hidden"></div>
-        <button class="btn btn-light" onclick="showPublic()">الرئيسية</button>
-        <button class="btn btn-primary" id="loginButton" onclick="openLogin()">دخول النظام</button>
-        <button class="btn btn-danger hidden" id="logoutButton" onclick="logout()">خروج</button>
-    </div>
-</header>
-
-<main class="container">
-
-<!-- الواجهة العامة -->
-
-<section id="publicPage">
-
-    <div class="hero">
-        <div>
-            <h2>رعايتك الصحية تبدأ من هنا</h2>
-            <p>
-                مرحبًا بك في نظام الشفاء الطبي.
-                يمكنك حجز موعدك وإرفاق سند التحويل
-                ومتابعة إجراءات الحجز.
-            </p>
-            <br>
-            <button class="btn btn-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-                احجز موعدك الآن
-            </button>
-        </div>
-        <div class="hero-icon">🏥</div>
-    </div>
-
-    <section class="section" id="bookingSection">
-        <div class="section-title">
-            <h2>🩺 حجز موعد طبي</h2>
-            <span class="badge blue">حجز جديد</span>
-        </div>
-
-        <form id="bookingForm" class="grid">
-
-            <div class="field">
-                <label>اسم المريض الكامل</label>
-                <input name="name" required minlength="3" maxlength="90" placeholder="أدخل اسمك">
-            </div>
-
-            <div class="field">
-                <label>رقم الهاتف</label>
-                <input name="phone" required inputmode="tel" placeholder="رقم الهاتف">
-            </div>
-
-            <div class="field">
-                <label>اسم الطبيب أو العيادة</label>
-                <input name="doctor" required maxlength="160" placeholder="أدخل اسم الطبيب">
-            </div>
-
-            <div class="field">
-                <label>تاريخ الموعد</label>
-                <input name="date" type="date" required>
-            </div>
-
-            <div class="field full">
-                <label>صورة سند التحويل</label>
-                <input name="receipt" type="file" accept="image/jpeg,image/png,image/webp" required>
-                <small class="muted">الصيغ المقبولة JPG وPNG وWEBP، بحد أقصى 5 ميجابايت.</small>
-            </div>
-
-            <div class="notice full">
-                يرجى التأكد من صحة بياناتك وإرفاق صورة واضحة لسند التحويل قبل إرسال الطلب.
-            </div>
-
-            <button class="btn btn-primary full" type="submit" id="bookingSubmit">
-                إرسال طلب الحجز
-            </button>
-        </form>
-
-        <div id="bookingResult"></div>
-    </section>
-
-    <section class="section">
-        <div class="section-title">
-            <h2>📋 متابعة طلب الحجز</h2>
-        </div>
-
-        <p class="muted">
-            إذا كنت قد أرسلت طلب حجز من هذا الجهاز، يمكنك معرفة رقم طلبك المحفوظ.
-            عرض الحالة التفصيلية يتطلب تسجيل الدخول.
+</header><main class="container"><section id="publicPage"><div class="hero">
+    <div>
+        <h2>رعايتك الصحية تبدأ من هنا</h2>
+        <p>
+            مرحبًا بك في نظام الشفاء الطبي.
+            يمكنك حجز موعدك وإرفاق سند التحويل
+            ومتابعة إجراءات الحجز.
         </p>
+        <br>
+        <button class="btn btn-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+            احجز موعدك الآن
+        </button>
+    </div>
+    <div class="hero-icon">🏥</div>
+</div>
 
-        <div id="lastBooking"></div>
-    </section>
-
-    <section class="section">
-        <div class="section-title">
-            <h2>📺 شاشة الانتظار</h2>
-            <span class="badge green">تحديث مباشر</span>
-        </div>
-        <div id="publicWaiting">
-            <div class="loading">جاري تحميل شاشة الانتظار...</div>
-        </div>
-    </section>
-
-</section>
-
-<!-- لوحة النظام -->
-
-<section id="adminPage" class="hidden">
-
-    <div class="section">
-        <div class="section-title">
-            <div>
-                <h2 id="dashboardTitle">لوحة التحكم</h2>
-                <small class="muted" id="dashboardSubtitle"></small>
-            </div>
-            <button class="btn btn-light" onclick="refreshCurrent()">تحديث البيانات ↻</button>
-        </div>
-
-        <div id="statsArea" class="stats"></div>
+<section class="section" id="bookingSection">
+    <div class="section-title">
+        <h2>🩺 حجز موعد طبي</h2>
+        <span class="badge blue">حجز جديد</span>
     </div>
 
-    <div class="tabs" id="mainTabs"></div>
+    <form id="bookingForm" class="grid">
 
-    <div id="mainPanels"></div>
+        <div class="field">
+            <label>اسم المريض الكامل</label>
+            <input name="name" required minlength="3" maxlength="90" placeholder="أدخل اسمك">
+        </div>
 
+        <div class="field">
+            <label>رقم الهاتف</label>
+            <input name="phone" required inputmode="tel" placeholder="رقم الهاتف">
+        </div>
+
+        <div class="field">
+            <label>اختر الطبيب</label>
+            <select name="doctor" id="bookingDoctorSelect" required>
+                <option value="">جاري تحميل الأطباء...</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>تاريخ الموعد</label>
+            <input name="date" type="date" required>
+        </div>
+
+        <div class="field full">
+            <label>صورة سند التحويل</label>
+            <input name="receipt" type="file" accept="image/jpeg,image/png,image/webp" required>
+            <small class="muted">الصيغ المقبولة JPG وPNG وWEBP، بحد أقصى 5 ميجابايت.</small>
+        </div>
+
+        <div class="notice full">
+            يرجى التأكد من صحة بياناتك وإرفاق صورة واضحة لسند التحويل قبل إرسال الطلب.
+        </div>
+
+        <button class="btn btn-primary full" type="submit" id="bookingSubmit">
+            إرسال طلب الحجز
+        </button>
+    </form>
+
+    <div id="bookingResult"></div>
 </section>
 
-</main>
+<section class="section">
+    <div class="section-title">
+        <h2>📋 متابعة طلب الحجز</h2>
+        <span class="badge blue">استعلام عن الطلب</span>
+    </div>
 
-<footer class="footer">
+    <p class="muted">
+        أدخل رقم الحجز ورقم الهاتف المستخدم عند تقديم الطلب لمعرفة حالته.
+    </p>
+
+    <form id="trackBookingForm" class="grid">
+        <div class="field">
+            <label>رقم الحجز</label>
+            <input
+                type="text"
+                name="id"
+                id="trackBookingId"
+                required
+                placeholder="أدخل رقم الحجز"
+                dir="ltr">
+        </div>
+
+        <div class="field">
+            <label>رقم الهاتف</label>
+            <input
+                type="tel"
+                name="phone"
+                required
+                placeholder="رقم الهاتف المستخدم في الحجز">
+        </div>
+
+        <button class="btn btn-primary full" id="trackBookingButton">
+            الاستعلام عن الحجز
+        </button>
+    </form>
+
+    <div id="lastBooking"></div>
+    <div id="trackingResult"></div>
+</section>
+
+<section class="section">
+    <div class="section-title">
+        <h2>📺 شاشة الانتظار</h2>
+        <span class="badge green">تحديث مباشر</span>
+    </div>
+    <div id="publicWaiting">
+        <div class="loading">جاري تحميل شاشة الانتظار...</div>
+    </div>
+</section>
+
+</section><section id="adminPage" class="hidden"><div class="section">
+    <div class="section-title">
+        <div>
+            <h2 id="dashboardTitle">لوحة التحكم</h2>
+            <small class="muted" id="dashboardSubtitle"></small>
+        </div>
+        <button class="btn btn-light" onclick="refreshCurrent()">تحديث البيانات ↻</button>
+    </div>
+
+    <div id="statsArea" class="stats"></div>
+</div>
+
+<div class="tabs" id="mainTabs"></div>
+
+<div id="mainPanels"></div>
+
+</section></main><footer class="footer">
     نظام الشفاء لإدارة العيادات الطبية © 2026
-</footer>
-
-<!-- نافذة تسجيل الدخول -->
-
-<div class="modal" id="loginModal">
+</footer><div class="modal" id="loginModal">
     <div class="modal-card login-box">
         <div class="modal-head">
             <h3>تسجيل الدخول</h3>
             <button class="close" onclick="closeLogin()">✕</button>
+        </div>    <form id="loginForm">
+        <div class="field">
+            <label>اسم المستخدم</label>
+            <input name="username" required autocomplete="username">
         </div>
+        <br>
+        <div class="field">
+            <label>كلمة المرور</label>
+            <input name="password" type="password" required autocomplete="current-password">
+        </div>
+        <br>
+        <button class="btn btn-primary" style="width:100%">دخول</button>
+    </form>
 
-        <form id="loginForm">
-            <div class="field">
-                <label>اسم المستخدم</label>
-                <input name="username" required autocomplete="username">
-            </div>
-            <br>
-            <div class="field">
-                <label>كلمة المرور</label>
-                <input name="password" type="password" required autocomplete="current-password">
-            </div>
-            <br>
-            <button class="btn btn-primary" style="width:100%">دخول</button>
-        </form>
-
-        <div id="loginResult"></div>
-    </div>
+    <div id="loginResult"></div>
 </div>
 
-<!-- نافذة إنشاء أول مدير -->
-
-<div class="modal" id="bootstrapModal">
+</div><div class="modal" id="bootstrapModal">
     <div class="modal-card">
         <div class="modal-head">
             <h3>إعداد النظام لأول مرة</h3>
-        </div>
-
-        <div class="notice warning">
-            لم يتم إنشاء حساب مدير بعد. أنشئ حساب المدير الأول بكلمة مرور قوية لا تقل عن 12 حرفًا.
-        </div>
-
-        <form id="bootstrapForm">
-            <div class="field">
-                <label>اسم المستخدم</label>
-                <input name="username" required minlength="3" value="admin">
-            </div>
-            <br>
-            <div class="field">
-                <label>كلمة المرور</label>
-                <input name="password" type="password" required minlength="12">
-            </div>
-            <br>
-            <button class="btn btn-primary" style="width:100%">إنشاء حساب المدير</button>
-        </form>
-
-        <div id="bootstrapResult"></div>
+        </div>    <div class="notice warning">
+        لم يتم إنشاء حساب مدير بعد. أنشئ حساب المدير الأول بكلمة مرور قوية لا تقل عن 12 حرفًا.
     </div>
+
+    <form id="bootstrapForm">
+        <div class="field">
+            <label>اسم المستخدم</label>
+            <input name="username" required minlength="3" value="admin">
+        </div>
+        <br>
+        <div class="field">
+            <label>كلمة المرور</label>
+            <input name="password" type="password" required minlength="12">
+        </div>
+        <br>
+        <button class="btn btn-primary" style="width:100%">إنشاء حساب المدير</button>
+    </form>
+
+    <div id="bootstrapResult"></div>
 </div>
 
-<script>
+</div><script>
 /* =========================================
    إعدادات الاتصال
 ========================================= */
@@ -825,6 +821,8 @@ function showPublic() {
     $('#publicPage').classList.remove('hidden');
     $('#adminPage').classList.add('hidden');
     activeTab = '';
+
+    loadPublicDoctors();
     loadPublicWaiting();
 }
 
@@ -958,6 +956,51 @@ async function initializeAuth() {
 }
 
 /* =========================================
+   تحميل الأطباء للحجز العام
+========================================= */
+
+async function loadPublicDoctors() {
+    const select = $('#bookingDoctorSelect');
+
+    if (!select) return;
+
+    try {
+        const doctors = await apiRequest('/api/doctors');
+
+        doctorsCache = Array.isArray(doctors) ? doctors : [];
+
+        const activeDoctors = doctorsCache.filter(d => d.active !== false);
+
+        if (!activeDoctors.length) {
+            select.innerHTML = `
+                <option value="">لا يوجد أطباء متاحون حاليًا</option>
+            `;
+            select.disabled = true;
+            return;
+        }
+
+        select.disabled = false;
+
+        select.innerHTML = `
+            <option value="">اختر الطبيب</option>
+            ${activeDoctors.map(d => `
+                <option value="${escapeHTML(d.name)}">
+                    ${escapeHTML(d.name)}
+                    ${d.specialty ? ' - ' + escapeHTML(d.specialty) : ''}
+                </option>
+            `).join('')}
+        `;
+
+    } catch (error) {
+        select.innerHTML = `
+            <option value="">تعذر تحميل قائمة الأطباء</option>
+        `;
+        select.disabled = true;
+        console.error('تعذر تحميل الأطباء:', error);
+    }
+}
+
+/* =========================================
    واجهة المريض والحجز
 ========================================= */
 
@@ -1019,24 +1062,155 @@ $('#bookingForm').addEventListener('submit', async event => {
     }
 });
 
+/* =========================================
+   متابعة حالة الحجز
+========================================= */
+
 function renderLastBooking() {
     const id = localStorage.getItem(LAST_BOOKING_KEY);
 
     if (!id) {
-        $('#lastBooking').innerHTML =
-            '<div class="empty">لا يوجد طلب محفوظ على هذا الجهاز.</div>';
+        $('#lastBooking').innerHTML = '';
         return;
     }
 
+    $('#trackBookingId').value = id;
+
     $('#lastBooking').innerHTML = `
         <div class="notice success">
-            رقم آخر طلب محفوظ:<br>
-            <strong dir="ltr">${escapeHTML(id)}</strong>
+            تم العثور على رقم آخر حجز محفوظ على هذا الجهاز:
             <br>
-            لمعرفة الحالة التفصيلية يرجى تسجيل الدخول إلى النظام.
+            <strong dir="ltr">${escapeHTML(id)}</strong>
         </div>
     `;
 }
+
+$('#trackBookingForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    const id = String(form.get('id') || '').trim();
+    const phone = String(form.get('phone') || '').trim();
+
+    if (!id || !phone) {
+        showResult(
+            '#trackingResult',
+            'يرجى إدخال رقم الحجز ورقم الهاتف.',
+            'error'
+        );
+        return;
+    }
+
+    const button = $('#trackBookingButton');
+
+    button.disabled = true;
+    button.textContent = 'جاري البحث...';
+
+    $('#trackingResult').innerHTML = '';
+
+    try {
+        const query = new URLSearchParams({
+            id,
+            phone
+        });
+
+        const data = await apiRequest(
+            '/api/appointments/track?' + query.toString()
+        );
+
+        const appointment = data.appointment;
+
+        if (!appointment) {
+            throw new Error(data.message || 'لم يتم العثور على بيانات الحجز.');
+        }
+
+        const status = appointment.status || 'pending';
+
+        $('#trackingResult').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>نتيجة الاستعلام</h3>
+                    ${badge(status)}
+                </div>
+
+                <div class="grid">
+                    <div class="notice">
+                        <strong>رقم الحجز</strong>
+                        <br>
+                        <span dir="ltr">${escapeHTML(appointment.id || id)}</span>
+                    </div>
+
+                    <div class="notice">
+                        <strong>اسم المريض</strong>
+                        <br>
+                        ${escapeHTML(appointment.name || '—')}
+                    </div>
+
+                    <div class="notice">
+                        <strong>الطبيب</strong>
+                        <br>
+                        ${escapeHTML(appointment.doctor || '—')}
+                    </div>
+
+                    <div class="notice">
+                        <strong>تاريخ الموعد</strong>
+                        <br>
+                        ${escapeHTML(appointment.date || '—')}
+                    </div>
+
+                    <div class="notice">
+                        <strong>وقت الموعد</strong>
+                        <br>
+                        ${escapeHTML(appointment.appointmentTime || 'لم يحدد بعد')}
+                    </div>
+
+                    <div class="notice">
+                        <strong>حالة الحجز</strong>
+                        <br>
+                        ${badge(status)}
+                    </div>
+                </div>
+
+                <div class="notice ${
+                    status === 'approved' || status === 'completed'
+                        ? 'success'
+                        : status === 'cancelled'
+                            ? 'warning'
+                            : ''
+                }">
+                    ${escapeHTML(data.message || statusName(status))}
+                </div>
+
+                ${
+                    appointment.returnStatus
+                    ? `
+                        <div class="notice">
+                            <strong>حالة موعد العودة:</strong>
+                            ${escapeHTML(statusName(appointment.returnStatus))}
+                            ${
+                                appointment.returnDate
+                                ? '<br>تاريخ العودة: ' + escapeHTML(appointment.returnDate)
+                                : ''
+                            }
+                        </div>
+                    `
+                    : ''
+                }
+            </div>
+        `;
+
+    } catch (error) {
+        showResult(
+            '#trackingResult',
+            error.message,
+            'error'
+        );
+    } finally {
+        button.disabled = false;
+        button.textContent = 'الاستعلام عن الحجز';
+    }
+});
 
 /* =========================================
    شاشة الانتظار العامة
@@ -1104,7 +1278,7 @@ function buildInterface() {
 
     const tabs = [];
 
-    if (['manager','accountant'].includes(role)) {
+    if (['manager','accountant','doctor'].includes(role)) {
         tabs.push(['dashboard','📊 الإحصائيات']);
     }
 
@@ -1129,9 +1303,7 @@ function buildInterface() {
     }
 
     if (['manager','accountant'].includes(role)) {
-        tabs.push(
-            ['finance','💰 الفواتير والمدفوعات']
-        );
+        tabs.push(['finance','💰 الفواتير والمدفوعات']);
     }
 
     if (['manager','receptionist','doctor'].includes(role)) {
@@ -1516,6 +1688,7 @@ async function viewReceipt(id) {
         const url = URL.createObjectURL(blob);
 
         const win = window.open();
+
         if (!win) {
             URL.revokeObjectURL(url);
             throw new Error('يرجى السماح بالنوافذ المنبثقة');
@@ -1622,6 +1795,11 @@ function doctorForm(doctor = null) {
             </form>
         </div>
     `;
+
+    if (doctor) {
+        $('#doctorForm [name="active"]').value =
+            doctor.active === false ? 'false' : 'true';
+    }
 
     $('#doctorForm').addEventListener('submit',async event => {
         event.preventDefault();
@@ -1756,631 +1934,975 @@ async function loadHours() {
 
                     <div class="field">
                         <label>الإجازات الرسمية (كل تاريخ في سطر)</label>
-                        <textarea name="holidays">${(settings.holidays || []).map(x => typeof x === 'string' ? x : x.date).join('\n')}</textarea>
-                    </div>
+                        <textarea name="holidays">${(settings.holidays || []).map(x => typeof x === 'string' ? x : x.date).join('\n')}</textarea>                </div>
 
-                    <br>
-
-                    <div class="field">
-                        <label>أيام الإغلاق (كل تاريخ في سطر)</label>
-                        <textarea name="closedDates">${(settings.closedDates || []).join('\n')}</textarea>
-                    </div>
-
-                    <br>
-                    <button class="btn btn-primary">حفظ إعدادات العمل</button>
-                </form>
-            </div>
-        `;
-
-        $('#hoursForm').addEventListener('submit',saveHours);
-
-    } catch (error) {
-        panelError('hours',error);
-    }
-}
-
-async function saveHours(event) {
-    event.preventDefault();
-
-    const form = new FormData(event.target);
-
-    const weeklyHours = {};
-
-    for (let i=0;i<7;i++) {
-        weeklyHours[i] = {
-            closed:$('#day-' + i + '-closed').value === 'true',
-            start:$('#day-' + i + '-start').value,
-            end:$('#day-' + i + '-end').value
-        };
-    }
-
-    const body = {
-        weeklyHours,
-        holidays:form.get('holidays').split('\n').map(x => x.trim()).filter(Boolean),
-        closedDates:form.get('closedDates').split('\n').map(x => x.trim()).filter(Boolean),
-        timezone:form.get('timezone'),
-        maxAppointmentsPerDoctorPerDay:Number(form.get('maxAppointments'))
-    };
-
-    try {
-        await apiRequest('/api/clinic/hours',{
-            method:'PUT',
-            body:JSON.stringify(body)
-        });
-
-        alert('تم حفظ ساعات العمل');
-
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-/* =========================================
-   المستخدمون
-========================================= */
-
-async function loadUsers() {
-    try {
-        const users = await apiRequest('/api/users');
-
-        const rows = users.map(user => `
-            <tr>
-                <td>${escapeHTML(user.name)}</td>
-                <td>${escapeHTML(user.username)}</td>
-                <td>${escapeHTML(roleName(user.role))}</td>
-                <td>${badge(user.active === false ? 'cancelled' : 'approved')}</td>
-                <td>
-                    <button class="btn btn-warning"
-                        onclick="toggleUser('${user.id}',${user.active !== false})">
-                        ${user.active === false ? 'تفعيل' : 'تعطيل'}
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-        $('#panel-users').innerHTML = `
-            <div class="section">
-                <div class="section-title">
-                    <h3>إدارة المستخدمين</h3>
-                    <button class="btn btn-primary" onclick="userForm()">إضافة مستخدم</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>اسم المستخدم</th>
-                                <th>الصلاحية</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-
-                <div id="userEditor"></div>
-            </div>
-        `;
-
-    } catch (error) {
-        panelError('users',error);
-    }
-}
-
-async function userForm() {
-    try {
-        doctorsCache = await apiRequest('/api/doctors');
-    } catch (_) {}
-
-    $('#userEditor').innerHTML = `
-        <div class="section">
-            <h3>إضافة مستخدم</h3>
-
-            <form id="userForm" class="grid">
-                <div class="field">
-                    <label>الاسم الكامل</label>
-                    <input name="name" required>
-                </div>
+                <br>
 
                 <div class="field">
-                    <label>اسم المستخدم</label>
-                    <input name="username" required minlength="3">
+                    <label>أيام الإغلاق (كل تاريخ في سطر)</label>
+                    <textarea name="closedDates">${(settings.closedDates || []).join('\n')}</textarea>
                 </div>
 
-                <div class="field">
-                    <label>كلمة المرور</label>
-                    <input name="password" type="password" required minlength="12">
-                </div>
-
-                <div class="field">
-                    <label>الصلاحية</label>
-                    <select name="role" id="newUserRole">
-                        <option value="manager">مدير</option>
-                        <option value="accountant">محاسب</option>
-                        <option value="receptionist">استقبال</option>
-                        <option value="doctor">طبيب</option>
-                    </select>
-                </div>
-
-                <div class="field full hidden" id="doctorSelectField">
-                    <label>ربط حساب الطبيب</label>
-                    <select name="doctorId">
-                        ${doctorsCache.map(d => `
-                            <option value="${d.id}">${escapeHTML(d.name)}</option>
-                        `).join('')}
-                    </select>
-                </div>
-
-                <button class="btn btn-primary full">إنشاء المستخدم</button>
+                <br>
+                <button class="btn btn-primary">حفظ إعدادات العمل</button>
             </form>
         </div>
     `;
 
-    $('#newUserRole').addEventListener('change',event => {
-        $('#doctorSelectField').classList.toggle(
-            'hidden',
-            event.target.value !== 'doctor'
-        );
-    });
+    $('#hoursForm').addEventListener('submit',saveHours);
 
-    $('#userForm').addEventListener('submit',async event => {
-        event.preventDefault();
-
-        const form = new FormData(event.target);
-
-        try {
-            await apiRequest('/api/users',{
-                method:'POST',
-                body:JSON.stringify({
-                    name:form.get('name'),
-                    username:form.get('username'),
-                    password:form.get('password'),
-                    role:form.get('role'),
-                    doctorId:form.get('doctorId') || null
-                })
-            });
-
-            alert('تم إنشاء المستخدم');
-            loadUsers();
-
-        } catch (error) {
-            alert(error.message);
-        }
-    });
+} catch (error) {
+    panelError('hours',error);
 }
 
-async function toggleUser(id,active) {
-    if (!confirm('هل تريد تغيير حالة المستخدم؟')) return;
+}
+
+async function saveHours(event) {
+event.preventDefault();
+
+const form = new FormData(event.target);
+
+const weeklyHours = {};
+
+for (let i=0;i<7;i++) {
+    weeklyHours[i] = {
+        closed:$('#day-' + i + '-closed').value === 'true',
+        start:$('#day-' + i + '-start').value,
+        end:$('#day-' + i + '-end').value
+    };
+}
+
+const body = {
+    weeklyHours,
+    holidays:form.get('holidays').split('\n').map(x => x.trim()).filter(Boolean),
+    closedDates:form.get('closedDates').split('\n').map(x => x.trim()).filter(Boolean),
+    timezone:form.get('timezone'),
+    maxAppointmentsPerDoctorPerDay:Number(form.get('maxAppointments'))
+};
+
+try {
+    await apiRequest('/api/clinic/hours',{
+        method:'PUT',
+        body:JSON.stringify(body)
+    });
+
+    alert('تم حفظ ساعات العمل');
+
+} catch (error) {
+    alert(error.message);
+}
+
+}
+
+/* =========================================
+المستخدمون
+========================================= */
+
+async function loadUsers() {
+try {
+const users = await apiRequest('/api/users');
+
+    const rows = users.map(user => `
+        <tr>
+            <td>${escapeHTML(user.name)}</td>
+            <td>${escapeHTML(user.username)}</td>
+            <td>${escapeHTML(roleName(user.role))}</td>
+            <td>${badge(user.active === false ? 'cancelled' : 'approved')}</td>
+            <td>
+                <button class="btn btn-warning"
+                    onclick="toggleUser('${user.id}',${user.active !== false})">
+                    ${user.active === false ? 'تفعيل' : 'تعطيل'}
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    $('#panel-users').innerHTML = `
+        <div class="section">
+            <div class="section-title">
+                <h3>إدارة المستخدمين</h3>
+                <button class="btn btn-primary" onclick="userForm()">إضافة مستخدم</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>الصلاحية</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+
+            <div id="userEditor"></div>
+        </div>
+    `;
+
+} catch (error) {
+    panelError('users',error);
+}
+
+}
+
+async function userForm() {
+try {
+doctorsCache = await apiRequest('/api/doctors');
+} catch (_) {}
+
+$('#userEditor').innerHTML = `
+    <div class="section">
+        <h3>إضافة مستخدم</h3>
+
+        <form id="userForm" class="grid">
+            <div class="field">
+                <label>الاسم الكامل</label>
+                <input name="name" required>
+            </div>
+
+            <div class="field">
+                <label>اسم المستخدم</label>
+                <input name="username" required minlength="3">
+            </div>
+
+            <div class="field">
+                <label>كلمة المرور</label>
+                <input name="password" type="password" required minlength="12">
+            </div>
+
+            <div class="field">
+                <label>الصلاحية</label>
+                <select name="role" id="newUserRole">
+                    <option value="manager">مدير</option>
+                    <option value="accountant">محاسب</option>
+                    <option value="receptionist">استقبال</option>
+                    <option value="doctor">طبيب</option>
+                </select>
+            </div>
+
+            <div class="field full hidden" id="doctorSelectField">
+                <label>ربط حساب الطبيب</label>
+                <select name="doctorId">
+                    ${doctorsCache.map(d => `
+                        <option value="${d.id}">${escapeHTML(d.name)}</option>
+                    `).join('')}
+                </select>
+            </div>
+
+            <button class="btn btn-primary full">إنشاء المستخدم</button>
+        </form>
+    </div>
+`;
+
+$('#newUserRole').addEventListener('change',event => {
+    $('#doctorSelectField').classList.toggle(
+        'hidden',
+        event.target.value !== 'doctor'
+    );
+});
+
+$('#userForm').addEventListener('submit',async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
 
     try {
-        await apiRequest('/api/users/' + id,{
-            method:'PATCH',
-            body:JSON.stringify({active:!active})
+        await apiRequest('/api/users',{
+            method:'POST',
+            body:JSON.stringify({
+                name:form.get('name'),
+                username:form.get('username'),
+                password:form.get('password'),
+                role:form.get('role'),
+                doctorId:form.get('doctorId') || null
+            })
         });
 
+        alert('تم إنشاء المستخدم');
         loadUsers();
 
     } catch (error) {
         alert(error.message);
     }
+});
+
+}
+
+async function toggleUser(id,active) {
+if (!confirm('هل تريد تغيير حالة المستخدم؟')) return;
+
+try {
+    await apiRequest('/api/users/' + id,{
+        method:'PATCH',
+        body:JSON.stringify({active:!active})
+    });
+
+    loadUsers();
+
+} catch (error) {
+    alert(error.message);
+}
+
 }
 
 /* =========================================
-   المرضى
+المرضى
 ========================================= */
 
 async function loadPatients() {
-    try {
-        patientsCache = await apiRequest('/api/patients');
+try {
+patientsCache = await apiRequest('/api/patients');
 
-        const rows = patientsCache.map(p => `
-            <tr>
-                <td>${escapeHTML(p.name)}</td>
-                <td>${escapeHTML(p.phone)}</td>
-                <td>${escapeHTML(p.age ?? '—')}</td>
-                <td>${escapeHTML(p.dateOfBirth || '—')}</td>
-                <td>
-                    <button class="btn btn-warning"
-                        onclick="editPatient('${p.id}')">تعديل</button>
+    const rows = patientsCache.map(p => `
+        <tr>
+            <td>${escapeHTML(p.name)}</td>
+            <td>${escapeHTML(p.phone)}</td>
+            <td>${escapeHTML(p.age ?? '—')}</td>
+            <td>${escapeHTML(p.dateOfBirth || '—')}</td>
+            <td>
+                <button class="btn btn-warning"
+                    onclick="editPatient('${p.id}')">تعديل</button>
 
-                    ${['manager','doctor'].includes(currentUser.role) ? `
-                        <button class="btn btn-primary"
-                            onclick="openMedical('${p.id}')">
-                            الملف الطبي
-                        </button>
-                    ` : ''}
-                </td>
-            </tr>
-        `).join('');
+                ${['manager','doctor'].includes(currentUser.role) ? `
+                    <button class="btn btn-primary"
+                        onclick="openMedical('${p.id}')">
+                        الملف الطبي
+                    </button>
+                ` : ''}
+            </td>
+        </tr>
+    `).join('');
 
-        $('#panel-patients').innerHTML = `
-            <div class="section">
-                <div class="section-title">
-                    <h3>إدارة المرضى</h3>
-                    <button class="btn btn-primary" onclick="patientForm()">إضافة مريض</button>
-                </div>
-
-                <div class="field">
-                    <label>البحث عن مريض</label>
-                    <input id="patientSearch" placeholder="الاسم أو رقم الهاتف">
-                </div>
-
-                <br>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>الهاتف</th>
-                                <th>العمر</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="patientsRows">${rows}</tbody>
-                    </table>
-                </div>
-
-                <div id="patientEditor"></div>
+    $('#panel-patients').innerHTML = `
+        <div class="section">
+            <div class="section-title">
+                <h3>إدارة المرضى</h3>
+                <button class="btn btn-primary" onclick="patientForm()">إضافة مريض</button>
             </div>
-        `;
 
-        $('#patientSearch').addEventListener('input',event => {
-            const q = event.target.value.toLowerCase();
+            <div class="field">
+                <label>البحث عن مريض</label>
+                <input id="patientSearch" placeholder="الاسم أو رقم الهاتف">
+            </div>
 
-            $('#patientsRows').innerHTML = patientsCache
-                .filter(p =>
-                    p.name.toLowerCase().includes(q) ||
-                    p.phone.includes(q)
-                )
-                .map(p => `
-                    <tr>
-                        <td>${escapeHTML(p.name)}</td>
-                        <td>${escapeHTML(p.phone)}</td>
-                        <td>${escapeHTML(p.age ?? '—')}</td>
-                        <td>${escapeHTML(p.dateOfBirth || '—')}</td>
-                        <td>
-                            <button class="btn btn-warning"
-                                onclick="editPatient('${p.id}')">تعديل</button>
-                            ${['manager','doctor'].includes(currentUser.role) ? `
-                                <button class="btn btn-primary"
-                                    onclick="openMedical('${p.id}')">الملف الطبي</button>
-                            ` : ''}
-                        </td>
-                    </tr>
-                `).join('');
-        });
+            <br>
 
-    } catch (error) {
-        panelError('patients',error);
-    }
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الهاتف</th>
+                            <th>العمر</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsRows">${rows}</tbody>
+                </table>
+            </div>
+
+            <div id="patientEditor"></div>
+        </div>
+    `;
+
+    $('#patientSearch').addEventListener('input',event => {
+        const q = event.target.value.toLowerCase();
+
+        $('#patientsRows').innerHTML = patientsCache
+            .filter(p =>
+                String(p.name || '').toLowerCase().includes(q) ||
+                String(p.phone || '').includes(q)
+            )
+            .map(p => `
+                <tr>
+                    <td>${escapeHTML(p.name)}</td>
+                    <td>${escapeHTML(p.phone)}</td>
+                    <td>${escapeHTML(p.age ?? '—')}</td>
+                    <td>${escapeHTML(p.dateOfBirth || '—')}</td>
+                    <td>
+                        <button class="btn btn-warning"
+                            onclick="editPatient('${p.id}')">تعديل</button>
+                        ${['manager','doctor'].includes(currentUser.role) ? `
+                            <button class="btn btn-primary"
+                                onclick="openMedical('${p.id}')">الملف الطبي</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+    });
+
+} catch (error) {
+    panelError('patients',error);
+}
+
 }
 
 function patientForm(patient = null) {
-    $('#patientEditor').innerHTML = `
+$('#patientEditor').innerHTML = `
+<div class="section">
+<h3>${patient ? 'تعديل بيانات المريض' : 'إضافة مريض جديد'}</h3>
+
+        <form id="patientForm" class="grid">
+            <div class="field">
+                <label>اسم المريض</label>
+                <input name="name" required value="${escapeHTML(patient?.name || '')}">
+            </div>
+
+            <div class="field">
+                <label>رقم الهاتف</label>
+                <input name="phone" required value="${escapeHTML(patient?.phone || '')}">
+            </div>
+
+            <div class="field">
+                <label>تاريخ الميلاد</label>
+                <input type="date" name="dateOfBirth"
+                    value="${escapeHTML(patient?.dateOfBirth || '')}">
+            </div>
+
+            <div class="field">
+                <label>العمر</label>
+                <input type="number" name="age" min="0"
+                    value="${escapeHTML(patient?.age ?? '')}">
+            </div>
+
+            <button class="btn btn-primary full">حفظ البيانات</button>
+        </form>
+    </div>
+`;
+
+$('#patientForm').addEventListener('submit',async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    const body = {
+        name:form.get('name'),
+        phone:form.get('phone'),
+        dateOfBirth:form.get('dateOfBirth') || null,
+        age:form.get('age') ? Number(form.get('age')) : null
+    };
+
+    try {
+        await apiRequest(
+            patient ? '/api/patients/' + patient.id : '/api/patients',
+            {
+                method:patient ? 'PATCH' : 'POST',
+                body:JSON.stringify(body)
+            }
+        );
+
+        alert('تم حفظ بيانات المريض');
+        loadPatients();
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+}
+
+function editPatient(id) {
+const patient = patientsCache.find(p => p.id === id);
+if (patient) patientForm(patient);
+}
+
+/* =========================================
+الملفات الطبية
+========================================= */
+
+async function loadMedical() {
+$('#panel-medical').innerHTML = "<div class="section"> <h3>الملفات الطبية</h3> <p class="muted">اختر مريضًا لعرض ملفه الطبي أو إضافة سجل زيارة.</p> <div class="field"> <label>البحث عن مريض</label> <input id="medicalSearch" placeholder="اسم المريض أو رقم الهاتف"> </div> <br> <div id="medicalPatients"></div> </div>";
+
+try {
+    patientsCache = await apiRequest('/api/patients');
+    renderMedicalPatients(patientsCache);
+
+    $('#medicalSearch').addEventListener('input',event => {
+        const q = event.target.value.toLowerCase();
+
+        renderMedicalPatients(
+            patientsCache.filter(p =>
+                String(p.name || '').toLowerCase().includes(q) ||
+                String(p.phone || '').includes(q)
+            )
+        );
+    });
+
+} catch (error) {
+    panelError('medical',error);
+}
+
+}
+
+function renderMedicalPatients(rows) {
+$('#medicalPatients').innerHTML = rows.map(p => "<div class="waiting-card"> <div> <strong>${escapeHTML(p.name)}</strong> <div class="muted">${escapeHTML(p.phone)}</div> </div> <button class="btn btn-primary" onclick="openMedical('${p.id}')">فتح الملف</button> </div>").join('') || '<div class="empty">لا يوجد مرضى</div>';
+}
+
+async function openMedical(id) {
+try {
+const data = await apiRequest('/api/patients/' + id + '/medical-record');
+
+    $('#panel-medical').innerHTML = `
         <div class="section">
-            <h3>${patient ? 'تعديل بيانات المريض' : 'إضافة مريض جديد'}</h3>
+            <button class="btn btn-light" onclick="loadMedical()">رجوع</button>
+            <h3>الملف الطبي: ${escapeHTML(data.patient.name)}</h3>
 
-            <form id="patientForm" class="grid">
-                <div class="field">
-                    <label>اسم المريض</label>
-                    <input name="name" required value="${escapeHTML(patient?.name || '')}">
+            <div class="notice">
+                الهاتف: ${escapeHTML(data.patient.phone)}
+            </div>
+
+            <h3>السجل السابق</h3>
+
+            ${data.records.map(r => `
+                <div class="section">
+                    <strong>التشخيص:</strong>
+                    <p>${escapeHTML(r.diagnosis || '—')}</p>
+                    <strong>الأدوية:</strong>
+                    <p>${escapeHTML((r.medicines || []).join('، ') || '—')}</p>
+                    <strong>الوصفة:</strong>
+                    <p>${escapeHTML(r.prescription || '—')}</p>
+                    <strong>ملاحظات:</strong>
+                    <p>${escapeHTML(r.notes || '—')}</p>
+                    <small class="muted">${escapeHTML(r.createdAt)}</small>
                 </div>
+            `).join('') || '<div class="empty">لا توجد سجلات طبية سابقة</div>'}
 
+            <h3>إضافة سجل طبي جديد</h3>
+
+            <form id="medicalForm">
                 <div class="field">
-                    <label>رقم الهاتف</label>
-                    <input name="phone" required value="${escapeHTML(patient?.phone || '')}">
+                    <label>التشخيص</label>
+                    <textarea name="diagnosis"></textarea>
                 </div>
-
+                <br>
                 <div class="field">
-                    <label>تاريخ الميلاد</label>
-                    <input type="date" name="dateOfBirth"
-                        value="${escapeHTML(patient?.dateOfBirth || '')}">
+                    <label>الأدوية (كل دواء في سطر)</label>
+                    <textarea name="medicines"></textarea>
                 </div>
-
+                <br>
                 <div class="field">
-                    <label>العمر</label>
-                    <input type="number" name="age" min="0"
-                        value="${escapeHTML(patient?.age ?? '')}">
+                    <label>الوصفة الطبية</label>
+                    <textarea name="prescription"></textarea>
                 </div>
-
-                <button class="btn btn-primary full">حفظ البيانات</button>
+                <br>
+                <div class="field">
+                    <label>ملاحظات الطبيب</label>
+                    <textarea name="notes"></textarea>
+                </div>
+                <br>
+                <button class="btn btn-primary">حفظ السجل الطبي</button>
             </form>
         </div>
     `;
 
-    $('#patientForm').addEventListener('submit',async event => {
+    $('#medicalForm').addEventListener('submit',async event => {
         event.preventDefault();
 
         const form = new FormData(event.target);
 
-        const body = {
-            name:form.get('name'),
-            phone:form.get('phone'),
-            dateOfBirth:form.get('dateOfBirth') || null,
-            age:form.get('age') ? Number(form.get('age')) : null
-        };
-
         try {
-            await apiRequest(
-                patient ? '/api/patients/' + patient.id : '/api/patients',
-                {
-                    method:patient ? 'PATCH' : 'POST',
-                    body:JSON.stringify(body)
-                }
-            );
+            await apiRequest('/api/patients/' + id + '/medical-record',{
+                method:'POST',
+                body:JSON.stringify({
+                    diagnosis:form.get('diagnosis'),
+                    medicines:form.get('medicines').split('\n').map(x => x.trim()).filter(Boolean),
+                    prescription:form.get('prescription'),
+                    notes:form.get('notes')
+                })
+            });
 
-            alert('تم حفظ بيانات المريض');
-            loadPatients();
+            alert('تم حفظ السجل الطبي');
+            openMedical(id);
 
         } catch (error) {
             alert(error.message);
         }
     });
+
+} catch (error) {
+    alert(error.message);
 }
 
-function editPatient(id) {
-    const patient = patientsCache.find(p => p.id === id);
-    if (patient) patientForm(patient);
 }
 
 /* =========================================
-   الملفات الطبية
+الفواتير والمدفوعات
 ========================================= */
 
-async function loadMedical() {
-    $('#panel-medical').innerHTML = `
+async function loadFinance() {
+try {
+[invoicesCache,paymentsCache,appointmentsCache] = await Promise.all([
+apiRequest('/api/invoices'),
+apiRequest('/api/payments'),
+apiRequest('/api/appointments')
+]);
+
+    $('#panel-finance').innerHTML = `
         <div class="section">
-            <h3>الملفات الطبية</h3>
-            <p class="muted">اختر مريضًا لعرض ملفه الطبي أو إضافة سجل زيارة.</p>
-            <div class="field">
-                <label>البحث عن مريض</label>
-                <input id="medicalSearch" placeholder="اسم المريض أو رقم الهاتف">
+            <div class="section-title">
+                <h3>إدارة الفواتير والمدفوعات</h3>
+                <button class="btn btn-primary" onclick="invoiceForm()">إنشاء فاتورة</button>
             </div>
+
+            <div class="grid-3">
+                <div class="stat">
+                    <small>عدد الفواتير</small>
+                    <strong>${invoicesCache.length}</strong>
+                </div>
+                <div class="stat">
+                    <small>عدد المدفوعات</small>
+                    <strong>${paymentsCache.length}</strong>
+                </div>
+                <div class="stat">
+                    <small>إجمالي الفواتير</small>
+                    <strong>${money(invoicesCache.reduce((s,x)=>s+Number(x.totalAmount),0))}</strong>
+                </div>
+            </div>
+
             <br>
-            <div id="medicalPatients"></div>
+
+            <h3>الفواتير</h3>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المريض</th>
+                            <th>الإجمالي</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${invoicesCache.map(i => `
+                            <tr>
+                                <td>${escapeHTML(i.patientName)}</td>
+                                <td>${money(i.totalAmount)}</td>
+                                <td>${money(i.paidAmount)}</td>
+                                <td>${money(i.remainingAmount)}</td>
+                                <td>${badge(i.status)}</td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                        onclick="paymentForm('${i.appointmentId}','${i.id}',${i.remainingAmount})">
+                                        تسجيل دفعة
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="6">لا توجد فواتير</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+
+            <br>
+
+            <h3>المدفوعات</h3>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المريض</th>
+                            <th>المبلغ</th>
+                            <th>العملة</th>
+                            <th>طريقة الدفع</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${paymentsCache.map(p => `
+                            <tr>
+                                <td>${escapeHTML(p.patientName)}</td>
+                                <td>${money(p.amount)}</td>
+                                <td>${escapeHTML(p.currency)}</td>
+                                <td>${escapeHTML(p.method)}</td>
+                                <td>${badge(p.status)}</td>
+                                <td>${escapeHTML(p.createdAt)}</td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="6">لا توجد مدفوعات</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="financeEditor"></div>
         </div>
     `;
 
-    try {
-        patientsCache = await apiRequest('/api/patients');
-        renderMedicalPatients(patientsCache);
-
-        $('#medicalSearch').addEventListener('input',event => {
-            const q = event.target.value.toLowerCase();
-
-            renderMedicalPatients(
-                patientsCache.filter(p =>
-                    p.name.toLowerCase().includes(q) ||
-                    p.phone.includes(q)
-                )
-            );
-        });
-
-    } catch (error) {
-        panelError('medical',error);
-    }
+} catch (error) {
+    panelError('finance',error);
 }
 
-function renderMedicalPatients(rows) {
-    $('#medicalPatients').innerHTML = rows.map(p => `
-        <div class="waiting-card">
-            <div>
-                <strong>${escapeHTML(p.name)}</strong>
-                <div class="muted">${escapeHTML(p.phone)}</div>
-            </div>
-            <button class="btn btn-primary"
-                onclick="openMedical('${p.id}')">فتح الملف</button>
-        </div>
-    `).join('') || '<div class="empty">لا يوجد مرضى</div>';
 }
 
-async function openMedical(id) {
-    try {
-        const data = await apiRequest('/api/patients/' + id + '/medical-record');
+function invoiceForm() {
+$('#financeEditor').innerHTML = `
+<div class="section">
+<h3>إنشاء فاتورة</h3>
 
-        $('#panel-medical').innerHTML = `
-            <div class="section">
-                <button class="btn btn-light" onclick="loadMedical()">رجوع</button>
-                <h3>الملف الطبي: ${escapeHTML(data.patient.name)}</h3>
-
-                <div class="notice">
-                    الهاتف: ${escapeHTML(data.patient.phone)}
-                </div>
-
-                <h3>السجل السابق</h3>
-
-                ${data.records.map(r => `
-                    <div class="section">
-                        <strong>التشخيص:</strong>
-                        <p>${escapeHTML(r.diagnosis || '—')}</p>
-                        <strong>الأدوية:</strong>
-                        <p>${escapeHTML((r.medicines || []).join('، ') || '—')}</p>
-                        <strong>الوصفة:</strong>
-                        <p>${escapeHTML(r.prescription || '—')}</p>
-                        <strong>ملاحظات:</strong>
-                        <p>${escapeHTML(r.notes || '—')}</p>
-                        <small class="muted">${escapeHTML(r.createdAt)}</small>
-                    </div>
-                `).join('') || '<div class="empty">لا توجد سجلات طبية سابقة</div>'}
-
-                <h3>إضافة سجل طبي جديد</h3>
-
-                <form id="medicalForm">
-                    <div class="field">
-                        <label>التشخيص</label>
-                        <textarea name="diagnosis"></textarea>
-                    </div>
-                    <br>
-                    <div class="field">
-                        <label>الأدوية (كل دواء في سطر)</label>
-                        <textarea name="medicines"></textarea>
-                    </div>
-                    <br>
-                    <div class="field">
-                        <label>الوصفة الطبية</label>
-                        <textarea name="prescription"></textarea>
-                    </div>
-                    <br>
-                    <div class="field">
-                        <label>ملاحظات الطبيب</label>
-                        <textarea name="notes"></textarea>
-                    </div>
-                    <br>
-                    <button class="btn btn-primary">حفظ السجل الطبي</button>
-                </form>
+        <form id="invoiceForm" class="grid">
+            <div class="field full">
+                <label>الحجز</label>
+                <select name="appointmentId" required>
+                    ${appointmentsCache.map(a => `
+                        <option value="${a.id}">
+                            ${escapeHTML(a.name)} - ${escapeHTML(a.date)}
+                        </option>
+                    `).join('')}
+                </select>
             </div>
-        `;
 
-        $('#medicalForm').addEventListener('submit',async event => {
-            event.preventDefault();
+            <div class="field">
+                <label>إجمالي الفاتورة</label>
+                <input type="number" name="totalAmount" min="1" required>
+            </div>
 
-            const form = new FormData(event.target);
+            <div class="field">
+                <label>العملة</label>
+                <select name="currency">
+                    <option value="YER">YER</option>
+                    <option value="USD">USD</option>
+                </select>
+            </div>
 
-            try {
-                await apiRequest('/api/patients/' + id + '/medical-record',{
-                    method:'POST',
-                    body:JSON.stringify({
-                        diagnosis:form.get('diagnosis'),
-                        medicines:form.get('medicines').split('\n').map(x => x.trim()).filter(Boolean),
-                        prescription:form.get('prescription'),
-                        notes:form.get('notes')
-                    })
-                });
+            <div class="field full">
+                <label>الوصف</label>
+                <input name="description">
+            </div>
 
-                alert('تم حفظ السجل الطبي');
-                openMedical(id);
+            <button class="btn btn-primary full">حفظ الفاتورة</button>
+        </form>
+    </div>
+`;
 
-            } catch (error) {
-                alert(error.message);
-            }
+$('#invoiceForm').addEventListener('submit',async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    try {
+        await apiRequest('/api/invoices',{
+            method:'POST',
+            body:JSON.stringify({
+                appointmentId:form.get('appointmentId'),
+                totalAmount:Number(form.get('totalAmount')),
+                currency:form.get('currency'),
+                description:form.get('description')
+            })
         });
+
+        alert('تم إنشاء الفاتورة');
+        loadFinance();
 
     } catch (error) {
         alert(error.message);
     }
+});
+
+}
+
+function paymentForm(appointmentId,invoiceId,remaining) {
+$('#financeEditor').innerHTML = `
+<div class="section">
+<h3>تسجيل دفعة مالية</h3>
+
+        <form id="paymentForm" class="grid">
+            <input type="hidden" name="appointmentId" value="${appointmentId}">
+            <input type="hidden" name="invoiceId" value="${invoiceId}">
+
+            <div class="field">
+                <label>المبلغ</label>
+                <input type="number" name="amount" min="1"
+                    max="${remaining}" required>
+            </div>
+
+            <div class="field">
+                <label>طريقة الدفع</label>
+                <select name="method">
+                    <option value="cash">نقدًا</option>
+                    <option value="transfer">تحويل</option>
+                    <option value="card">بطاقة</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>العملة</label>
+                <select name="currency">
+                    <option value="YER">YER</option>
+                    <option value="USD">USD</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>الحالة</label>
+                <select name="status">
+                    <option value="paid">مدفوع</option>
+                    <option value="refunded">مسترد</option>
+                </select>
+            </div>
+
+            <div class="field full">
+                <label>رقم المرجع</label>
+                <input name="reference">
+            </div>
+
+            <button class="btn btn-primary full">حفظ الدفعة</button>
+        </form>
+    </div>
+`;
+
+$('#paymentForm').addEventListener('submit',async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    try {
+        await apiRequest('/api/payments',{
+            method:'POST',
+            body:JSON.stringify({
+                appointmentId:form.get('appointmentId'),
+                invoiceId:form.get('invoiceId'),
+                amount:Number(form.get('amount')),
+                method:form.get('method'),
+                currency:form.get('currency'),
+                status:form.get('status'),
+                reference:form.get('reference')
+            })
+        });
+
+        alert('تم تسجيل الدفعة');
+        loadFinance();
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
 }
 
 /* =========================================
-   الفواتير والمدفوعات
+قائمة الانتظار
 ========================================= */
 
-async function loadFinance() {
-    try {
-        [invoicesCache,paymentsCache,appointmentsCache] = await Promise.all([
-            apiRequest('/api/invoices'),
-            apiRequest('/api/payments'),
-            apiRequest('/api/appointments')
-        ]);
+async function loadWaitlist() {
+try {
+const list = await apiRequest('/api/waitlist');
 
-        $('#panel-finance').innerHTML = `
-            <div class="section">
-                <div class="section-title">
-                    <h3>إدارة الفواتير والمدفوعات</h3>
-                    <button class="btn btn-primary" onclick="invoiceForm()">إنشاء فاتورة</button>
-                </div>
-
-                <div class="grid-3">
-                    <div class="stat">
-                        <small>عدد الفواتير</small>
-                        <strong>${invoicesCache.length}</strong>
-                    </div>
-                    <div class="stat">
-                        <small>عدد المدفوعات</small>
-                        <strong>${paymentsCache.length}</strong>
-                    </div>
-                    <div class="stat">
-                        <small>إجمالي الفواتير</small>
-                        <strong>${money(invoicesCache.reduce((s,x)=>s+Number(x.totalAmount),0))}</strong>
-                    </div>
-                </div>
-
-                <br>
-
-                <h3>الفواتير</h3>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المريض</th>
-                                <th>الإجمالي</th>
-                                <th>المدفوع</th>
-                                <th>المتبقي</th>
-                                <th>الحالة</th>
-                                <th>الإجراء</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${invoicesCache.map(i => `
-                                <tr>
-                                    <td>${escapeHTML(i.patientName)}</td>
-                                    <td>${money(i.totalAmount)}</td>
-                                    <td>${money(i.paidAmount)}</td>
-                                    <td>${money(i.remainingAmount)}</td>
-                                    <td>${badge(i.status)}</td>
-                                    <td>
-                                        <button class="btn btn-primary"
-                                            onclick="paymentForm('${i.appointmentId}','${i.id}',${i.remainingAmount})">
-                                            تسجيل دفعة
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="6">لا توجد فواتير</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-
-                <br>
-
-                <h3>المدفوعات</h3>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المريض</th>
-                                <th>المبلغ</th>
-                                <th>العملة</th>
-                                <th>طريقة الدفع</th>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${paymentsCache.map(p => `
-                                <tr>
-                                    <td>${escapeHTML(p.patientName)}</td>
-                                    <td>${money(p.amount)}</td>
-                                    <td>${escapeHTML(p.currency)}</td>
-                                    <td>${escapeHTML(p.method)}</td>
-                                    <td>${badge(p.status)}</td>
-                                    <td>${escapeHTML(p.createdAt)}</td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="6">لا توجد مدفوعات</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="financeEditor"></div>
+    $('#panel-waitlist').innerHTML = `
+        <div class="section">
+            <div class="section-title">
+                <h3>قائمة الانتظار</h3>
+                ${currentUser.role !== 'doctor' ? `
+                    <button class="btn btn-primary" onclick="waitlistForm()">
+                        إضافة منتظر
+                    </button>
+                ` : ''}
             </div>
-        `;
 
-    } catch (error) {
-        panelError('finance',error);
-    }
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المريض</th>
+                            <th>الهاتف</th>
+                            <th>الطبيب</th>
+                            <th>التاريخ</th>
+                            <th>السبب</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${list.map(item => `
+                            <tr>
+                                <td>${escapeHTML(item.name)}</td>
+                                <td>${escapeHTML(item.phone)}</td>
+                                <td>${escapeHTML(item.doctor)}</td>
+                                <td>${escapeHTML(item.date)}</td>
+                                <td>${escapeHTML(item.reason || item.note || '—')}</td>
+                                <td>${badge(item.status)}</td>
+                                <td>
+                                    <select onchange="updateWaitlist('${item.id}',this.value)">
+                                        <option value="">تغيير الحالة</option>
+                                        <option value="waiting">منتظر</option>
+                                        <option value="called">تم استدعاؤه</option>
+                                        <option value="served">تمت الخدمة</option>
+                                        <option value="cancelled">إلغاء</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="7">لا توجد طلبات انتظار</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="waitlistEditor"></div>
+        </div>
+    `;
+
+} catch (error) {
+    panelError('waitlist',error);
 }
 
-function invoiceForm() {
-    $('#financeEditor').innerHTML = `
-        <div class="section">
-            <h3>إنشاء فاتورة</h3>
+}
 
-            <form id="invoiceForm" class="grid">
-                <div class="field full">
+async function updateWaitlist(id,status) {
+if (!status) return;
+
+try {
+    await apiRequest('/api/waitlist/' + id,{
+        method:'PATCH',
+        body:JSON.stringify({status})
+    });
+
+    loadWaitlist();
+
+} catch (error) {
+    alert(error.message);
+}
+
+}
+
+function waitlistForm() {
+$('#waitlistEditor').innerHTML = `
+<div class="section">
+<h3>إضافة مريض لقائمة الانتظار</h3>
+
+        <form id="waitlistForm" class="grid">
+            <div class="field">
+                <label>اسم المريض</label>
+                <input name="name" required>
+            </div>
+
+            <div class="field">
+                <label>الهاتف</label>
+                <input name="phone" required>
+            </div>
+
+            <div class="field">
+                <label>الطبيب</label>
+                <input name="doctor" required>
+            </div>
+
+            <div class="field">
+                <label>التاريخ</label>
+                <input type="date" name="date" required>
+            </div>
+
+            <div class="field full">
+                <label>ملاحظة</label>
+                <textarea name="note"></textarea>
+            </div>
+
+            <button class="btn btn-primary full">إضافة للقائمة</button>
+        </form>
+    </div>
+`;
+
+$('#waitlistForm').addEventListener('submit',async event => {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    try {
+        await apiRequest('/api/waitlist',{
+            method:'POST',
+            body:JSON.stringify({
+                name:form.get('name'),
+                phone:form.get('phone'),
+                doctor:form.get('doctor'),
+                date:form.get('date'),
+                note:form.get('note')
+            })
+        });
+
+        alert('تمت إضافة المريض');
+        loadWaitlist();
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+}
+
+/* =========================================
+الإشعارات
+========================================= */
+
+async function loadNotifications() {
+try {
+// تحميل الحجوزات أولًا عند الحاجة حتى لا يظهر نموذج الإشعارات فارغًا
+if (!appointmentsCache.length) {
+appointmentsCache = await apiRequest('/api/appointments');
+}
+
+    const [notifications,reminders] = await Promise.all([
+        apiRequest('/api/notifications'),
+        apiRequest('/api/notifications/reminders-due')
+    ]);
+
+    $('#panel-notifications').innerHTML = `
+        <div class="section">
+            <div class="section-title">
+                <h3>إدارة الإشعارات</h3>
+                <button class="btn btn-primary" onclick="sendReminders()">
+                    إرسال تذكيرات الغد
+                </button>
+            </div>
+
+            <h3>المواعيد المستحقة للتذكير</h3>
+
+            ${reminders.map(r => `
+                <div class="waiting-card">
+                    <div>
+                        <strong>${escapeHTML(r.name)}</strong>
+                        <div class="muted">${escapeHTML(r.doctor)} - ${escapeHTML(r.date)}</div>
+                    </div>
+                    <span>${escapeHTML(r.time || '—')}</span>
+                </div>
+            `).join('') || '<div class="empty">لا توجد تذكيرات مستحقة</div>'}
+
+            <br>
+            <h3>سجل الإشعارات</h3>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الحجز</th>
+                            <th>النوع</th>
+                            <th>القناة</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${notifications.map(n => `
+                            <tr>
+                                <td>${escapeHTML(n.appointmentId)}</td>
+                                <td>${escapeHTML(n.type)}</td>
+                                <td>${escapeHTML(n.channel)}</td>
+                                <td>${badge(n.status)}</td>
+                                <td>${escapeHTML(n.createdAt)}</td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="5">لا توجد إشعارات</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+
+            <br>
+
+            <h3>إرسال إشعار يدوي</h3>
+
+            <form id="notificationForm" class="grid">
+                <div class="field">
                     <label>الحجز</label>
                     <select name="appointmentId" required>
                         ${appointmentsCache.map(a => `
@@ -2392,472 +2914,164 @@ function invoiceForm() {
                 </div>
 
                 <div class="field">
-                    <label>إجمالي الفاتورة</label>
-                    <input type="number" name="totalAmount" min="1" required>
-                </div>
-
-                <div class="field">
-                    <label>العملة</label>
-                    <select name="currency">
-                        <option value="YER">YER</option>
-                        <option value="USD">USD</option>
+                    <label>نوع الإشعار</label>
+                    <select name="type">
+                        <option value="confirmation">تأكيد</option>
+                        <option value="reminder">تذكير</option>
+                        <option value="cancellation">إلغاء</option>
+                        <option value="rescheduled">إعادة جدولة</option>
                     </select>
                 </div>
 
-                <div class="field full">
-                    <label>الوصف</label>
-                    <input name="description">
-                </div>
-
-                <button class="btn btn-primary full">حفظ الفاتورة</button>
+                <button class="btn btn-primary full">إرسال الإشعار</button>
             </form>
         </div>
     `;
 
-    $('#invoiceForm').addEventListener('submit',async event => {
+    $('#notificationForm').addEventListener('submit',async event => {
         event.preventDefault();
 
         const form = new FormData(event.target);
 
         try {
-            await apiRequest('/api/invoices',{
+            await apiRequest('/api/notifications',{
                 method:'POST',
                 body:JSON.stringify({
                     appointmentId:form.get('appointmentId'),
-                    totalAmount:Number(form.get('totalAmount')),
-                    currency:form.get('currency'),
-                    description:form.get('description')
+                    type:form.get('type')
                 })
             });
 
-            alert('تم إنشاء الفاتورة');
-            loadFinance();
+            alert('تمت معالجة الإشعار');
+            loadNotifications();
 
         } catch (error) {
             alert(error.message);
         }
     });
+
+} catch (error) {
+    panelError('notifications',error);
 }
 
-function paymentForm(appointmentId,invoiceId,remaining) {
-    $('#financeEditor').innerHTML = `
-        <div class="section">
-            <h3>تسجيل دفعة مالية</h3>
-
-            <form id="paymentForm" class="grid">
-                <input type="hidden" name="appointmentId" value="${appointmentId}">
-                <input type="hidden" name="invoiceId" value="${invoiceId}">
-
-                <div class="field">
-                    <label>المبلغ</label>
-                    <input type="number" name="amount" min="1"
-                        max="${remaining}" required>
-                </div>
-
-                <div class="field">
-                    <label>طريقة الدفع</label>
-                    <select name="method">
-                        <option value="cash">نقدًا</option>
-                        <option value="transfer">تحويل</option>
-                        <option value="card">بطاقة</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>العملة</label>
-                    <select name="currency">
-                        <option value="YER">YER</option>
-                        <option value="USD">USD</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>الحالة</label>
-                    <select name="status">
-                        <option value="paid">مدفوع</option>
-                        <option value="refunded">مسترد</option>
-                    </select>
-                </div>
-
-                <div class="field full">
-                    <label>رقم المرجع</label>
-                    <input name="reference">
-                </div>
-
-                <button class="btn btn-primary full">حفظ الدفعة</button>
-            </form>
-        </div>
-    `;
-
-    $('#paymentForm').addEventListener('submit',async event => {
-        event.preventDefault();
-
-        const form = new FormData(event.target);
-
-        try {
-            await apiRequest('/api/payments',{
-                method:'POST',
-                body:JSON.stringify({
-                    appointmentId:form.get('appointmentId'),
-                    invoiceId:form.get('invoiceId'),
-                    amount:Number(form.get('amount')),
-                    method:form.get('method'),
-                    currency:form.get('currency'),
-                    status:form.get('status'),
-                    reference:form.get('reference')
-                })
-            });
-
-            alert('تم تسجيل الدفعة');
-            loadFinance();
-
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-}
-
-/* =========================================
-   قائمة الانتظار
-========================================= */
-
-async function loadWaitlist() {
-    try {
-        const list = await apiRequest('/api/waitlist');
-
-        $('#panel-waitlist').innerHTML = `
-            <div class="section">
-                <div class="section-title">
-                    <h3>قائمة الانتظار</h3>
-                    ${currentUser.role !== 'doctor' ? `
-                        <button class="btn btn-primary" onclick="waitlistForm()">
-                            إضافة منتظر
-                        </button>
-                    ` : ''}
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المريض</th>
-                                <th>الهاتف</th>
-                                <th>الطبيب</th>
-                                <th>التاريخ</th>
-                                <th>السبب</th>
-                                <th>الحالة</th>
-                                <th>الإجراء</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${list.map(item => `
-                                <tr>
-                                    <td>${escapeHTML(item.name)}</td>
-                                    <td>${escapeHTML(item.phone)}</td>
-                                    <td>${escapeHTML(item.doctor)}</td>
-                                    <td>${escapeHTML(item.date)}</td>
-                                    <td>${escapeHTML(item.reason || item.note || '—')}</td>
-                                    <td>${badge(item.status)}</td>
-                                    <td>
-                                        <select onchange="updateWaitlist('${item.id}',this.value)">
-                                            <option value="">تغيير الحالة</option>
-                                            <option value="waiting">منتظر</option>
-                                            <option value="called">تم استدعاؤه</option>
-                                            <option value="served">تمت الخدمة</option>
-                                            <option value="cancelled">إلغاء</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="7">لا توجد طلبات انتظار</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="waitlistEditor"></div>
-            </div>
-        `;
-
-    } catch (error) {
-        panelError('waitlist',error);
-    }
-}
-
-async function updateWaitlist(id,status) {
-    if (!status) return;
-
-    try {
-        await apiRequest('/api/waitlist/' + id,{
-            method:'PATCH',
-            body:JSON.stringify({status})
-        });
-
-        loadWaitlist();
-
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-function waitlistForm() {
-    $('#waitlistEditor').innerHTML = `
-        <div class="section">
-            <h3>إضافة مريض لقائمة الانتظار</h3>
-
-            <form id="waitlistForm" class="grid">
-                <div class="field">
-                    <label>اسم المريض</label>
-                    <input name="name" required>
-                </div>
-
-                <div class="field">
-                    <label>الهاتف</label>
-                    <input name="phone" required>
-                </div>
-
-                <div class="field">
-                    <label>الطبيب</label>
-                    <input name="doctor" required>
-                </div>
-
-                <div class="field">
-                    <label>التاريخ</label>
-                    <input type="date" name="date" required>
-                </div>
-
-                <div class="field full">
-                    <label>ملاحظة</label>
-                    <textarea name="note"></textarea>
-                </div>
-
-                <button class="btn btn-primary full">إضافة للقائمة</button>
-            </form>
-        </div>
-    `;
-
-    $('#waitlistForm').addEventListener('submit',async event => {
-        event.preventDefault();
-
-        const form = new FormData(event.target);
-
-        try {
-            await apiRequest('/api/waitlist',{
-                method:'POST',
-                body:JSON.stringify({
-                    name:form.get('name'),
-                    phone:form.get('phone'),
-                    doctor:form.get('doctor'),
-                    date:form.get('date'),
-                    note:form.get('note')
-                })
-            });
-
-            alert('تمت إضافة المريض');
-            loadWaitlist();
-
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-}
-
-/* =========================================
-   الإشعارات
-========================================= */
-
-async function loadNotifications() {
-    try {
-        const [notifications,reminders] = await Promise.all([
-            apiRequest('/api/notifications'),
-            apiRequest('/api/notifications/reminders-due')
-        ]);
-
-        $('#panel-notifications').innerHTML = `
-            <div class="section">
-                <div class="section-title">
-                    <h3>إدارة الإشعارات</h3>
-                    <button class="btn btn-primary" onclick="sendReminders()">
-                        إرسال تذكيرات الغد
-                    </button>
-                </div>
-
-                <h3>المواعيد المستحقة للتذكير</h3>
-
-                ${reminders.map(r => `
-                    <div class="waiting-card">
-                        <div>
-                            <strong>${escapeHTML(r.name)}</strong>
-                            <div class="muted">${escapeHTML(r.doctor)} - ${escapeHTML(r.date)}</div>
-                        </div>
-                        <span>${escapeHTML(r.time || '—')}</span>
-                    </div>
-                `).join('') || '<div class="empty">لا توجد تذكيرات مستحقة</div>'}
-
-                <br>
-                <h3>سجل الإشعارات</h3>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الحجز</th>
-                                <th>النوع</th>
-                                <th>القناة</th>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${notifications.map(n => `
-                                <tr>
-                                    <td>${escapeHTML(n.appointmentId)}</td>
-                                    <td>${escapeHTML(n.type)}</td>
-                                    <td>${escapeHTML(n.channel)}</td>
-                                    <td>${badge(n.status)}</td>
-                                    <td>${escapeHTML(n.createdAt)}</td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="5">لا توجد إشعارات</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-
-                <br>
-
-                <h3>إرسال إشعار يدوي</h3>
-
-                <form id="notificationForm" class="grid">
-                    <div class="field">
-                        <label>الحجز</label>
-                        <select name="appointmentId">
-                            ${appointmentsCache.map(a => `
-                                <option value="${a.id}">
-                                    ${escapeHTML(a.name)} - ${escapeHTML(a.date)}
-                                </option>
-                            `).join('')}
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label>نوع الإشعار</label>
-                        <select name="type">
-                            <option value="confirmation">تأكيد</option>
-                            <option value="reminder">تذكير</option>
-                            <option value="cancellation">إلغاء</option>
-                            <option value="rescheduled">إعادة جدولة</option>
-                        </select>
-                    </div>
-
-                    <button class="btn btn-primary full">إرسال الإشعار</button>
-                </form>
-            </div>
-        `;
-
-        $('#notificationForm').addEventListener('submit',async event => {
-            event.preventDefault();
-
-            const form = new FormData(event.target);
-
-            try {
-                await apiRequest('/api/notifications',{
-                    method:'POST',
-                    body:JSON.stringify({
-                        appointmentId:form.get('appointmentId'),
-                        type:form.get('type')
-                    })
-                });
-
-                alert('تمت معالجة الإشعار');
-                loadNotifications();
-
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-    } catch (error) {
-        panelError('notifications',error);
-    }
 }
 
 async function sendReminders() {
-    if (!confirm('هل تريد فحص مواعيد الغد وإرسال التذكيرات؟')) return;
+if (!confirm('هل تريد فحص مواعيد الغد وإرسال التذكيرات؟')) return;
 
-    try {
-        const result = await apiRequest('/api/notifications/send-reminders',{
-            method:'POST'
-        });
+try {
+    const result = await apiRequest('/api/notifications/send-reminders',{
+        method:'POST'
+    });
 
-        alert(result.message);
-        loadNotifications();
+    alert(result.message);
+    loadNotifications();
 
-    } catch (error) {
-        alert(error.message);
-    }
+} catch (error) {
+    alert(error.message);
+}
+
 }
 
 /* =========================================
-   سجل التدقيق
+سجل التدقيق
 ========================================= */
 
 async function loadAudit() {
-    try {
-        const logs = await apiRequest('/api/audit-log?limit=200');
+try {
+const logs = await apiRequest('/api/audit-log?limit=200');
 
-        $('#panel-audit').innerHTML = `
-            <div class="section">
-                <h3>سجل العمليات والتدقيق</h3>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المستخدم</th>
-                                <th>الصلاحية</th>
-                                <th>العملية</th>
-                                <th>المسار</th>
-                                <th>النتيجة</th>
-                                <th>التاريخ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${logs.map(log => `
-                                <tr>
-                                    <td>${escapeHTML(log.username)}</td>
-                                    <td>${escapeHTML(log.role)}</td>
-                                    <td>${escapeHTML(log.method)}</td>
-                                    <td dir="ltr">${escapeHTML(log.path)}</td>
-                                    <td>${escapeHTML(log.statusCode)}</td>
-                                    <td>${escapeHTML(log.at)}</td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="6">لا توجد عمليات مسجلة</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-
-    } catch (error) {
-        panelError('audit',error);
-    }
-}
-
-/* =========================================
-   شاشة الانتظار داخل الإدارة
-========================================= */
-
-async function loadBoard() {
-    $('#panel-board').innerHTML = `
+    $('#panel-audit').innerHTML = `
         <div class="section">
-            <div class="section-title">
-                <h3>شاشة انتظار المرضى</h3>
-                <span class="badge green">اتصال مباشر</span>
-            </div>
+            <h3>سجل العمليات والتدقيق</h3>
 
-            <div id="adminWaiting"></div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المستخدم</th>
+                            <th>الصلاحية</th>
+                            <th>العملية</th>
+                            <th>المسار</th>
+                            <th>النتيجة</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${logs.map(log => `
+                            <tr>
+                                <td>${escapeHTML(log.username)}</td>
+                                <td>${escapeHTML(log.role)}</td>
+                                <td>${escapeHTML(log.method)}</td>
+                                <td dir="ltr">${escapeHTML(log.path)}</td>
+                                <td>${escapeHTML(log.statusCode)}</td>
+                                <td>${escapeHTML(log.at)}</td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="6">لا توجد عمليات مسجلة</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
         </div>
     `;
 
+} catch (error) {
+    panelError('audit',error);
+}
+
+}
+
+/* =========================================
+شاشة الانتظار داخل الإدارة
+========================================= */
+
+async function loadBoard() {
+$('#panel-board').innerHTML = `
+<div class="section">
+<div class="section-title">
+<h3>شاشة انتظار المرضى</h3>
+<span class="badge green">اتصال مباشر</span>
+</div>
+
+        <div id="adminWaiting"></div>
+    </div>
+`;
+
+try {
+    const data = await apiRequest('/api/waiting-room');
+
+    $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
+        <div class="waiting-card">
+            <div>
+                <strong>${escapeHTML(row.doctor)}</strong>
+                <div class="muted">${escapeHTML(row.time || '—')}</div>
+            </div>
+            <div>
+                <div class="ticket">#${escapeHTML(row.ticket)}</div>
+                ${escapeHTML(row.state)}
+            </div>
+        </div>
+    `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
+
+    startAdminWaitingStream();
+
+} catch (error) {
+    panelError('board',error);
+}
+
+}
+
+function startAdminWaitingStream() {
+if (waitingEventSource) waitingEventSource.close();
+
+waitingEventSource = new EventSource(
+    API_BASE + '/api/waiting-room/stream'
+);
+
+waitingEventSource.onmessage = event => {
     try {
-        const data = await apiRequest('/api/waiting-room');
+        const data = JSON.parse(event.data);
+
+        if (!$('#adminWaiting')) return;
 
         $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
             <div class="waiting-card">
@@ -2872,86 +3086,63 @@ async function loadBoard() {
             </div>
         `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
 
-        startAdminWaitingStream();
-
     } catch (error) {
-        panelError('board',error);
+        console.error(error);
     }
-}
+};
 
-function startAdminWaitingStream() {
-    if (waitingEventSource) waitingEventSource.close();
-
-    waitingEventSource = new EventSource(
-        API_BASE + '/api/waiting-room/stream'
-    );
-
-    waitingEventSource.onmessage = event => {
-        try {
-            const data = JSON.parse(event.data);
-
-            if (!$('#adminWaiting')) return;
-
-            $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
-                <div class="waiting-card">
-                    <div>
-                        <strong>${escapeHTML(row.doctor)}</strong>
-                        <div class="muted">${escapeHTML(row.time || '—')}</div>
-                    </div>
-                    <div>
-                        <div class="ticket">#${escapeHTML(row.ticket)}</div>
-                        ${escapeHTML(row.state)}
-                    </div>
-                </div>
-            `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
 }
 
 /* =========================================
-   رسائل الأخطاء
+رسائل الأخطاء
 ========================================= */
 
 function panelError(panel,error) {
-    const target = $('#panel-' + panel);
+const target = $('#panel-' + panel);
 
-    if (!target) return;
+if (!target) return;
 
-    target.innerHTML = `
-        <div class="section">
-            <div class="result error">
-                ${escapeHTML(error.message)}
-            </div>
-            <button class="btn btn-primary" onclick="loadPanel('${panel}')">
-                إعادة المحاولة
-            </button>
+target.innerHTML = `
+    <div class="section">
+        <div class="result error">
+            ${escapeHTML(error.message)}
         </div>
-    `;
+        <button class="btn btn-primary" onclick="loadPanel('${panel}')">
+            إعادة المحاولة
+        </button>
+    </div>
+`;
+
 }
 
 /* =========================================
-   تشغيل التطبيق
+تشغيل التطبيق
 ========================================= */
 
 function setMinimumBookingDate() {
-    const input = document.querySelector('#bookingForm input[name="date"]');
+const input = document.querySelector('#bookingForm input[name="date"]');
 
-    if (!input) return;
+if (!input) return;
 
-    const now = new Date();
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+const now = new Date();
+const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 
-    input.min = local.toISOString().slice(0,10);
+input.min = local.toISOString().slice(0,10);
+
 }
 
 async function startApplication() {
-    setMinimumBookingDate();
-    renderLastBooking();
-    await initializeAuth();
-    loadPublicWaiting();
+setMinimumBookingDate();
+
+renderLastBooking();
+
+await Promise.all([
+    loadPublicDoctors(),
+    loadPublicWaiting()
+]);
+
+await initializeAuth();
+
 }
 
 startApplication();

@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
-<head>
+head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#102c46">
@@ -777,6 +776,8 @@ let activeTab = '';
 let doctorsCache = [];
 let appointmentsCache = [];
 let appointmentsDoctorFilterName = '';
+let appointmentsViewMode = 'today';
+let appointmentsViewMonth = clinicToday().slice(0, 7);
 let patientsCache = [];
 let invoicesCache = [];
 let paymentsCache = [];
@@ -1663,12 +1664,35 @@ async function loadAppointments() {
         appointmentsCache = await apiRequest('/api/appointments');
 
         const role = currentUser.role;
-        const visibleAppointments = appointmentsDoctorFilterName
+        const doctorScopedAppointments = appointmentsDoctorFilterName
             ? appointmentsCache.filter(row =>
                 row.doctor === appointmentsDoctorFilterName &&
                 ['approved','in_progress','completed','skipped'].includes(row.status)
             )
             : appointmentsCache;
+        const today = clinicToday();
+        const selectedMonth = appointmentsViewMonth || today.slice(0, 7);
+        const activeReturn = row => ['scheduled','attended'].includes(row.returnStatus);
+        const displayedDateForRow = row => {
+            const normalDateMatches = appointmentsViewMode === 'today'
+                ? row.date === today
+                : String(row.date || '').startsWith(selectedMonth);
+            return normalDateMatches ? row.date : (row.returnDate || row.date);
+        };
+        const visibleAppointments = doctorScopedAppointments.filter(row => {
+            const appointmentDate = String(row.date || '');
+            const returnDate = String(row.returnDate || '');
+            if (appointmentsViewMode === 'today') {
+                return appointmentDate === today || (activeReturn(row) && returnDate === today);
+            }
+            return appointmentDate.startsWith(selectedMonth) ||
+                (activeReturn(row) && returnDate.startsWith(selectedMonth));
+        }).sort((a, b) => {
+            const aDate = displayedDateForRow(a);
+            const bDate = displayedDateForRow(b);
+            return String(aDate || '').localeCompare(String(bDate || '')) ||
+                Number(a.queue || a.returnQueue || 9999) - Number(b.queue || b.returnQueue || 9999);
+        });
 
         let dailyCapacityPanel = '';
         if (role === 'doctor') {
@@ -1691,6 +1715,13 @@ async function loadAppointments() {
         }
 
         const rows = visibleAppointments.map(row => {
+            const rowDateIsInView = appointmentsViewMode === 'today'
+                ? row.date === today
+                : String(row.date || '').startsWith(selectedMonth);
+            const displayedDate = displayedDateForRow(row);
+            const displayedTime = !rowDateIsInView && row.returnDate
+                ? (row.returnTime || row.appointmentTime)
+                : row.appointmentTime;
             let actions = '';
 
             if (['accountant','manager'].includes(role) && row.status === 'pending') {
@@ -1795,9 +1826,9 @@ async function loadAppointments() {
                     <td>${escapeHTML(row.name)}</td>
                     <td>${escapeHTML(row.phone)}</td>
                     <td>${escapeHTML(row.doctor)}</td>
-                    <td>${formatDate(row.date)}</td>
+                    <td>${formatDate(displayedDate)}</td>
                     <td>${badge(row.status)}</td>
-                    <td>${escapeHTML(row.appointmentTime || '—')}</td>
+                    <td>${escapeHTML(displayedTime || '—')}</td>
                     <td>${receiptCell}</td>
                     <td>
                         ${badge(row.returnStatus)}
@@ -1817,6 +1848,26 @@ async function loadAppointments() {
                         ${appointmentsDoctorFilterName ? '<button class="btn btn-light" onclick="clearDoctorAppointmentsFilter()">عرض كل الحجوزات</button>' : ''}
                         <span class="badge blue">${visibleAppointments.length} حجز</span>
                     </div>
+                </div>
+
+                <div class="grid" style="margin-bottom:12px">
+                    <div class="field">
+                        <label for="appointmentViewMode">طريقة عرض المواعيد</label>
+                        <select id="appointmentViewMode">
+                            <option value="today" ${appointmentsViewMode === 'today' ? 'selected' : ''}>مواعيد اليوم فقط (افتراضي)</option>
+                            <option value="month" ${appointmentsViewMode === 'month' ? 'selected' : ''}>جميع مواعيد شهر محدد</option>
+                        </select>
+                    </div>
+                    <div class="field ${appointmentsViewMode === 'month' ? '' : 'hidden'}" id="appointmentMonthField">
+                        <label for="appointmentViewMonth">اختر الشهر</label>
+                        <input type="month" id="appointmentViewMonth" value="${escapeHTML(selectedMonth)}">
+                    </div>
+                </div>
+
+                <div class="notice ${appointmentsViewMode === 'today' ? 'success' : ''}">
+                    ${appointmentsViewMode === 'today'
+                        ? `يعرض الجدول مرضى ومواعيد اليوم فقط: ${escapeHTML(today)}. لعرض مواعيد التواريخ الأخرى اختر عرض الشهر.`
+                        : `يعرض الجدول المرضى المسجلين خلال شهر ${escapeHTML(selectedMonth)} مع تاريخ كل موعد.`}
                 </div>
 
                 <div class="table-wrap">
@@ -1839,6 +1890,17 @@ async function loadAppointments() {
                 </div>
             </div>
         `;
+
+        $('#appointmentViewMode').addEventListener('change', event => {
+            appointmentsViewMode = event.target.value === 'month' ? 'month' : 'today';
+            loadAppointments();
+        });
+
+        $('#appointmentViewMonth')?.addEventListener('change', event => {
+            if (!event.target.value) return;
+            appointmentsViewMonth = event.target.value;
+            if (appointmentsViewMode === 'month') loadAppointments();
+        });
 
         if (role === 'doctor' && $('#doctorCapacityForm')) {
             $('#doctorCapacityForm').addEventListener('submit', saveDoctorDailyCapacity);

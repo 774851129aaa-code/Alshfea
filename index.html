@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -554,7 +554,7 @@ td .btn {
 
     <div class="payment-box full" style="margin-bottom:16px">
         <h3>💳 مبلغ الحجز وبيانات التحويل</h3>
-        <div><strong>مبلغ الحجز: 3000 ألف ريال يمني</strong></div>
+        <div><strong>مبلغ الحجز: 3000 ريال يمني</strong></div>
         <div class="payment-account"><span>حساب بنك الكريمي</span><strong dir="ltr">30000000</strong></div>
         <div class="payment-account"><span>حساب بنك القطيبي</span><strong dir="ltr">35555555</strong></div>
         <div class="payment-account"><span>حساب البنك المركزي</span><strong dir="ltr">34444444</strong></div>
@@ -791,6 +791,14 @@ function formatDate(value) {
     return escapeHTML(value);
 }
 
+function clinicToday() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone:'Asia/Aden', year:'numeric', month:'2-digit', day:'2-digit'
+    }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.filter(x => x.type !== 'literal').map(x => [x.type, x.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+}
+
 function statusName(status) {
     const names = {
         pending:'بانتظار المراجعة',
@@ -886,11 +894,16 @@ function showPublic() {
 
     loadPublicDoctors();
     loadPublicWaiting();
+    startWaitingStream();
 }
 
 function showAdmin() {
     $('#publicPage').classList.add('hidden');
     $('#adminPage').classList.remove('hidden');
+    if (waitingEventSource) {
+        waitingEventSource.close();
+        waitingEventSource = null;
+    }
 }
 
 function logout(redirect = true) {
@@ -1222,6 +1235,12 @@ $('#trackBookingForm').addEventListener('submit', async event => {
                     </div>
 
                     <div class="notice">
+                        <strong>رقم الدور</strong>
+                        <br>
+                        ${appointment.queue ? '#' + escapeHTML(String(appointment.queue).padStart(2, '0')) : 'يظهر بعد اعتماد السند'}
+                    </div>
+
+                    <div class="notice">
                         <strong>وقت الموعد</strong>
                         <br>
                         ${escapeHTML(appointment.appointmentTime || 'لم يحدد بعد')}
@@ -1287,18 +1306,29 @@ function renderWaiting(data) {
         return;
     }
 
-    $('#publicWaiting').innerHTML = rows.map(row => `
-        <div class="waiting-card">
-            <div>
-                <strong>${escapeHTML(row.doctor)}</strong>
-                <div class="muted">${escapeHTML(row.time || '—')}</div>
-            </div>
-            <div>
-                <div class="ticket">#${escapeHTML(row.ticket)}</div>
-                ${badge(row.state === 'قيد الكشف' ? 'in_progress' : 'waiting')}
-            </div>
+    $('#publicWaiting').innerHTML = `
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th>الطبيب</th>
+                    <th>رقم الدور</th>
+                    <th>الأدوار قبلك</th>
+                    <th>الوقت المتوقع</th>
+                    <th>الحالة</th>
+                </tr></thead>
+                <tbody>${rows.map(row => `
+                    <tr>
+                        <td>${escapeHTML(row.doctor)}</td>
+                        <td><strong class="ticket">#${escapeHTML(row.ticket)}</strong></td>
+                        <td>${Number(row.remainingTurns || 0)}</td>
+                        <td>${escapeHTML(row.time || '—')}</td>
+                        <td>${badge(row.state === 'قيد الكشف' ? 'in_progress' : row.state === 'التالي' ? 'called' : 'waiting')}</td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>
         </div>
-    `).join('');
+        <div class="notice">الأوقات تقديرية على أساس 20 دقيقة لكل دور، وتتغير عند تأخر الكشف أو تقديمه. يظهر رقم الدور دون اسم المريض حفاظًا على الخصوصية.</div>
+    `;
 }
 
 async function loadPublicWaiting() {
@@ -1575,6 +1605,26 @@ async function loadAppointments() {
             )
             : appointmentsCache;
 
+        let dailyCapacityPanel = '';
+        if (role === 'doctor') {
+            try {
+                const capacity = await apiRequest('/api/doctor/daily-capacity?date=' + encodeURIComponent(clinicToday()));
+                dailyCapacityPanel = `
+                    <div class="section">
+                        <div class="section-title"><h3>سعة الحالات حسب التاريخ</h3><span class="badge blue">كل دور 20 دقيقة</span></div>
+                        <form id="doctorCapacityForm" class="grid">
+                            <div class="field"><label>التاريخ</label><input type="date" name="date" value="${escapeHTML(capacity.date)}" min="${escapeHTML(clinicToday())}" required></div>
+                            <div class="field"><label>عدد الحالات المسموح بها</label><input type="number" id="doctorDailyCapacity" name="maxAppointments" min="1" max="500" value="${Number(capacity.maxAppointments || 20)}" required></div>
+                            <div class="notice full" id="doctorCapacityBooked">المحجوز حاليًا: ${Number(capacity.bookedAppointments || 0)} حالة. الحد خاص بهذا الطبيب وهذا التاريخ.</div>
+                            <button class="btn btn-primary full">حفظ عدد الحالات لليوم المختار</button>
+                        </form>
+                    </div>
+                `;
+            } catch (capacityError) {
+                dailyCapacityPanel = `<div class="notice warning">${escapeHTML(capacityError.message)}</div>`;
+            }
+        }
+
         const rows = visibleAppointments.map(row => {
             let actions = '';
 
@@ -1691,6 +1741,7 @@ async function loadAppointments() {
         }).join('');
 
         $('#panel-appointments').innerHTML = `
+            ${dailyCapacityPanel}
             <div class="section">
                 <div class="section-title">
                     <h3>إدارة الحجوزات${appointmentsDoctorFilterName ? ' - ' + escapeHTML(appointmentsDoctorFilterName) : ''}</h3>
@@ -1721,8 +1772,41 @@ async function loadAppointments() {
             </div>
         `;
 
+        if (role === 'doctor' && $('#doctorCapacityForm')) {
+            $('#doctorCapacityForm').addEventListener('submit', saveDoctorDailyCapacity);
+            $('#doctorCapacityForm input[name="date"]').addEventListener('change', event => loadDoctorCapacityForDate(event.target.value));
+        }
+
     } catch (error) {
         panelError('appointments',error);
+    }
+}
+
+async function loadDoctorCapacityForDate(date) {
+    if (!date) return;
+    try {
+        const data = await apiRequest('/api/doctor/daily-capacity?date=' + encodeURIComponent(date));
+        const capacityInput = $('#doctorDailyCapacity');
+        const booked = $('#doctorCapacityBooked');
+        if (capacityInput) capacityInput.value = Number(data.maxAppointments || 20);
+        if (booked) booked.textContent = `المحجوز حاليًا: ${Number(data.bookedAppointments || 0)} حالة. الحد خاص بهذا الطبيب وهذا التاريخ.`;
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function saveDoctorDailyCapacity(event) {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    try {
+        const result = await apiRequest('/api/doctor/daily-capacity', {
+            method:'PUT',
+            body:JSON.stringify({date:form.get('date'), maxAppointments:Number(form.get('maxAppointments'))})
+        });
+        const booked = $('#doctorCapacityBooked');
+        if (booked) booked.textContent = `تم الحفظ. المحجوز حاليًا: ${Number(result.bookedAppointments || 0)} حالة من أصل ${Number(result.maxAppointments)}.${result.overCapacity ? ' تنبيه: الحجوزات الحالية تجاوزت الحد الجديد، ولن تُقبل حجوزات إضافية حتى يصبح العدد أقل من الحد.' : ''}`;
+    } catch (error) {
+        alert(error.message);
     }
 }
 
@@ -3184,6 +3268,14 @@ const logs = await apiRequest('/api/audit-log?limit=200');
 شاشة الانتظار داخل الإدارة
 ========================================= */
 
+function renderAdminWaiting(data) {
+    const rows = data?.patients || [];
+    $('#adminWaiting').innerHTML = rows.length ? `
+        <div class="table-wrap"><table><thead><tr><th>الطبيب</th><th>رقم الدور</th><th>الأدوار قبله</th><th>الوقت المتوقع</th><th>الحالة</th></tr></thead>
+        <tbody>${rows.map(row => `<tr><td>${escapeHTML(row.doctor)}</td><td><strong>#${escapeHTML(row.ticket)}</strong></td><td>${Number(row.remainingTurns || 0)}</td><td>${escapeHTML(row.time || '—')}</td><td>${escapeHTML(row.state)}</td></tr>`).join('')}</tbody></table></div>
+    ` : '<div class="empty">لا يوجد مرضى منتظرون</div>';
+}
+
 async function loadBoard() {
 $('#panel-board').innerHTML = `
 <div class="section">
@@ -3199,18 +3291,7 @@ $('#panel-board').innerHTML = `
 try {
     const data = await apiRequest('/api/waiting-room');
 
-    $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
-        <div class="waiting-card">
-            <div>
-                <strong>${escapeHTML(row.doctor)}</strong>
-                <div class="muted">${escapeHTML(row.time || '—')}</div>
-            </div>
-            <div>
-                <div class="ticket">#${escapeHTML(row.ticket)}</div>
-                ${escapeHTML(row.state)}
-            </div>
-        </div>
-    `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
+    renderAdminWaiting(data);
 
     startAdminWaitingStream();
 
@@ -3233,18 +3314,7 @@ waitingEventSource.onmessage = event => {
 
         if (!$('#adminWaiting')) return;
 
-        $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
-            <div class="waiting-card">
-                <div>
-                    <strong>${escapeHTML(row.doctor)}</strong>
-                    <div class="muted">${escapeHTML(row.time || '—')}</div>
-                </div>
-                <div>
-                    <div class="ticket">#${escapeHTML(row.ticket)}</div>
-                    ${escapeHTML(row.state)}
-                </div>
-            </div>
-        `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
+        renderAdminWaiting(data);
 
     } catch (error) {
         console.error(error);
@@ -3293,6 +3363,10 @@ input.min = local.toISOString().slice(0,10);
 
 async function startApplication() {
 setMinimumBookingDate();
+
+setInterval(() => {
+    if (currentUser && activeTab === 'dashboard') loadDashboard();
+}, 30000);
 
 renderLastBooking();
 

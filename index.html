@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
-<head>
+head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#102c46">
@@ -258,6 +257,32 @@ textarea {
 .notice.success {
     background:#e9f8f1;
     color:#167c58;
+}
+
+.payment-box {
+    padding:16px;
+    border:1px solid #cfe7e5;
+    border-radius:12px;
+    background:#f1fbfa;
+    line-height:1.9;
+}
+
+.payment-box h3 {
+    margin:0 0 8px;
+    color:var(--navy);
+}
+
+.payment-account {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-top:1px solid #dcecea;
+}
+
+.payment-account strong {
+    direction:ltr;
+    unicode-bidi:embed;
 }
 
 .result {
@@ -524,6 +549,15 @@ td .btn {
     <div class="section-title">
         <h2>🩺 حجز موعد طبي</h2>
         <span class="badge blue">حجز جديد</span>
+    </div>
+
+    <div class="payment-box full" style="margin-bottom:16px">
+        <h3>💳 مبلغ الحجز وبيانات التحويل</h3>
+        <div><strong>مبلغ الحجز: 3000 ألف ريال يمني</strong></div>
+        <div class="payment-account"><span>حساب بنك الكريمي</span><strong dir="ltr">30000000</strong></div>
+        <div class="payment-account"><span>حساب بنك القطيبي</span><strong dir="ltr">35555555</strong></div>
+        <div class="payment-account"><span>حساب البنك المركزي</span><strong dir="ltr">34444444</strong></div>
+        <div class="notice warning" style="margin-bottom:0">لا يمكنك إرسال طلب الحجز دون إرفاق صورة سند التحويل.</div>
     </div>
 
     <form id="bookingForm" class="grid">

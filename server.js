@@ -1,4 +1,3 @@
-const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +15,7 @@ const HOST = process.env.HOST || '0.0.0.0';
 const TIME_ZONE = process.env.APP_TIME_ZONE || 'Asia/Aden';
 const CLINIC_START_TIME = process.env.CLINIC_START_TIME || '09:00';
 const APPOINTMENT_DURATION = 20;
+const APPROVED_RECEIPT_AMOUNT = 3000;
 
 const DATA_DIR = path.join(__dirname, 'data');
 const RECEIPTS_DIR = path.join(DATA_DIR, 'receipts');
@@ -386,7 +386,10 @@ function rebuildQueues(rows, doctor, date) {
         const completedMinute = minutesFromISO(completedAt);
 
         if (completedMinute !== null) {
-            pointer = Math.max(pointer, completedMinute);
+            pointer = Math.max(
+                pointer,
+                completedMinute + APPOINTMENT_DURATION
+            );
         }
     }
 
@@ -1111,6 +1114,94 @@ function syncPatientsFromAppointments() {
 
 syncPatientsFromAppointments();
 
+function upsertPatientFromAppointment(appointment) {
+    const patients = readCollection('patients');
+    const phone = normalizePhone(appointment.phone);
+    let patient = patients.find(p => normalizePhone(p.phone) === phone);
+
+    if (patient) return patient;
+
+    const now = nowISO();
+    patient = {
+        id: makeId(),
+        name: appointment.name,
+        phone,
+        dateOfBirth: null,
+        age: null,
+        createdAt: appointment.approvedAt || now,
+        updatedAt: now,
+        source: 'approved-appointment'
+    };
+    patients.push(patient);
+    writeCollection('patients', patients);
+    return patient;
+}
+
+function recordApprovedReceiptPayment(appointment, createdBy = null) {
+    const payments = readCollection('payments');
+    const existing = payments.find(payment =>
+        payment.appointmentId === appointment.id &&
+        payment.source === 'approved-receipt'
+    );
+    if (existing) return existing;
+
+    const payment = {
+        id: makeId(),
+        appointmentId: appointment.id,
+        patientName: appointment.name,
+        amount: APPROVED_RECEIPT_AMOUNT,
+        currency: 'YER',
+        status: 'paid',
+        method: 'transfer',
+        reference: appointment.receiptName || '',
+        note: 'إيراد تلقائي عند اعتماد سند الحجز',
+        source: 'approved-receipt',
+        createdBy,
+        createdAt: appointment.approvedAt || nowISO()
+    };
+    payments.push(payment);
+    writeCollection('payments', payments);
+    return payment;
+}
+
+function ensureHistoricalApprovedReceiptPayments() {
+    const appointments = readAppointments();
+    let changed = false;
+    const payments = readCollection('payments');
+    const known = new Set(
+        payments
+            .filter(payment => payment.source === 'approved-receipt')
+            .map(payment => payment.appointmentId)
+    );
+
+    for (const appointment of appointments) {
+        if (
+            !['approved', 'in_progress', 'completed', 'skipped'].includes(appointment.status) ||
+            !appointment.approvedAt ||
+            known.has(appointment.id)
+        ) continue;
+
+        payments.push({
+            id: makeId(),
+            appointmentId: appointment.id,
+            patientName: appointment.name,
+            amount: APPROVED_RECEIPT_AMOUNT,
+            currency: 'YER',
+            status: 'paid',
+            method: 'transfer',
+            reference: appointment.receiptName || '',
+            note: 'إيراد تلقائي لسند حجز معتمد',
+            source: 'approved-receipt',
+            createdBy: null,
+            createdAt: appointment.approvedAt
+        });
+        known.add(appointment.id);
+        changed = true;
+    }
+
+    if (changed) writeCollection('payments', payments);
+}
+
 /* =====================================
    إعدادات دوام العيادة
 ===================================== */
@@ -1176,7 +1267,14 @@ function getClinicSchedule(doctorName, date) {
             ? slot.end
             : null;
 
+    const doctorDailyOverride = Number(
+        doctor?.dailyAppointmentLimits?.[date] ||
+        doctor?.dailyAppointmentLimit ||
+        0
+    );
+
     const configuredLimit = Number(
+        doctorDailyOverride ||
         slot?.maxAppointments ||
         settings.maxAppointmentsPerDoctorPerDay ||
         0
@@ -1196,7 +1294,7 @@ function getClinicSchedule(doctorName, date) {
             ? configuredLimit
             : calculatedLimit > 0
                 ? calculatedLimit
-                : null;
+                : 20;
 
     return {
         open: true,
@@ -2080,6 +2178,76 @@ app.put(
     }
 );
 
+app.get(
+    '/api/doctor/daily-capacity',
+    requireAuth,
+    allowRoles('doctor'),
+    (req, res) => {
+        const date = String(req.query.date || localDateString());
+        if (!validDate(date)) {
+            return res.status(400).json({ error: 'التاريخ غير صحيح' });
+        }
+        const doctor = readCollection('doctors').find(d => d.id === req.user.doctorId);
+        if (!doctor) {
+            return res.status(404).json({ error: 'حساب الطبيب غير مرتبط بطبيب' });
+        }
+        const schedule = getClinicSchedule(doctor.name, date);
+        const bookedAppointments = readAppointments().filter(row =>
+            withinDoctorScope(req, row) &&
+            row.date === date &&
+            ['pending', 'approved', 'in_progress'].includes(row.status)
+        ).length;
+        res.json({
+            date,
+            maxAppointments: schedule.maxAppointments || 20,
+            bookedAppointments,
+            open: schedule.open,
+            isOverride: Number.isInteger(Number(doctor.dailyAppointmentLimits?.[date]))
+        });
+    }
+);
+
+app.put(
+    '/api/doctor/daily-capacity',
+    requireAuth,
+    allowRoles('doctor'),
+    (req, res) => {
+        const date = String(req.body?.date || '');
+        const maxAppointments = Number(req.body?.maxAppointments);
+        if (!validDate(date) || date < localDateString()) {
+            return res.status(400).json({ error: 'اختر تاريخ اليوم أو تاريخًا مستقبليًا صحيحًا' });
+        }
+        if (!Number.isInteger(maxAppointments) || maxAppointments < 1 || maxAppointments > 500) {
+            return res.status(400).json({ error: 'عدد الحالات يجب أن يكون بين 1 و500' });
+        }
+
+        const doctors = readCollection('doctors');
+        const doctor = doctors.find(d => d.id === req.user.doctorId);
+        if (!doctor) {
+            return res.status(404).json({ error: 'حساب الطبيب غير مرتبط بطبيب' });
+        }
+        const before = doctor.dailyAppointmentLimits?.[date] ?? null;
+        doctor.dailyAppointmentLimits = doctor.dailyAppointmentLimits || {};
+        doctor.dailyAppointmentLimits[date] = maxAppointments;
+        doctor.updatedAt = nowISO();
+        writeCollection('doctors', doctors);
+
+        const bookedAppointments = readAppointments().filter(row =>
+            withinDoctorScope(req, row) &&
+            row.date === date &&
+            ['pending', 'approved', 'in_progress'].includes(row.status)
+        ).length;
+        setAuditChange(req, 'doctor-daily-capacity', doctor.id, { date, maxAppointments: before }, { date, maxAppointments });
+        res.json({
+            date,
+            maxAppointments,
+            bookedAppointments,
+            overCapacity: bookedAppointments > maxAppointments,
+            message: 'تم حفظ سعة الطبيب لهذا التاريخ'
+        });
+    }
+);
+
 /* =====================================
    المرضى وملفاتهم الطبية
 ===================================== */
@@ -2820,13 +2988,11 @@ app.get(
                     : patients;
 
             const newPatientsToday = visiblePatients.filter(
-                p =>
-                    String(p.createdAt || '').slice(0, 10) === today
+                p => dateOfISO(p.createdAt) === today
             ).length;
 
             const newPatientsMonth = visiblePatients.filter(
-                p =>
-                    String(p.createdAt || '').slice(0, 7) === month
+                p => String(dateOfISO(p.createdAt) || '').startsWith(month)
             ).length;
 
             /*
@@ -2840,7 +3006,7 @@ app.get(
                 ? payments.filter(
                     p =>
                         ['paid', 'refunded'].includes(p.status) &&
-                        String(p.createdAt).slice(0, 10) === today
+                        dateOfISO(p.createdAt) === today
                 )
                 : [];
 
@@ -2848,7 +3014,7 @@ app.get(
                 ? payments.filter(
                     p =>
                         ['paid', 'refunded'].includes(p.status) &&
-                        String(p.createdAt).slice(0, 7) === month
+                        String(dateOfISO(p.createdAt) || '').startsWith(month)
                 )
                 : [];
 
@@ -3251,10 +3417,19 @@ function waitingBoard() {
         type: 'return'
     }));
 
-    return [...returns, ...normal].sort(
+    const board = [...returns, ...normal].sort(
         (a, b) =>
+            String(a.doctor).localeCompare(String(b.doctor), 'ar') ||
             Number(a.ticket) - Number(b.ticket)
     );
+
+    return board.map(item => ({
+        ...item,
+        remainingTurns: board.filter(other =>
+            other.doctor === item.doctor &&
+            Number(other.ticket) < Number(item.ticket)
+        ).length
+    }));
 }
 
 app.get('/api/waiting-room', (_req, res) => {
@@ -3648,6 +3823,9 @@ app.get('/api/appointments/track', (req, res) => {
         }
 
         const rows = readAppointments();
+        updateMissedReturns(rows);
+        rebuildAllQueues(rows);
+        writeAppointments(rows);
 
         const row = rows.find(
             appointment =>
@@ -3903,7 +4081,7 @@ app.post(
             ).length;
 
             const dailyCapacity =
-                schedule.maxAppointments || 1;
+                schedule.maxAppointments ?? 20;
 
             if (dailyCount >= dailyCapacity) {
 
@@ -4110,6 +4288,9 @@ app.patch(
                 row.status = 'approved';
 
                 row.approvedAt = new Date().toISOString();
+
+                upsertPatientFromAppointment(row);
+                recordApprovedReceiptPayment(row, req.user.id);
 
                 row.appointmentTime = null;
             }
@@ -4678,6 +4859,8 @@ app.use((error, _req, res, _next) => {
 /* =====================================
    تشغيل الخادم
 ===================================== */
+
+ensureHistoricalApprovedReceiptPayments();
 
 app.listen(PORT, HOST, () => {
 

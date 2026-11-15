@@ -696,6 +696,11 @@ td .btn {
         <button class="btn btn-primary" style="width:100%">دخول</button>
     </form>
 
+    <div class="notice warning">
+        بيانات الدخول الأولية: اسم المستخدم <strong>admin</strong> وكلمة المرور <strong>admin</strong>.
+        غيّر كلمة المرور قبل نشر النظام للعامة.
+    </div>
+
     <div id="loginResult"></div>
 </div>
 
@@ -1532,6 +1537,10 @@ async function loadAppointments() {
                         <button class="btn btn-primary"
                             onclick="changeAppointment('${row.id}','in_progress')">
                             بدء الكشف
+                        </button>
+                        <button class="btn btn-warning"
+                            onclick="changeAppointment('${row.id}','skipped')">
+                            تجاوز الدور
                         </button>
                     `;
                 }

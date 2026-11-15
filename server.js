@@ -1,4 +1,3 @@
-const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -716,6 +715,30 @@ function nowISO() {
 function makeId() {
     return crypto.randomUUID();
 }
+
+/* =====================================
+   أطباء تجريبيون عند بدء النظام لأول مرة
+   لا تُضاف الأسماء إذا كانت هناك بيانات أطباء موجودة مسبقًا.
+===================================== */
+
+function seedDefaultDoctors() {
+    const doctors = readCollection('doctors');
+
+    if (doctors.length > 0) return;
+
+    const createdAt = nowISO();
+
+    writeCollection('doctors', [
+        { id: 'sample-doctor-1', name: 'د. أحمد السقاف', specialty: 'طب عام', phone: '', active: true, workingHours: {}, createdAt },
+        { id: 'sample-doctor-2', name: 'د. سارة العريقي', specialty: 'طب الأطفال', phone: '', active: true, workingHours: {}, createdAt },
+        { id: 'sample-doctor-3', name: 'د. محمد الحكيمي', specialty: 'الأمراض الباطنية', phone: '', active: true, workingHours: {}, createdAt },
+        { id: 'sample-doctor-4', name: 'د. ليلى اليافعي', specialty: 'أمراض النساء والولادة', phone: '', active: true, workingHours: {}, createdAt },
+        { id: 'sample-doctor-5', name: 'د. خالد الحضرمي', specialty: 'جراحة العظام', phone: '', active: true, workingHours: {}, createdAt },
+        { id: 'sample-doctor-6', name: 'د. نور القيسي', specialty: 'طب الأسنان', phone: '', active: true, workingHours: {}, createdAt }
+    ]);
+}
+
+seedDefaultDoctors();
 
 function safeUser(user) {
     const {

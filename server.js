@@ -1,4 +1,3 @@
-const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -17,6 +16,8 @@ const TIME_ZONE = process.env.APP_TIME_ZONE || 'Asia/Aden';
 const CLINIC_START_TIME = process.env.CLINIC_START_TIME || '09:00';
 const APPOINTMENT_DURATION = 20;
 const APPROVED_RECEIPT_AMOUNT = 3000;
+const HOSPITAL_RECEIPT_SHARE = 1000;
+const DOCTOR_RECEIPT_SHARE = 2000;
 
 const DATA_DIR = path.join(__dirname, 'data');
 const RECEIPTS_DIR = path.join(DATA_DIR, 'receipts');
@@ -356,10 +357,6 @@ function rebuildQueues(rows, doctor, date) {
         minutesFromTime(CLINIC_START_TIME);
 
     let pointer = startMinutes;
-
-    if (date === localDateString()) {
-        pointer = Math.max(pointer, currentMinutes());
-    }
 
     const completedRows = rows.filter(row => {
 
@@ -1154,6 +1151,8 @@ function recordApprovedReceiptPayment(appointment, createdBy = null) {
         appointmentId: appointment.id,
         patientName: appointment.name,
         amount: APPROVED_RECEIPT_AMOUNT,
+        hospitalShare: HOSPITAL_RECEIPT_SHARE,
+        doctorShare: DOCTOR_RECEIPT_SHARE,
         currency: 'YER',
         status: 'paid',
         method: 'transfer',
@@ -1178,6 +1177,18 @@ function ensureHistoricalApprovedReceiptPayments() {
             .map(payment => payment.appointmentId)
     );
 
+    for (const payment of payments) {
+        if (payment.source !== 'approved-receipt') continue;
+        if (
+            Number(payment.hospitalShare) !== HOSPITAL_RECEIPT_SHARE ||
+            Number(payment.doctorShare) !== DOCTOR_RECEIPT_SHARE
+        ) {
+            payment.hospitalShare = HOSPITAL_RECEIPT_SHARE;
+            payment.doctorShare = DOCTOR_RECEIPT_SHARE;
+            changed = true;
+        }
+    }
+
     for (const appointment of appointments) {
         if (
             !['approved', 'in_progress', 'completed', 'skipped'].includes(appointment.status) ||
@@ -1190,6 +1201,8 @@ function ensureHistoricalApprovedReceiptPayments() {
             appointmentId: appointment.id,
             patientName: appointment.name,
             amount: APPROVED_RECEIPT_AMOUNT,
+            hospitalShare: HOSPITAL_RECEIPT_SHARE,
+            doctorShare: DOCTOR_RECEIPT_SHARE,
             currency: 'YER',
             status: 'paid',
             method: 'transfer',
@@ -3034,6 +3047,55 @@ app.get(
                     0
                 );
 
+            const approvedReceiptPayments = payments.filter(payment =>
+                payment.source === 'approved-receipt' &&
+                ['paid', 'refunded'].includes(payment.status)
+            );
+            const receiptPaymentsToday = approvedReceiptPayments.filter(
+                payment => dateOfISO(payment.createdAt) === today
+            );
+            const receiptPaymentsMonth = approvedReceiptPayments.filter(
+                payment => String(dateOfISO(payment.createdAt) || '').startsWith(month)
+            );
+            const sumShare = (list, key, fallback) => list.reduce(
+                (sum, payment) => {
+                    const amount = Number(payment[key] ?? fallback);
+                    return sum + (payment.status === 'refunded' ? -amount : amount);
+                },
+                0
+            );
+
+            const ownAppointmentIds = new Set(
+                req.user.role === 'doctor' ? scope.map(row => row.id) : []
+            );
+            const ownReceiptPayments = req.user.role === 'doctor'
+                ? approvedReceiptPayments.filter(payment =>
+                    ownAppointmentIds.has(payment.appointmentId)
+                )
+                : [];
+            const ownReceiptPaymentsToday = ownReceiptPayments.filter(
+                payment => dateOfISO(payment.createdAt) === today
+            );
+            const ownReceiptPaymentsMonth = ownReceiptPayments.filter(
+                payment => String(dateOfISO(payment.createdAt) || '').startsWith(month)
+            );
+            const doctorShareToday = req.user.role === 'doctor'
+                ? sumShare(ownReceiptPaymentsToday, 'doctorShare', DOCTOR_RECEIPT_SHARE)
+                : canViewFinancials
+                    ? sumShare(receiptPaymentsToday, 'doctorShare', DOCTOR_RECEIPT_SHARE)
+                    : 0;
+            const doctorShareMonth = req.user.role === 'doctor'
+                ? sumShare(ownReceiptPaymentsMonth, 'doctorShare', DOCTOR_RECEIPT_SHARE)
+                : canViewFinancials
+                    ? sumShare(receiptPaymentsMonth, 'doctorShare', DOCTOR_RECEIPT_SHARE)
+                    : 0;
+            const hospitalShareToday = canViewFinancials
+                ? sumShare(receiptPaymentsToday, 'hospitalShare', HOSPITAL_RECEIPT_SHARE)
+                : 0;
+            const hospitalShareMonth = canViewFinancials
+                ? sumShare(receiptPaymentsMonth, 'hospitalShare', HOSPITAL_RECEIPT_SHARE)
+                : 0;
+
             const outstanding = canViewFinancials
                 ? invoices.reduce(
                     (sum, invoice) =>
@@ -3055,13 +3117,14 @@ app.get(
                     const appointmentIds = new Set(doctorRows.map(row => row.id));
                     const doctorPayments = payments.filter(
                         payment => appointmentIds.has(payment.appointmentId) &&
+                            payment.source === 'approved-receipt' &&
                             ['paid', 'refunded'].includes(payment.status)
                     );
                     const amountInPeriod = predicate => doctorPayments.reduce(
                         (sum, payment) => {
                             const paymentDate = dateOfISO(payment.createdAt);
                             if (!paymentDate || !predicate(paymentDate)) return sum;
-                            const amount = Number(payment.amount || 0);
+                            const amount = Number(payment.doctorShare ?? DOCTOR_RECEIPT_SHARE);
                             return sum + (payment.status === 'refunded' ? -amount : amount);
                         },
                         0
@@ -3113,11 +3176,20 @@ app.get(
                 revenue: {
                     today: canViewFinancials
                         ? total(todayPayments)
-                        : 0,
+                        : req.user.role === 'doctor'
+                            ? doctorShareToday
+                            : 0,
 
                     month: canViewFinancials
                         ? total(monthPayments)
-                        : 0,
+                        : req.user.role === 'doctor'
+                            ? doctorShareMonth
+                            : 0,
+
+                    hospitalToday: hospitalShareToday,
+                    hospitalMonth: hospitalShareMonth,
+                    doctorShareToday,
+                    doctorShareMonth,
 
                     currency:
                         canViewFinancials

@@ -4,2434 +4,2958 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#102c46">
-<title>الشفاء | حجز المواعيد الطبية</title>
+<title>الشفاء | النظام الطبي المتكامل</title>
 
 <style>
 :root {
     --navy:#102c46;
-    --navy2:#174567;
-    --teal:#15a99a;
-    --teal-dark:#108b80;
-    --light:#e8f7f4;
+    --navy2:#183e5c;
+    --teal:#13a89e;
+    --teal2:#0c887f;
     --bg:#f3f7fa;
     --white:#fff;
-    --text:#20394d;
-    --muted:#8293a0;
-    --border:#e5edf2;
-    --red:#d95665;
-    --green:#168b6b;
-    --orange:#e6a43a;
-    --shadow:0 12px 35px rgba(16,44,70,.07);
-    --radius:20px;
+    --text:#193348;
+    --muted:#718395;
+    --border:#e1eaf0;
+    --red:#dc5353;
+    --green:#15966c;
+    --orange:#e89a38;
+    --shadow:0 8px 30px rgba(16,44,70,.08);
+    --radius:16px;
 }
 
 *{box-sizing:border-box}
 
-html{
-    direction:rtl;
-}
-
-body{
+body {
     margin:0;
+    font-family:Tahoma,Arial,sans-serif;
     background:var(--bg);
     color:var(--text);
-    font-family:Tahoma,Arial,sans-serif;
-    font-size:14px;
-    line-height:1.7;
-    direction:rtl;
-    text-align:right;
 }
 
-button,input,select{font:inherit}
-button{cursor:pointer;direction:rtl}
-
-input,select,textarea{
-    direction:rtl;
-    text-align:right;
+button,input,select,textarea {
+    font:inherit;
 }
 
-input[type="date"]{
-    direction:ltr;
-    text-align:right;
+button {
+    cursor:pointer;
+    border:0;
 }
 
-button:focus-visible,input:focus-visible,select:focus-visible{
-    outline:3px solid #15a99a55;
-    outline-offset:2px;
-}
+.hidden{display:none!important}
 
-.shell{
-    max-width:1250px;
-    margin:auto;
-    padding:0 25px;
-}
-
-/* HEADER */
-
-.topbar{
-    height:82px;
+.topbar {
+    background:linear-gradient(120deg,var(--navy),var(--navy2));
+    color:white;
+    padding:17px 5%;
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:15px;
-    position:relative;
+    flex-wrap:wrap;
+    box-shadow:var(--shadow);
 }
 
-.brand{
+.brand {
     display:flex;
     align-items:center;
     gap:12px;
-    color:var(--navy);
-    text-decoration:none;
-    font-size:20px;
-    font-weight:900;
 }
 
-.brand-mark{
+.logo {
     width:46px;
     height:46px;
-    background:linear-gradient(135deg,var(--navy),#1e6680);
-    border-radius:15px;
-    display:grid;
-    place-items:center;
-    color:white;
-    font-size:27px;
-    box-shadow:0 7px 15px #102c4625;
-}
-
-.brand small{
-    display:block;
-    font-size:10px;
-    color:var(--muted);
-    font-weight:500;
-}
-
-.nav{
-    display:flex;
-    align-items:center;
-    gap:7px;
-}
-
-.nav button{
-    border:0;
-    background:transparent;
-    padding:10px 15px;
-    border-radius:11px;
-    color:#526b7e;
-    transition:.2s;
-}
-
-.nav button:hover,
-.nav button.active{
-    background:#e5f1f5;
-    color:var(--navy);
-}
-
-.menu{position:relative}
-
-.drop{
-    display:none;
-    position:absolute;
-    z-index:20;
-    top:calc(100% + 10px);
-    right:0;
-    min-width:210px;
-    padding:8px;
-    background:white;
-    border:1px solid var(--border);
-    border-radius:15px;
-    box-shadow:var(--shadow);
-}
-
-.drop.show{display:block}
-
-.drop button{
-    width:100%;
-    text-align:right;
-    display:block;
-}
-
-.drop button:hover{background:#f0f7f8}
-
-.mobile-menu{
-    display:none;
-    background:white;
-    border:1px solid var(--border);
-    padding:9px 13px;
-    border-radius:11px;
-    color:var(--navy);
-}
-
-.mobile-dropdown{
-    display:none;
-    position:absolute;
-    z-index:25;
-    top:65px;
-    left:0;
-    right:0;
-    background:white;
-    border:1px solid var(--border);
-    border-radius:15px;
-    box-shadow:var(--shadow);
-    padding:8px;
-}
-
-.mobile-dropdown.open{display:grid}
-
-.mobile-dropdown button{
-    border:0;
-    background:transparent;
-    text-align:right;
-    padding:12px;
-    color:var(--navy);
-    border-radius:10px;
-}
-
-.mobile-dropdown button:hover{background:#eef6f7}
-
-.user-chip{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    background:#e6f4f1;
-    color:var(--navy);
-    padding:8px 13px;
-    border-radius:30px;
-    font-size:12px;
-}
-
-.user-chip button{
-    border:0;
-    background:transparent;
-    color:var(--red);
-}
-
-.dot{
-    width:8px;
-    height:8px;
-    background:var(--teal);
-    border-radius:50%;
-}
-
-/* HERO */
-
-.hero{
-    background:linear-gradient(115deg,#102c46,#174c6a 65%,#147a7b);
-    color:white;
-    border-radius:27px;
-    padding:45px 48px;
-    min-height:255px;
-    display:grid;
-    grid-template-columns:1.2fr .8fr;
-    align-items:center;
-    position:relative;
-    overflow:hidden;
-    box-shadow:0 15px 35px #102c4620;
-}
-
-.hero:before,
-.hero:after{
-    content:"";
-    position:absolute;
-    border:1px solid #ffffff17;
-    border-radius:50%;
-    width:350px;
-    height:350px;
-    left:-100px;
-    top:-200px;
-}
-
-.hero:after{
-    width:260px;
-    height:260px;
-    left:35px;
-    top:-150px;
-}
-
-.hero-copy{position:relative;z-index:2}
-
-.eyebrow{
-    color:#85e5d2;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.hero h1{
-    font-size:34px;
-    line-height:1.4;
-    margin:10px 0;
-}
-
-.hero p{
-    color:#d7e9ee;
-    max-width:570px;
-    margin:0;
-}
-
-.hero-art{
-    display:flex;
-    justify-content:center;
-    position:relative;
-    z-index:2;
-}
-
-.medical-card{
-    width:225px;
-    padding:20px;
-    border-radius:23px;
-    background:#ffffff17;
-    border:1px solid #ffffff35;
-    backdrop-filter:blur(10px);
-    transform:rotate(-5deg);
-    box-shadow:0 20px 40px #071d3030;
-}
-
-.medical-card-top{
-    display:flex;
-    justify-content:space-between;
-    color:#d9efef;
-    font-size:11px;
-}
-
-.pulse{
-    height:55px;
-    margin:10px 0;
-    border-bottom:1px solid #ffffff55;
-}
-
-.pulse svg{width:100%;height:100%}
-
-.pills{display:flex;gap:7px}
-.pills i{
-    width:30px;
-    height:6px;
-    background:#7be0ca;
-    border-radius:10px;
-}
-.pills i:nth-child(2){width:45px;opacity:.6}
-.pills i:nth-child(3){width:20px;opacity:.4}
-
-/* TITLES */
-
-.section-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:end;
-    margin:30px 0 17px;
-    gap:15px;
-}
-
-.section-head h2{
-    color:var(--navy);
-    font-size:21px;
-    margin:0;
-}
-
-.section-head p{
-    margin:3px 0 0;
-    color:var(--muted);
-    font-size:12px;
-}
-
-.secure-label{
-    background:#e4f6f0;
-    color:#13846d;
-    border-radius:30px;
-    padding:8px 13px;
-    font-size:11px;
-}
-
-/* LAYOUT */
-
-.layout{
-    display:grid;
-    grid-template-columns:minmax(0,1.4fr) minmax(290px,.8fr);
-    gap:20px;
-    align-items:start;
-}
-
-.card{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:25px;
-    box-shadow:var(--shadow);
-    direction:rtl;
-    text-align:right;
-}
-
-.card-title{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:20px;
-}
-
-.iconbox{
-    width:43px;
-    height:43px;
-    display:grid;
-    place-items:center;
-    background:#e4f6f1;
-    color:#118879;
+    background:rgba(255,255,255,.13);
     border-radius:14px;
-    font-size:21px;
-}
-
-.card-title h3{
-    color:var(--navy);
-    margin:0;
-    font-size:16px;
-}
-
-.card-title p{
-    color:var(--muted);
-    font-size:11px;
-    margin:2px 0 0;
-}
-
-/* BANK */
-
-.bank-box{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    padding:16px;
-    background:#f0faf7;
-    border:1px solid #d8eee7;
-    border-radius:15px;
-    margin-bottom:20px;
-}
-
-.bank-box strong{
-    color:var(--navy);
-    display:block;
-}
-
-.bank-box small{
-    color:var(--muted);
-    font-size:10px;
-}
-
-.bank-number{
-    color:#118879;
-    font-weight:900;
-    font-size:19px;
-    letter-spacing:2px;
-    direction:ltr;
-    text-align:right;
-}
-
-.bank-fee{
-    display:block;
-    color:#b16c12;
-    font-size:12px;
-    font-weight:bold;
-    margin-top:8px;
-    background:#fff5df;
-    border-radius:8px;
-    padding:7px 10px;
-}
-
-.bank-instruction{
-    display:block;
-    color:#168b6b;
-    font-size:11px;
-    margin-top:7px;
-    line-height:1.8;
-}
-
-.copy-btn{
-    border:0;
-    border-radius:10px;
-    background:white;
-    color:#118879;
-    padding:9px 13px;
-    font-size:11px;
-}
-
-/* FORM */
-
-.form-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
+    place-items:center;
+    font-size:25px;
 }
 
-.field{
-    display:flex;
-    flex-direction:column;
-    gap:7px;
+.brand h1 {
+    font-size:21px;
+    margin:0;
 }
 
-.field.full{grid-column:1/-1}
-
-.field label{
-    color:#425e73;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.field input,
-.field select{
-    width:100%;
-    padding:13px;
-    border:1px solid #dce6eb;
-    border-radius:12px;
-    background:white;
-    color:var(--text);
-    outline:none;
-    transition:.2s;
-}
-
-.field input:focus,
-.field select:focus{
-    border-color:var(--teal);
-    box-shadow:0 0 0 3px #15a99a18;
-}
-
-.hint{
-    font-size:10px;
-    color:var(--muted);
-}
-
-.upload{
-    border:1px dashed #b8d1da;
-    border-radius:13px;
-    padding:15px;
-    background:#fbfdfe;
-}
-
-.upload input{
-    border:0;
-    padding:5px 0;
-}
-
-.file-name{
-    color:var(--green);
-    font-size:10px;
-}
-
-.checkline{
-    display:flex;
-    gap:9px;
-    align-items:flex-start;
-    margin:17px 0;
-    color:#70818e;
-    font-size:11px;
-}
-
-.checkline input{
-    accent-color:var(--teal);
+.brand small {
+    display:block;
+    color:#c2d5e2;
     margin-top:5px;
 }
 
-.primary{
-    background:linear-gradient(135deg,var(--teal),#108e83);
-    color:white;
-    border:0;
-    border-radius:12px;
-    padding:14px 18px;
+.top-actions {
+    display:flex;
+    gap:9px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.btn {
+    padding:11px 17px;
+    border-radius:10px;
     font-weight:bold;
-    box-shadow:0 7px 18px #15a99a30;
     transition:.2s;
 }
 
-.primary:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 22px #15a99a45;
-}
+.btn:hover{transform:translateY(-1px)}
 
-.wide{width:100%}
-
-.secondary{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:10px;
-    color:var(--navy);
-    padding:9px 13px;
-}
-
-/* STATUS */
-
-.status-card{min-height:250px}
-
-.status-empty{
-    text-align:center;
-    border:1px dashed #dce7eb;
-    background:#fbfdfe;
-    border-radius:16px;
-    padding:25px 15px;
-    color:var(--muted);
-}
-
-.empty-illustration{
-    width:55px;
-    height:55px;
-    display:grid;
-    place-items:center;
-    background:#edf5f8;
-    color:#63889b;
-    border-radius:18px;
-    margin:0 auto 10px;
-    font-size:24px;
-}
-
-.status-empty strong{
-    display:block;
-    color:#385368;
-    font-size:13px;
-}
-
-.status-entry{
-    border:1px solid var(--border);
-    border-radius:15px;
-    padding:16px;
-    direction:rtl;
-    text-align:right;
-}
-
-.status-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-.status-top strong{color:var(--navy)}
-
-.badge{
-    display:inline-block;
-    font-size:10px;
-    padding:5px 10px;
-    border-radius:30px;
-    background:#fff3dc;
-    color:#a96a05;
-    white-space:nowrap;
-}
-
-.badge.ok{
-    background:#e3f6f1;
-    color:#087c68;
-}
-
-.badge.blue{
-    background:#e9f3fb;
-    color:#356c9a;
-}
-
-.badge.red{
-    background:#fde9eb;
-    color:#ae4653;
-}
-
-.badge.gray{
-    background:#edf1f4;
-    color:#667784;
-}
-
-.status-details{
-    color:var(--muted);
-    font-size:11px;
-    margin:12px 0;
-    direction:rtl;
-    text-align:right;
-}
-
-.ticket{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    background:#f1f8f7;
-    padding:13px;
-    border-radius:13px;
-}
-
-.ticket-num{
-    color:#138d81;
-    font-size:25px;
-    font-weight:900;
-}
-
-.ticket small{
-    display:block;
-    color:var(--muted);
-    font-size:10px;
-}
-
-.notice{
-    background:#fff8e9;
-    color:#94611b;
-    padding:11px;
-    border-radius:11px;
-    font-size:10px;
-    margin-top:13px;
-}
-
-/* TRUST */
-
-.trust-row{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:13px;
-    margin:25px 0 40px;
-}
-
-.trust-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:16px;
-    background:white;
-    border:1px solid var(--border);
-    border-radius:15px;
-}
-
-.trust-icon{
-    color:var(--teal);
-    font-size:22px;
-}
-
-.trust-item strong{
-    display:block;
-    color:#27475d;
-    font-size:11px;
-}
-
-.trust-item small{
-    color:var(--muted);
-    font-size:10px;
-}
-
-/* ADMIN DASHBOARD */
-
-.panel{margin:25px 0 40px}
-
-.panel-header{
-    background:linear-gradient(110deg,#102c46,#1a506a);
-    border-radius:20px;
-    padding:24px;
+.btn-primary {
+    background:var(--teal);
     color:white;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+}
+
+.btn-primary:hover{background:var(--teal2)}
+
+.btn-light {
+    background:#edf5f8;
+    color:var(--navy);
+}
+
+.btn-danger {
+    background:#fff0f0;
+    color:var(--red);
+}
+
+.btn-success {
+    background:#e9f8f1;
+    color:var(--green);
+}
+
+.btn-warning {
+    background:#fff5e8;
+    color:#b87919;
+}
+
+.btn-dark {
+    background:var(--navy);
+    color:white;
+}
+
+.container {
+    width:min(1200px,94%);
+    margin:25px auto;
+}
+
+.hero {
+    background:linear-gradient(125deg,#102c46,#17617a);
+    color:white;
+    padding:35px;
+    border-radius:22px;
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
     gap:20px;
+    align-items:center;
+    overflow:hidden;
+    position:relative;
 }
 
-.panel-header h2{
-    margin:0 0 5px;
-    font-size:20px;
+.hero h2 {
+    font-size:30px;
+    margin:0 0 12px;
 }
 
-.panel-header p{
-    color:#c5dbe4;
-    font-size:11px;
+.hero p {
+    color:#d1e4ec;
+    line-height:1.9;
     margin:0;
 }
 
-.stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
+.hero-icon {
+    text-align:center;
+    font-size:100px;
+    opacity:.9;
+}
+
+.section {
+    background:white;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-top:20px;
+    box-shadow:var(--shadow);
+}
+
+.section-title {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
     gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
 }
 
-.stat{
-    min-width:100px;
-    padding:12px 15px;
-    border:1px solid #ffffff25;
-    background:#ffffff13;
-    border-radius:13px;
+.section-title h2 {
+    font-size:19px;
+    margin:0;
 }
 
-.stat b{
-    display:block;
-    font-size:22px;
-}
+.muted{color:var(--muted)}
 
-.stat small{
-    color:#d6e5eb;
-    font-size:10px;
-}
-
-.panel-grid{
+.grid {
     display:grid;
-    grid-template-columns:minmax(0,1fr) 300px;
-    gap:18px;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:15px;
+}
+
+.grid-3 {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:15px;
+}
+
+.field {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.field label {
+    font-size:13px;
+    font-weight:bold;
+    color:#526b7d;
+}
+
+input,select,textarea {
+    width:100%;
+    padding:12px 13px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    background:#fbfdfe;
+    color:var(--text);
+}
+
+input:focus,select:focus,textarea:focus {
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(19,168,158,.1);
+}
+
+textarea {
+    min-height:100px;
+    resize:vertical;
+}
+
+.full{grid-column:1/-1}
+
+.notice {
+    padding:13px;
+    border-radius:10px;
+    background:#edf7fa;
+    color:#315d74;
+    line-height:1.8;
+    font-size:13px;
+    margin:14px 0;
+}
+
+.notice.warning {
+    background:#fff5e8;
+    color:#93611c;
+}
+
+.notice.success {
+    background:#e9f8f1;
+    color:#167c58;
+}
+
+.result {
+    padding:15px;
+    border-radius:12px;
+    margin-top:15px;
+    line-height:1.8;
+}
+
+.result.success {
+    background:#e9f8f1;
+    color:#167c58;
+}
+
+.result.error {
+    background:#fff0f0;
+    color:#b83b3b;
+}
+
+.result.info {
+    background:#edf7fa;
+    color:#315d74;
+}
+
+.stats {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
     margin-top:18px;
 }
 
-.toolbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-bottom:15px;
+.stat {
+    background:white;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:var(--shadow);
 }
 
-.toolbar h3{
+.stat small {
+    color:var(--muted);
+}
+
+.stat strong {
+    display:block;
+    font-size:25px;
+    margin-top:12px;
     color:var(--navy);
-    margin:0;
-    font-size:15px;
 }
 
-.table-wrap{overflow:auto}
-
-.table{
-    width:100%;
-    min-width:690px;
-    border-collapse:collapse;
-    direction:rtl;
+.stat-icon {
+    font-size:23px;
 }
 
-.table th{
-    background:#f5f9fa;
-    color:#8293a0;
-    text-align:right;
-    padding:13px 10px;
-    font-size:10px;
-}
-
-.table td{
-    border-bottom:1px solid #edf1f4;
-    padding:13px 10px;
-    font-size:11px;
-    text-align:right;
-}
-
-.patient{
+.tabs {
     display:flex;
-    align-items:center;
-    gap:9px;
-    white-space:nowrap;
-    direction:rtl;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:15px 0;
 }
 
-.avatar{
-    width:34px;
-    height:34px;
-    display:grid;
-    place-items:center;
-    border-radius:11px;
-    background:#e4f4f1;
-    color:#148c7c;
+.tab {
+    background:#edf3f6;
+    color:#506a7c;
+    padding:11px 15px;
+    border-radius:10px;
+    font-size:13px;
     font-weight:bold;
 }
 
-.action{
-    border:0;
-    border-radius:9px;
+.tab.active {
+    background:var(--navy);
+    color:white;
+}
+
+.panel {
+    display:none;
+}
+
+.panel.active {
+    display:block;
+}
+
+.table-wrap {
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:12px;
+}
+
+table {
+    border-collapse:collapse;
+    width:100%;
+    min-width:650px;
+    background:white;
+}
+
+th,td {
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    text-align:right;
+    font-size:13px;
+}
+
+th {
+    background:#f4f8fa;
+    color:#50697b;
+}
+
+td .btn {
     padding:8px 10px;
-    font-size:10px;
-    font-weight:bold;
-    white-space:nowrap;
+    font-size:12px;
     margin:2px;
 }
 
-.action.green{background:#e4f6ef;color:#0b7c5d}
-.action.red{background:#fff0f0;color:#bc4e58}
-.action.blue{background:#edf5fb;color:#316d98}
-.action.orange{background:#fff5df;color:#9b6a12}
-.action.gray{background:#edf1f4;color:#667784}
-
-.action:hover{filter:brightness(.96)}
-
-.side-note{
-    background:#f5f9fa;
-    border-radius:13px;
-    padding:14px;
-    margin-top:12px;
-    color:var(--muted);
+.badge {
+    display:inline-block;
+    border-radius:30px;
+    padding:5px 10px;
     font-size:11px;
+    font-weight:bold;
+    background:#edf3f6;
 }
 
-.side-note b{
-    display:block;
-    color:var(--navy);
-    margin-bottom:5px;
+.badge.green{background:#e5f7ee;color:#16845e}
+.badge.red{background:#fff0f0;color:#c34343}
+.badge.orange{background:#fff4e6;color:#b77a20}
+.badge.blue{background:#e9f3ff;color:#3476b5}
+
+.login-box {
+    max-width:430px;
+    margin:35px auto;
 }
 
-/* RETURN SECTION */
-
-.return-section{
-    margin-top:20px;
-}
-
-.return-heading{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.return-heading h3{
-    color:var(--navy);
-    margin:0;
-    font-size:16px;
-}
-
-.return-heading p{
-    color:var(--muted);
-    margin:3px 0 0;
-    font-size:11px;
-}
-
-.return-stats{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.return-stat{
-    padding:13px;
-    border-radius:13px;
-    background:#f5f9fa;
-    border:1px solid var(--border);
-}
-
-.return-stat b{
-    display:block;
-    color:var(--navy);
-    font-size:21px;
-}
-
-.return-stat small{
-    color:var(--muted);
-    font-size:10px;
-}
-
-.return-table{
-    min-width:760px;
-}
-
-.return-help{
-    margin-top:12px;
-    padding:12px;
-    background:#f0faf7;
-    border:1px solid #d8eee7;
-    border-radius:12px;
-    color:#53776d;
-    font-size:11px;
-}
-
-/* MODAL */
-
-.modal-backdrop{
+.modal {
     position:fixed;
     inset:0;
-    z-index:50;
+    background:rgba(10,28,43,.65);
+    z-index:1000;
     display:none;
-    justify-content:center;
     align-items:center;
-    padding:18px;
-    background:#0c2239b0;
-    backdrop-filter:blur(4px);
+    justify-content:center;
+    padding:15px;
 }
 
-.modal-backdrop.open{display:flex}
+.modal.show{display:flex}
 
-.modal{
+.modal-card {
+    width:min(550px,100%);
     background:white;
-    width:min(430px,100%);
-    padding:27px;
-    border-radius:22px;
-    box-shadow:0 25px 80px #06192d66;
-    position:relative;
-    animation:modalIn .2s ease;
-    direction:rtl;
-    text-align:right;
+    border-radius:18px;
+    padding:24px;
+    max-height:90vh;
+    overflow:auto;
 }
 
-@keyframes modalIn{
-    from{opacity:0;transform:translateY(12px)}
-    to{opacity:1;transform:translateY(0)}
-}
-
-.modal h2{
-    margin:0;
-    color:var(--navy);
-}
-
-.modal p{
-    color:var(--muted);
-    font-size:12px;
-    margin:5px 0 20px;
-}
-
-.modal-close{
-    position:absolute;
-    left:16px;
-    top:15px;
-    width:34px;
-    height:34px;
-    border:0;
-    border-radius:10px;
-    background:#f0f5f7;
-    color:var(--navy);
-    font-size:20px;
-}
-
-.role-icon{
-    width:55px;
-    height:55px;
-    border-radius:17px;
-    background:#e7f6f3;
-    color:#168b7c;
-    display:grid;
-    place-items:center;
-    font-size:24px;
-    margin-bottom:14px;
-}
-
-.modal .field{margin-bottom:13px}
-
-.demo-note{
-    padding:11px;
-    background:#f4f8fa;
-    border-radius:11px;
-    color:#718391;
-    font-size:10px;
-    margin:12px 0;
-}
-
-.alert{
-    display:none;
-    padding:10px;
-    border-radius:10px;
-    margin:12px 0;
-    font-size:11px;
-}
-
-.alert.show{display:block}
-.alert.error{background:#fff0ef;color:#ae4349}
-
-/* FOOTER AND TOAST */
-
-.footer{
-    border-top:1px solid var(--border);
-    padding:20px 0 28px;
+.modal-head {
     display:flex;
     justify-content:space-between;
-    gap:15px;
-    color:var(--muted);
-    font-size:10px;
+    align-items:center;
+    margin-bottom:20px;
 }
 
-.security-footnote{
-    border-right:3px solid #f0bb5a;
-    padding:7px 12px;
-    color:#798a95;
-    font-size:10px;
-    margin-top:20px;
+.modal-head h3{margin:0}
+
+.close {
+    background:#f1f4f6;
+    border-radius:9px;
+    padding:8px 12px;
 }
 
-.toast{
-    position:fixed;
-    bottom:22px;
-    left:50%;
-    transform:translate(-50%,30px);
-    opacity:0;
-    pointer-events:none;
-    z-index:100;
-    background:#153d55;
-    color:white;
-    padding:12px 19px;
-    border-radius:13px;
-    font-size:12px;
-    box-shadow:var(--shadow);
-    transition:.25s;
-    max-width:90%;
+.loading {
     text-align:center;
+    padding:30px;
+    color:var(--muted);
 }
 
-.toast.show{
-    opacity:1;
-    transform:translate(-50%,0);
+.empty {
+    padding:25px;
+    text-align:center;
+    color:var(--muted);
 }
 
-.hide{display:none!important}
-
-/* RESPONSIVE */
-
-@media(max-width:900px){
-    .hero{grid-template-columns:1.3fr .7fr;padding:35px}
-    .hero h1{font-size:28px}
-    .layout{grid-template-columns:1fr}
-    .panel-grid{grid-template-columns:1fr}
+.footer {
+    text-align:center;
+    color:var(--muted);
+    padding:30px 10px;
+    font-size:12px;
 }
 
-@media(max-width:650px){
-    .shell{padding:0 15px}
-    .topbar{height:72px}
-    .brand{font-size:17px}
-    .brand-mark{width:40px;height:40px}
-    .nav{display:none}
-    .mobile-menu{display:block}
-    .hero{
-        grid-template-columns:1fr;
-        padding:28px 23px;
-        min-height:0;
-    }
-    .hero h1{font-size:25px}
-    .hero-art{display:none}
-    .section-head{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-    .card{padding:18px}
-    .form-grid{grid-template-columns:1fr}
-    .field.full{grid-column:auto}
-    .trust-row{grid-template-columns:1fr}
-    .footer{flex-direction:column;gap:5px}
-    .panel-header{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-    .stats{width:100%}
-    .stat{min-width:0;padding:9px}
-    .stat b{font-size:18px}
-    .panel-grid{display:block}
-    .panel-grid>.card+.card{margin-top:14px}
-    .toolbar{align-items:flex-start;flex-direction:column}
-    .return-stats{grid-template-columns:repeat(2,1fr)}
-    .return-heading{align-items:flex-start;flex-direction:column}
+.user-info {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#d9e9ef;
+    font-size:13px;
+}
+
+.waiting-card {
+    padding:14px;
+    background:#f4f8fa;
+    border-radius:12px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.ticket {
+    font-size:23px;
+    font-weight:bold;
+    color:var(--teal);
+}
+
+@media(max-width:800px) {
+    .hero{grid-template-columns:1fr}
+    .hero-icon{display:none}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:550px) {
+    .grid,.grid-3{grid-template-columns:1fr}
+    .hero{padding:23px}
+    .hero h2{font-size:23px}
+    .stats{gap:9px}
+    .stat{padding:13px}
+    .stat strong{font-size:21px}
+    .section{padding:15px}
+    .topbar{padding:14px}
+    .brand h1{font-size:18px}
 }
 </style>
 </head>
 
 <body>
 
-<div class="shell">
-
 <header class="topbar">
-
-<a class="brand" href="#" onclick="showBooking();return false">
-    <span class="brand-mark">✚</span>
-    <span>الشفاء<small>نظام المواعيد الطبية</small></span>
-</a>
-
-<nav class="nav">
-    <button onclick="showBooking()">الرئيسية</button>
-
-    <div class="menu">
-        <button onclick="toggleDrop('regDrop',event)">التسجيل⌄</button>
-        <div class="drop" id="regDrop">
-            <button onclick="showBooking();closeDrops()">＋ حجز موعد جديد</button>
-            <button onclick="focusStatus();closeDrops()">◷ متابعة حالة الحجز</button>
+    <div class="brand">
+        <div class="logo">✚</div>
+        <div>
+            <h1>الشفاء</h1>
+            <small>نظام إدارة العيادات الطبية</small>
         </div>
     </div>
 
-    <div class="menu">
-        <button onclick="toggleDrop('adminDrop',event)">الإدارة⌄</button>
-        <div class="drop" id="adminDrop">
-            <button onclick="openLogin('accountant');closeDrops()">▣ دخول المحاسب</button>
-            <button onclick="openLogin('doctor');closeDrops()">✚ دخول الطبيب</button>
-        </div>
+    <div class="top-actions">
+        <div id="userInfo" class="user-info hidden"></div>
+        <button class="btn btn-light" onclick="showPublic()">الرئيسية</button>
+        <button class="btn btn-primary" id="loginButton" onclick="openLogin()">دخول النظام</button>
+        <button class="btn btn-danger hidden" id="logoutButton" onclick="logout()">خروج</button>
     </div>
-</nav>
-
-<button class="mobile-menu" onclick="toggleMobileMenu()">القائمة ☰</button>
-
-<div class="mobile-dropdown" id="mobileDropdown">
-    <button onclick="showBooking();closeMobileMenu()">حجز موعد جديد</button>
-    <button onclick="focusStatus();closeMobileMenu()">متابعة حالة الحجز</button>
-    <button onclick="openLogin('accountant');closeMobileMenu()">دخول المحاسب</button>
-    <button onclick="openLogin('doctor');closeMobileMenu()">دخول الطبيب</button>
-</div>
-
-<div id="userChip" class="user-chip hide">
-    <span class="dot"></span>
-    <span id="userName"></span>
-    <button onclick="logout()">خروج</button>
-</div>
-
 </header>
 
-<main id="bookingView">
+<main class="container">
 
-<section class="hero">
+<!-- الواجهة العامة -->
 
-<div class="hero-copy">
-    <div class="eyebrow">رعاية أقرب.. وانتظار أقل</div>
-    <h1>احجز موعدك الطبي<br>بخطوات بسيطة</h1>
-    <p>أرسل طلبك وسند الدفع من مكانك، وتابع حالة الحجز ورقم دورك حتى يحين موعدك.</p>
-</div>
+<section id="publicPage">
 
-<div class="hero-art">
-    <div class="medical-card">
-        <div class="medical-card-top">
-            <span>مواعيدك الصحية</span>
-            <span>● متاح</span>
+    <div class="hero">
+        <div>
+            <h2>رعايتك الصحية تبدأ من هنا</h2>
+            <p>
+                مرحبًا بك في نظام الشفاء الطبي.
+                يمكنك حجز موعدك وإرفاق سند التحويل
+                ومتابعة إجراءات الحجز.
+            </p>
+            <br>
+            <button class="btn btn-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+                احجز موعدك الآن
+            </button>
         </div>
-        <div class="pulse">
-            <svg viewBox="0 0 220 48" fill="none">
-                <path d="M0 28h49l11-1 8-17 12 33 13-24 8 9h33l11-1 9-18 13 32 12-13h41"
-                stroke="#94e8d6" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-        </div>
-        <div class="pills"><i></i><i></i><i></i></div>
+        <div class="hero-icon">🏥</div>
     </div>
-</div>
+
+    <section class="section" id="bookingSection">
+        <div class="section-title">
+            <h2>🩺 حجز موعد طبي</h2>
+            <span class="badge blue">حجز جديد</span>
+        </div>
+
+        <form id="bookingForm" class="grid">
+
+            <div class="field">
+                <label>اسم المريض الكامل</label>
+                <input name="name" required minlength="3" maxlength="90" placeholder="أدخل اسمك">
+            </div>
+
+            <div class="field">
+                <label>رقم الهاتف</label>
+                <input name="phone" required inputmode="tel" placeholder="رقم الهاتف">
+            </div>
+
+            <div class="field">
+                <label>اسم الطبيب أو العيادة</label>
+                <input name="doctor" required maxlength="160" placeholder="أدخل اسم الطبيب">
+            </div>
+
+            <div class="field">
+                <label>تاريخ الموعد</label>
+                <input name="date" type="date" required>
+            </div>
+
+            <div class="field full">
+                <label>صورة سند التحويل</label>
+                <input name="receipt" type="file" accept="image/jpeg,image/png,image/webp" required>
+                <small class="muted">الصيغ المقبولة JPG وPNG وWEBP، بحد أقصى 5 ميجابايت.</small>
+            </div>
+
+            <div class="notice full">
+                يرجى التأكد من صحة بياناتك وإرفاق صورة واضحة لسند التحويل قبل إرسال الطلب.
+            </div>
+
+            <button class="btn btn-primary full" type="submit" id="bookingSubmit">
+                إرسال طلب الحجز
+            </button>
+        </form>
+
+        <div id="bookingResult"></div>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>📋 متابعة طلب الحجز</h2>
+        </div>
+
+        <p class="muted">
+            إذا كنت قد أرسلت طلب حجز من هذا الجهاز، يمكنك معرفة رقم طلبك المحفوظ.
+            عرض الحالة التفصيلية يتطلب تسجيل الدخول.
+        </p>
+
+        <div id="lastBooking"></div>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>📺 شاشة الانتظار</h2>
+            <span class="badge green">تحديث مباشر</span>
+        </div>
+        <div id="publicWaiting">
+            <div class="loading">جاري تحميل شاشة الانتظار...</div>
+        </div>
+    </section>
 
 </section>
 
-<div class="section-head">
-    <div>
-        <h2>طلب حجز موعد</h2>
-        <p>املأ البيانات التالية لإرسال طلبك إلى العيادة</p>
+<!-- لوحة النظام -->
+
+<section id="adminPage" class="hidden">
+
+    <div class="section">
+        <div class="section-title">
+            <div>
+                <h2 id="dashboardTitle">لوحة التحكم</h2>
+                <small class="muted" id="dashboardSubtitle"></small>
+            </div>
+            <button class="btn btn-light" onclick="refreshCurrent()">تحديث البيانات ↻</button>
+        </div>
+
+        <div id="statsArea" class="stats"></div>
     </div>
-    <div class="secure-label">⌑ بياناتك محفوظة بأمان</div>
-</div>
 
-<div class="layout">
+    <div class="tabs" id="mainTabs"></div>
 
-<section class="card">
-
-<div class="card-title">
-    <span class="iconbox">▦</span>
-    <div>
-        <h3>بيانات الحجز</h3>
-        <p>الحقول التي عليها نجمة مطلوبة</p>
-    </div>
-</div>
-
-<div class="bank-box">
-    <div>
-        <strong>بيانات التحويل البنكي</strong>
-        <small>بنك الكريمي الإسلامي · مستشفى الشفاء الطبي الموحد</small>
-        <div class="bank-number">30155444</div>
-
-        <span class="bank-fee">
-            رسوم الحجز: 3,000 ريال يمني
-        </span>
-
-        <span class="bank-instruction">
-            بعد التحويل يرجى تصوير سند التحويل وإرفاق صورته في النموذج أدناه.
-        </span>
-    </div>
-    <button class="copy-btn" onclick="copyAccount()">نسخ الرقم</button>
-</div>
-
-<form id="bookingForm" novalidate>
-
-<div class="form-grid">
-
-<div class="field">
-    <label for="patientName">اسم المريض الكامل *</label>
-    <input id="patientName" maxlength="90" autocomplete="name"
-    placeholder="مثال: عبدالله محمد" required>
-</div>
-
-<div class="field">
-    <label for="phone">رقم الهاتف *</label>
-    <input id="phone" inputmode="tel" maxlength="18"
-    placeholder="77xxxxxxx" required>
-    <span class="hint">يستخدم لمطابقة طلبك</span>
-</div>
-
-<div class="field">
-    <label for="doctorSelect">الطبيب / العيادة *</label>
-    <select id="doctorSelect" required>
-        <option value="">اختر العيادة المناسبة</option>
-        <option value="د. أحمد — عيادة الباطنية">د. أحمد — عيادة الباطنية</option>
-        <option value="د. سارة — عيادة الأطفال">د. سارة — عيادة الأطفال</option>
-        <option value="د. محمد — عيادة القلب">د. محمد — عيادة القلب</option>
-        <option value="د. ليلى — عيادة الجلدية">د. ليلى — عيادة الجلدية</option>
-    </select>
-</div>
-
-<div class="field">
-    <label for="visitDate">التاريخ المفضل *</label>
-    <input type="date" id="visitDate" required>
-    <span class="hint">يؤكد الموعد بعد مراجعة الدفع</span>
-</div>
-
-<div class="field full">
-    <label for="receipt">صورة سند التحويل *</label>
-    <div class="upload">
-        <input type="file" id="receipt"
-        accept="image/jpeg,image/png,image/webp" required>
-        <div class="hint">PNG أو JPG أو WEBP · الحد الأقصى 5 ميجابايت</div>
-        <div class="file-name" id="fileName"></div>
-    </div>
-</div>
-
-</div>
-
-<label class="checkline">
-    <input type="checkbox" id="agree">
-    <span>أقر بصحة البيانات وأفهم أن الحجز يبقى قيد مراجعة الدفع حتى اعتماده من المحاسب.</span>
-</label>
-
-<button class="primary wide" type="submit">إرسال طلب الحجز ←</button>
-
-</form>
-
-<div class="security-footnote">
-    يتم إرسال طلب الحجز وصورة السند إلى الخادم. يلزم إضافة مصادقة وصلاحيات للخادم قبل النشر العام.
-</div>
+    <div id="mainPanels"></div>
 
 </section>
-
-<aside class="card status-card" id="statusCard">
-
-<div class="card-title">
-    <span class="iconbox">◷</span>
-    <div>
-        <h3>حالة موعدك</h3>
-        <p>تابع حالة طلبك من هذا المتصفح بعد إرسال الحجز</p>
-    </div>
-</div>
-
-<div id="statusContent"></div>
-
-<div class="notice">
-    بعد اعتماد الدفع سيظهر رقم الدور. يرجى الحضور قبل الموعد بـ 10 دقائق.
-</div>
-
-</aside>
-
-</div>
-
-<div class="trust-row">
-
-<div class="trust-item">
-    <span class="trust-icon">◉</span>
-    <div>
-        <strong>حجز من أي مكان</strong>
-        <small>أرسل طلبك دون انتظار</small>
-    </div>
-</div>
-
-<div class="trust-item">
-    <span class="trust-icon">▤</span>
-    <div>
-        <strong>مراجعة مالية منظمة</strong>
-        <small>تدقيق سند الدفع قبل الاعتماد</small>
-    </div>
-</div>
-
-<div class="trust-item">
-    <span class="trust-icon">◷</span>
-    <div>
-        <strong>دور واضح ومنصف</strong>
-        <small>تابع رقمك وحالة الانتظار</small>
-    </div>
-</div>
-
-</div>
 
 </main>
 
-<main id="dashboardView" class="hide"></main>
-
 <footer class="footer">
-    <span>© 2026 مستشفى الشفاء الطبي الموحد</span>
-    <span>نظام حجز المواعيد الطبية</span>
+    نظام الشفاء لإدارة العيادات الطبية © 2026
 </footer>
 
+<!-- نافذة تسجيل الدخول -->
+
+<div class="modal" id="loginModal">
+    <div class="modal-card login-box">
+        <div class="modal-head">
+            <h3>تسجيل الدخول</h3>
+            <button class="close" onclick="closeLogin()">✕</button>
+        </div>
+
+        <form id="loginForm">
+            <div class="field">
+                <label>اسم المستخدم</label>
+                <input name="username" required autocomplete="username">
+            </div>
+            <br>
+            <div class="field">
+                <label>كلمة المرور</label>
+                <input name="password" type="password" required autocomplete="current-password">
+            </div>
+            <br>
+            <button class="btn btn-primary" style="width:100%">دخول</button>
+        </form>
+
+        <div id="loginResult"></div>
+    </div>
 </div>
 
-<!-- LOGIN MODAL -->
+<!-- نافذة إنشاء أول مدير -->
 
-<div class="modal-backdrop" id="loginBackdrop"
-onclick="backdropClose(event)">
+<div class="modal" id="bootstrapModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h3>إعداد النظام لأول مرة</h3>
+        </div>
 
-<section class="modal" role="dialog" aria-modal="true">
+        <div class="notice warning">
+            لم يتم إنشاء حساب مدير بعد. أنشئ حساب المدير الأول بكلمة مرور قوية لا تقل عن 12 حرفًا.
+        </div>
 
-<button class="modal-close" onclick="closeLogin()">×</button>
+        <form id="bootstrapForm">
+            <div class="field">
+                <label>اسم المستخدم</label>
+                <input name="username" required minlength="3" value="admin">
+            </div>
+            <br>
+            <div class="field">
+                <label>كلمة المرور</label>
+                <input name="password" type="password" required minlength="12">
+            </div>
+            <br>
+            <button class="btn btn-primary" style="width:100%">إنشاء حساب المدير</button>
+        </form>
 
-<div class="role-icon" id="loginIcon">▣</div>
-
-<h2 id="loginTitle">دخول المحاسب</h2>
-<p id="loginDescription">أدخل كلمة المرور للمتابعة.</p>
-
-<form id="loginForm">
-
-<div class="field">
-    <label for="loginPassword">كلمة المرور</label>
-    <input type="password" id="loginPassword"
-    autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
+        <div id="bootstrapResult"></div>
+    </div>
 </div>
-
-<div class="alert error" id="loginError"></div>
-
-<div class="demo-note" id="demoNote"></div>
-
-<button class="primary wide" type="submit">تسجيل الدخول ←</button>
-
-</form>
-</section>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
+/* =========================================
+   إعدادات الاتصال
+========================================= */
 
-/* إعدادات الاتصال بالباك إند */
+const API_BASE = '';
 
-const API_BASE='';
-const LAST_APPOINTMENT_KEY='alshifa_last_appointment_id';
+const TOKEN_KEY = 'alshifa_jwt_token';
+const USER_KEY = 'alshifa_current_user';
+const LAST_BOOKING_KEY = 'alshifa_last_appointment_id';
 
-const DEMO_PASSWORDS={
-    accountant:'2468',
-    doctor:'1357'
-};
+let token = localStorage.getItem(TOKEN_KEY) || '';
+let currentUser = null;
+let activeTab = '';
+let doctorsCache = [];
+let appointmentsCache = [];
+let patientsCache = [];
+let invoicesCache = [];
+let paymentsCache = [];
+let waitingEventSource = null;
 
-let currentRole=null;
+/* =========================================
+   أدوات عامة
+========================================= */
 
-async function apiRequest(path,options={}){
-    const response=await fetch(API_BASE+path,options);
-    const contentType=response.headers.get('content-type')||'';
-    const data=contentType.includes('application/json')
-        ?await response.json()
-        :await response.text();
+const $ = selector => document.querySelector(selector);
 
-    if(!response.ok){
-        const message=typeof data==='object'&&data
-            ?data.error||data.message
-            :data;
-        throw new Error(message||`حدث خطأ في الاتصال (${response.status})`);
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+    })[char]);
+}
+
+function money(value) {
+    return Number(value || 0).toLocaleString('en-US') + ' ر.ي';
+}
+
+function formatDate(value) {
+    if (!value) return '—';
+    return escapeHTML(value);
+}
+
+function statusName(status) {
+    const names = {
+        pending:'بانتظار المراجعة',
+        approved:'تم الاعتماد',
+        in_progress:'قيد الكشف',
+        skipped:'تم تجاوز الدور',
+        completed:'مكتمل',
+        cancelled:'ملغي',
+        scheduled:'موعد عودة',
+        attended:'حضر للمراجعة',
+        missed:'موعد فائت',
+        not_scheduled:'لا يوجد موعد عودة',
+        waiting:'منتظر',
+        called:'تم استدعاؤه',
+        served:'تمت الخدمة',
+        paid:'مدفوعة',
+        partial:'مدفوعة جزئيًا',
+        due:'مستحقة',
+        void:'ملغاة',
+        refunded:'مستردة',
+        sent:'تم الإرسال',
+        failed:'فشل الإرسال',
+        not_configured:'غير مهيأ'
+    };
+
+    return names[status] || status || '—';
+}
+
+function badge(status) {
+    let cls = 'blue';
+
+    if (['approved','completed','paid','attended','served','sent'].includes(status)) cls = 'green';
+    if (['cancelled','failed','refunded'].includes(status)) cls = 'red';
+    if (['pending','waiting','scheduled','due','partial'].includes(status)) cls = 'orange';
+
+    return `<span class="badge ${cls}">${escapeHTML(statusName(status))}</span>`;
+}
+
+async function apiRequest(url, options = {}) {
+    const headers = new Headers(options.headers || {});
+
+    if (token) headers.set('Authorization', 'Bearer ' + token);
+
+    if (!(options.body instanceof FormData) && options.body !== undefined) {
+        headers.set('Content-Type', 'application/json');
+    }
+
+    const response = await fetch(API_BASE + url, {
+        ...options,
+        headers
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+
+    let data;
+
+    if (contentType.includes('application/json')) {
+        data = await response.json();
+    } else {
+        data = await response.text();
+    }
+
+    if (!response.ok) {
+        if (response.status === 401 && token) {
+            logout(false);
+        }
+
+        throw new Error(data?.error || data || 'حدث خطأ أثناء الاتصال بالخادم');
     }
 
     return data;
 }
 
-function loadAppointments(){
-    return apiRequest('/api/appointments');
+function showResult(element, message, type = 'info') {
+    const target = typeof element === 'string' ? $(element) : element;
+    if (!target) return;
+
+    target.innerHTML = `<div class="result ${type}">${escapeHTML(message)}</div>`;
 }
 
-/* التاريخ */
-
-function localDateString(date=new Date()){
-    const year=date.getFullYear();
-    const month=String(date.getMonth()+1).padStart(2,'0');
-    const day=String(date.getDate()).padStart(2,'0');
-    return `${year}-${month}-${day}`;
+function openLogin() {
+    $('#loginModal').classList.add('show');
 }
 
-function addDays(dateString,days){
-    const date=new Date(dateString+'T12:00:00');
-    date.setDate(date.getDate()+days);
-    return localDateString(date);
+function closeLogin() {
+    $('#loginModal').classList.remove('show');
 }
 
-document.getElementById('visitDate').min=localDateString();
-
-/* حماية عرض النصوص */
-
-function safeText(value){
-    return String(value??'').replace(/[&<>"']/g,c=>({
-        '&':'&amp;',
-        '<':'&lt;',
-        '>':'&gt;',
-        '"':'&quot;',
-        "'":'&#39;'
-    }[c]));
+function showPublic() {
+    $('#publicPage').classList.remove('hidden');
+    $('#adminPage').classList.add('hidden');
+    activeTab = '';
+    loadPublicWaiting();
 }
 
-/* الإشعارات */
-
-function toast(message){
-    const element=document.getElementById('toast');
-    element.textContent=message;
-    element.classList.add('show');
-
-    clearTimeout(window.toastTimer);
-
-    window.toastTimer=setTimeout(()=>{
-        element.classList.remove('show');
-    },3000);
+function showAdmin() {
+    $('#publicPage').classList.add('hidden');
+    $('#adminPage').classList.remove('hidden');
 }
 
-/* التنقل */
+function logout(redirect = true) {
+    token = '';
+    currentUser = null;
 
-function closeDrops(){
-    document.querySelectorAll('.drop').forEach(x=>{
-        x.classList.remove('show');
-    });
-}
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
 
-function toggleDrop(id,event){
-    event.stopPropagation();
-
-    document.querySelectorAll('.drop').forEach(x=>{
-        if(x.id!==id)x.classList.remove('show');
-    });
-
-    document.getElementById(id).classList.toggle('show');
-}
-
-document.addEventListener('click',event=>{
-    if(!event.target.closest('.menu'))closeDrops();
-});
-
-function toggleMobileMenu(){
-    document.getElementById('mobileDropdown').classList.toggle('open');
-}
-
-function closeMobileMenu(){
-    document.getElementById('mobileDropdown').classList.remove('open');
-}
-
-function showBooking(){
-    document.getElementById('bookingView').classList.remove('hide');
-    document.getElementById('dashboardView').classList.add('hide');
-    document.getElementById('userChip').classList.add('hide');
-
-    currentRole=null;
-
-    renderStatus();
-
-    window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function focusStatus(){
-    showBooking();
-
-    document.getElementById('statusCard')
-    .scrollIntoView({behavior:'smooth',block:'center'});
-}
-
-/* تسجيل الدخول */
-
-function openLogin(role){
-
-    currentRole=role;
-
-    const accountant=role==='accountant';
-
-    document.getElementById('loginTitle').textContent=
-    accountant?'دخول المحاسب':'دخول الطبيب';
-
-    document.getElementById('loginDescription').textContent=
-    accountant
-    ?'أدخل كلمة المرور لمراجعة سندات الدفع.'
-    :'أدخل كلمة المرور لإدارة طابور العيادة.';
-
-    document.getElementById('loginIcon').textContent=
-    accountant?'▣':'✚';
-
-    document.getElementById('demoNote').innerHTML=
-    accountant
-    ?'رمز تجريبي فقط: <b>2468</b> — ليس تسجيل دخول آمنًا'
-    :'رمز تجريبي فقط: <b>1357</b> — ليس تسجيل دخول آمنًا';
-
-    document.getElementById('loginError').classList.remove('show');
-
-    document.getElementById('loginPassword').value='';
-
-    document.getElementById('loginBackdrop').classList.add('open');
-
-    setTimeout(()=>{
-        document.getElementById('loginPassword').focus();
-    },100);
-}
-
-function closeLogin(){
-    document.getElementById('loginBackdrop').classList.remove('open');
-}
-
-function backdropClose(event){
-    if(event.target.id==='loginBackdrop')closeLogin();
-}
-
-document.getElementById('loginForm').addEventListener('submit',event=>{
-
-    event.preventDefault();
-
-    const password=document.getElementById('loginPassword').value;
-
-    if(password!==DEMO_PASSWORDS[currentRole]){
-
-        const error=document.getElementById('loginError');
-
-        error.textContent='كلمة المرور غير صحيحة. حاول مرة أخرى.';
-        error.classList.add('show');
-
-        return;
+    if (waitingEventSource) {
+        waitingEventSource.close();
+        waitingEventSource = null;
     }
 
-    const role=currentRole;
+    $('#loginButton').classList.remove('hidden');
+    $('#logoutButton').classList.add('hidden');
+    $('#userInfo').classList.add('hidden');
+
+    if (redirect) showPublic();
+}
+
+function saveSession(data) {
+    token = data.token;
+    currentUser = data.user;
+
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+
+    $('#loginButton').classList.add('hidden');
+    $('#logoutButton').classList.remove('hidden');
+    $('#userInfo').classList.remove('hidden');
+
+    $('#userInfo').textContent =
+        currentUser.name + ' | ' + roleName(currentUser.role);
 
     closeLogin();
-
-    renderDashboard(role);
-});
-
-function logout(){
-
-    currentRole=null;
-
-    document.getElementById('userChip').classList.add('hide');
-
-    showBooking();
-
-    toast('تم تسجيل الخروج');
+    showAdmin();
+    buildInterface();
 }
 
-/* نموذج الحجز */
-
-function normalizedPhone(value){
-    return value.replace(/[\s()+-]/g,'');
+function roleName(role) {
+    return {
+        manager:'مدير النظام',
+        accountant:'المحاسب',
+        doctor:'الطبيب',
+        receptionist:'الاستقبال'
+    }[role] || role;
 }
 
-function validPhone(value){
-    return /^\d{8,15}$/.test(normalizedPhone(value));
-}
+/* =========================================
+   المصادقة
+========================================= */
 
-const form=document.getElementById('bookingForm');
-const receiptInput=document.getElementById('receipt');
-
-receiptInput.addEventListener('change',()=>{
-
-    const file=receiptInput.files[0];
-
-    document.getElementById('fileName').textContent=
-    file?`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`:'';
-});
-
-form.addEventListener('submit',async event=>{
-
+$('#loginForm').addEventListener('submit', async event => {
     event.preventDefault();
 
-    const name=document.getElementById('patientName').value.trim();
-    const phone=normalizedPhone(document.getElementById('phone').value);
-    const doctor=document.getElementById('doctorSelect').value;
-    const date=document.getElementById('visitDate').value;
-    const file=receiptInput.files[0];
+    const form = new FormData(event.target);
 
-    if(name.length<3){toast('يرجى كتابة الاسم الكامل');return;}
-    if(!validPhone(phone)){toast('أدخل رقم هاتف صحيحًا');return;}
-    if(!doctor||!date){toast('يرجى اختيار العيادة والتاريخ');return;}
-    if(date<localDateString()){toast('لا يمكن اختيار تاريخ سابق');return;}
-    if(!file){toast('يرجى إرفاق صورة سند التحويل');return;}
-
-    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
-        toast('نوع الملف غير مسموح');
-        return;
-    }
-
-    if(file.size>5*1024*1024){
-        toast('حجم الصورة أكبر من 5 ميجابايت');
-        return;
-    }
-
-    if(!document.getElementById('agree').checked){
-        toast('يرجى الموافقة على الإقرار');
-        return;
-    }
-
-    const submitButton=form.querySelector('button[type="submit"]');
-    submitButton.disabled=true;
-    submitButton.textContent='جارٍ إرسال الطلب...';
-
-    try{
-        const body=new FormData();
-        body.append('name',name);
-        body.append('phone',phone);
-        body.append('doctor',doctor);
-        body.append('date',date);
-        body.append('receipt',file);
-
-        const created=await apiRequest('/api/appointments',{
+    try {
+        const data = await apiRequest('/api/auth/login', {
             method:'POST',
-            body
+            body:JSON.stringify({
+                username:form.get('username'),
+                password:form.get('password')
+            })
         });
 
-        localStorage.setItem(LAST_APPOINTMENT_KEY,created.id);
+        saveSession(data);
 
-        form.reset();
-
-        document.getElementById('fileName').textContent='';
-
-        await renderStatus();
-
-        toast('تم إرسال طلبك وبانتظار مراجعة سند التحويل');
-
-        document.getElementById('statusCard')
-            .scrollIntoView({behavior:'smooth',block:'center'});
-
-    }catch(error){
-        toast(error.message||'تعذر إرسال طلب الحجز');
-    }finally{
-        submitButton.disabled=false;
-        submitButton.textContent='إرسال طلب الحجز ←';
+    } catch (error) {
+        showResult('#loginResult', error.message, 'error');
     }
 });
 
-/* عرض حالة الحجز */
+$('#bootstrapForm').addEventListener('submit', async event => {
+    event.preventDefault();
 
-async function renderStatus(){
+    const form = new FormData(event.target);
 
-    const content=document.getElementById('statusContent');
+    try {
+        const data = await apiRequest('/api/auth/bootstrap', {
+            method:'POST',
+            body:JSON.stringify({
+                username:form.get('username'),
+                password:form.get('password')
+            })
+        });
 
-    let rows=[];
+        $('#bootstrapModal').classList.remove('show');
+        saveSession(data);
 
-    try{
-        rows=await loadAppointments();
-    }catch(error){
-        content.innerHTML=`
-        <div class="status-empty">
-            <strong>تعذر الاتصال بالخادم</strong>
-            <span style="font-size:11px">${safeText(error.message)}</span>
-        </div>`;
-        return;
+    } catch (error) {
+        showResult('#bootstrapResult', error.message, 'error');
     }
+});
 
-    const selectedId=localStorage.getItem(LAST_APPOINTMENT_KEY);
-    const row=rows.find(item=>item.id===selectedId);
+async function initializeAuth() {
+    try {
+        if (token) {
+            const data = await apiRequest('/api/auth/me');
+            currentUser = data.user;
 
-    if(!row){
+            $('#loginButton').classList.add('hidden');
+            $('#logoutButton').classList.remove('hidden');
+            $('#userInfo').classList.remove('hidden');
 
-        content.innerHTML=`
-        <div class="status-empty">
-            <div class="empty-illustration">◷</div>
-            <strong>لا يوجد حجز نشط حتى الآن</strong>
-            <span style="font-size:11px">سيظهر طلبك هنا بعد إرساله</span>
-        </div>`;
+            $('#userInfo').textContent =
+                currentUser.name + ' | ' + roleName(currentUser.role);
 
-        return;
+            showAdmin();
+            buildInterface();
+            return;
+        }
+
+        const state = await apiRequest('/api/auth/bootstrap');
+
+        if (!state.initialized) {
+            $('#bootstrapModal').classList.add('show');
+        }
+
+    } catch (error) {
+        console.error(error);
+        logout(false);
     }
-
-    let badge='<span class="badge">قيد مراجعة الدفع</span>';
-    let extra='طلبك بانتظار مراجعة سند التحويل.';
-
-    if(row.status==='approved'){
-        badge='<span class="badge ok">معتمد · قيد الانتظار</span>';
-        extra='تم اعتماد الدفع. تابع رقم دورك.';
-    }
-
-    if(row.status==='in_progress'){
-        badge='<span class="badge blue">بدأ الكشف</span>';
-        extra='الطبيب بدأ استقبال حالتك.';
-    }
-
-    if(row.status==='skipped'){
-        badge='<span class="badge red">تم تجاوز الدور</span>';
-        extra='يرجى التواصل مع الاستقبال.';
-    }
-
-    if(row.status==='completed'){
-        badge='<span class="badge ok">اكتمل الكشف</span>';
-        extra='نتمنى لك دوام الصحة والعافية.';
-    }
-
-    if(row.status==='cancelled'){
-        badge='<span class="badge red">تم رفض السند وإلغاء الحجز</span>';
-        extra='تم رفض سند التحويل من المحاسب وإلغاء طلب الحجز. يرجى مراجعة إدارة المستشفى.';
-    }
-
-    let returnInfo='';
-
-    if(row.returnStatus==='scheduled'){
-        returnInfo=`
-        <div class="notice">
-            موعد العودة: <b>${safeText(row.returnDate)}</b>
-            <br>يرجى الحضور في التاريخ المحدد للمراجعة.
-        </div>`;
-    }
-
-    if(row.returnStatus==='attended'){
-        returnInfo=`
-        <div class="notice" style="background:#e4f6ef;color:#087c68">
-            تم تسجيل حضورك لموعد العودة بتاريخ ${safeText(row.returnDate)}.
-        </div>`;
-    }
-
-    if(row.returnStatus==='missed'){
-        returnInfo=`
-        <div class="notice" style="background:#fde9eb;color:#ae4653">
-            لم يتم تسجيل حضورك في موعد العودة بتاريخ ${safeText(row.returnDate)}.
-        </div>`;
-    }
-
-    if(row.returnStatus==='cancelled'){
-        returnInfo=`
-        <div class="notice">
-            تم إلغاء موعد العودة السابق.
-        </div>`;
-    }
-
-    content.innerHTML=`
-    <div class="status-entry">
-
-        <div class="status-top">
-            <strong>${safeText(row.name)}</strong>
-            ${badge}
-        </div>
-
-        <div class="status-details">
-            ${safeText(row.doctor)}
-            <br>
-            التاريخ المفضل: ${safeText(row.date)}
-            <br>
-            ${extra}
-        </div>
-
-        ${row.queue?`
-        <div class="ticket">
-            <div class="ticket-num">#${safeText(row.queue)}</div>
-            <div>
-                <b>رقم دورك</b>
-                <small>تابع تعليمات الطبيب</small>
-            </div>
-        </div>`:''}
-
-        ${returnInfo}
-
-    </div>`;
 }
 
-/* لوحة الإدارة */
+/* =========================================
+   واجهة المريض والحجز
+========================================= */
 
-async function renderDashboard(role){
+$('#bookingForm').addEventListener('submit', async event => {
+    event.preventDefault();
 
-    let rows;
+    const form = event.target;
+    const data = new FormData(form);
 
-    try{
-        rows=await loadAppointments();
-    }catch(error){
-        toast(error.message||'تعذر تحميل بيانات الخادم');
+    const file = data.get('receipt');
+
+    if (!file || !file.size) {
+        showResult('#bookingResult', 'يرجى إرفاق صورة السند', 'error');
         return;
     }
 
-    document.getElementById('bookingView').classList.add('hide');
+    if (file.size > 5 * 1024 * 1024) {
+        showResult('#bookingResult', 'حجم الصورة أكبر من 5 ميجابايت', 'error');
+        return;
+    }
 
-    const view=document.getElementById('dashboardView');
+    const button = $('#bookingSubmit');
+    button.disabled = true;
+    button.textContent = 'جاري إرسال الطلب...';
 
-    view.classList.remove('hide');
+    try {
+        const result = await apiRequest('/api/appointments', {
+            method:'POST',
+            body:data
+        });
 
-    document.getElementById('userChip').classList.remove('hide');
+        if (result.id) {
+            localStorage.setItem(LAST_BOOKING_KEY, result.id);
+        }
 
-    document.getElementById('userName').textContent=
-    role==='accountant'?'المحاسب':'الطبيب';
+        if (result.waitlistAvailable) {
+            showResult(
+                '#bookingResult',
+                result.message + ' رقم طلب الانتظار: ' + (result.waitlist?.id || ''),
+                'info'
+            );
+        } else {
+            showResult(
+                '#bookingResult',
+                'تم إرسال طلب الحجز بنجاح. رقم الطلب: ' + result.id +
+                '. الطلب الآن بانتظار مراجعة السند.',
+                'success'
+            );
+        }
 
-    const waiting=rows.filter(x=>x.status==='pending');
+        form.reset();
+        renderLastBooking();
 
-    const approved=rows.filter(x=>x.status==='approved');
+    } catch (error) {
+        showResult('#bookingResult', error.message, 'error');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'إرسال طلب الحجز';
+    }
+});
 
-    const active=rows.filter(x=>
-        ['approved','in_progress'].includes(x.status)
+function renderLastBooking() {
+    const id = localStorage.getItem(LAST_BOOKING_KEY);
+
+    if (!id) {
+        $('#lastBooking').innerHTML =
+            '<div class="empty">لا يوجد طلب محفوظ على هذا الجهاز.</div>';
+        return;
+    }
+
+    $('#lastBooking').innerHTML = `
+        <div class="notice success">
+            رقم آخر طلب محفوظ:<br>
+            <strong dir="ltr">${escapeHTML(id)}</strong>
+            <br>
+            لمعرفة الحالة التفصيلية يرجى تسجيل الدخول إلى النظام.
+        </div>
+    `;
+}
+
+/* =========================================
+   شاشة الانتظار العامة
+========================================= */
+
+function renderWaiting(data) {
+    const rows = data?.patients || [];
+
+    if (!rows.length) {
+        $('#publicWaiting').innerHTML =
+            '<div class="empty">لا يوجد مرضى في قائمة الانتظار حاليًا.</div>';
+        return;
+    }
+
+    $('#publicWaiting').innerHTML = rows.map(row => `
+        <div class="waiting-card">
+            <div>
+                <strong>${escapeHTML(row.doctor)}</strong>
+                <div class="muted">${escapeHTML(row.time || '—')}</div>
+            </div>
+            <div>
+                <div class="ticket">#${escapeHTML(row.ticket)}</div>
+                ${badge(row.state === 'قيد الكشف' ? 'in_progress' : 'waiting')}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function loadPublicWaiting() {
+    try {
+        const data = await apiRequest('/api/waiting-room');
+        renderWaiting(data);
+    } catch (error) {
+        $('#publicWaiting').innerHTML =
+            '<div class="empty">تعذر تحميل شاشة الانتظار.</div>';
+    }
+}
+
+function startWaitingStream() {
+    if (waitingEventSource) waitingEventSource.close();
+
+    waitingEventSource = new EventSource(
+        API_BASE + '/api/waiting-room/stream'
     );
 
-    const admin=role==='accountant';
+    waitingEventSource.onmessage = event => {
+        try {
+            renderWaiting(JSON.parse(event.data));
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-    const visibleRows=admin?waiting:active;
+    waitingEventSource.onerror = () => {
+        console.warn('انقطع اتصال شاشة الانتظار المباشر');
+    };
+}
 
-    let tableRows=visibleRows.map((row,index)=>`
+/* =========================================
+   بناء الواجهة حسب الصلاحيات
+========================================= */
 
-    <tr>
+function buildInterface() {
+    const role = currentUser.role;
 
-        <td>${admin?'—':`#${safeText(row.queue||index+1)}`}</td>
+    const tabs = [];
 
-        <td>
-            <div class="patient">
-                <span class="avatar">${safeText(row.name.slice(0,1))}</span>
-                <span>
-                    ${safeText(row.name)}
-                    <small style="display:block;color:#8999a4">
-                        ${safeText(row.phone)}
-                    </small>
-                </span>
-            </div>
-        </td>
+    if (['manager','accountant'].includes(role)) {
+        tabs.push(['dashboard','📊 الإحصائيات']);
+    }
 
-        <td>${safeText(row.doctor)}</td>
+    if (['manager','accountant','receptionist','doctor'].includes(role)) {
+        tabs.push(['appointments','📋 الحجوزات']);
+    }
 
-        <td>${safeText(row.date)}</td>
+    if (role === 'manager') {
+        tabs.push(
+            ['doctors','👨‍⚕️ الأطباء'],
+            ['hours','🕒 ساعات العمل'],
+            ['users','👥 المستخدمون']
+        );
+    }
 
-        <td>
-            ${admin
-            ?'<span class="badge">قيد مراجعة الدفع</span>'
-            :`<span class="badge ${row.status==='in_progress'?'blue':'ok'}">
-                ${row.status==='in_progress'?'بدأ الكشف':'قيد الانتظار'}
-              </span>`}
-        </td>
+    if (['manager','receptionist','doctor'].includes(role)) {
+        tabs.push(['patients','🧑‍🤝‍🧑 المرضى']);
+    }
 
-        <td>
-            ${admin
-            ?`
-                <button class="action blue"
-                onclick="viewReceipt('${safeText(row.id)}')">
-                استعراض السند
-                </button>
+    if (['manager','doctor'].includes(role)) {
+        tabs.push(['medical','🩺 الملفات الطبية']);
+    }
 
-                <button class="action green"
-                onclick="approve('${safeText(row.id)}')">
-                اعتماد مالي
-                </button>
+    if (['manager','accountant'].includes(role)) {
+        tabs.push(
+            ['finance','💰 الفواتير والمدفوعات']
+        );
+    }
 
-                <button class="action red"
-                onclick="cancelReceipt('${safeText(row.id)}')">
-                ✕ رفض السند وإلغاء الحجز
-                </button>
-            `
-            :`
-                <button class="action green"
-                onclick="doctorAction('${safeText(row.id)}','in_progress')">
-                حضر · بدء الكشف
-                </button>
+    if (['manager','receptionist','doctor'].includes(role)) {
+        tabs.push(['waitlist','⏳ قائمة الانتظار']);
+    }
 
-                <button class="action red"
-                onclick="doctorAction('${safeText(row.id)}','skipped')">
-                تأخر · تجاوز
-                </button>
+    if (['manager','receptionist'].includes(role)) {
+        tabs.push(['notifications','🔔 الإشعارات']);
+    }
 
-                <button class="action blue"
-                onclick="doctorAction('${safeText(row.id)}','completed')">
-                إنهاء الكشف
-                </button>
+    if (role === 'manager') {
+        tabs.push(['audit','🛡️ سجل العمليات']);
+    }
 
-                <button class="action orange"
-                onclick="scheduleReturn('${safeText(row.id)}')">
-                تحديد موعد عودة
-                </button>
-            `}
-        </td>
+    tabs.push(['board','📺 شاشة الانتظار']);
 
-    </tr>
-
+    $('#mainTabs').innerHTML = tabs.map((tab,index) => `
+        <button class="tab ${index === 0 ? 'active' : ''}"
+            data-tab="${tab[0]}"
+            onclick="switchTab('${tab[0]}')">
+            ${tab[1]}
+        </button>
     `).join('');
 
-    if(!tableRows){
+    $('#mainPanels').innerHTML = tabs.map((tab,index) => `
+        <section class="panel ${index === 0 ? 'active' : ''}"
+            id="panel-${tab[0]}">
+            <div class="section">
+                <div class="loading">جاري تحميل البيانات...</div>
+            </div>
+        </section>
+    `).join('');
 
-        tableRows=`
-        <tr>
-            <td colspan="6" style="text-align:center;padding:30px;color:#81919d">
-                ${admin?'لا توجد طلبات معلقة للمراجعة.':'لا يوجد مرضى في الطابور حاليًا.'}
-            </td>
-        </tr>`;
+    activeTab = tabs[0]?.[0] || '';
+
+    loadPanel(activeTab);
+}
+
+function switchTab(tab) {
+    activeTab = tab;
+
+    document.querySelectorAll('.tab').forEach(button => {
+        button.classList.toggle(
+            'active',
+            button.dataset.tab === tab
+        );
+    });
+
+    document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.toggle(
+            'active',
+            panel.id === 'panel-' + tab
+        );
+    });
+
+    loadPanel(tab);
+}
+
+function refreshCurrent() {
+    loadPanel(activeTab);
+}
+
+async function loadPanel(tab) {
+    const functions = {
+        dashboard:loadDashboard,
+        appointments:loadAppointments,
+        doctors:loadDoctors,
+        hours:loadHours,
+        users:loadUsers,
+        patients:loadPatients,
+        medical:loadMedical,
+        finance:loadFinance,
+        waitlist:loadWaitlist,
+        notifications:loadNotifications,
+        audit:loadAudit,
+        board:loadBoard
+    };
+
+    if (functions[tab]) {
+        await functions[tab]();
     }
+}
 
-    /* جدول متابعة العودة */
+/* =========================================
+   لوحة الإحصائيات
+========================================= */
 
-    const returnRows=rows.filter(row=>
-        ['scheduled','attended','missed','cancelled'].includes(row.returnStatus)
-    ).sort((a,b)=>
-        String(a.returnDate||'').localeCompare(String(b.returnDate||''))
-    );
+async function loadDashboard() {
+    try {
+        const data = await apiRequest('/api/dashboard');
 
-    let returnTableRows=returnRows.map(row=>{
+        $('#dashboardTitle').textContent = 'لوحة الإحصائيات';
+        $('#dashboardSubtitle').textContent =
+            'تاريخ اليوم: ' + data.date;
 
-        let statusBadge='';
+        const cards = [
+            ['👥','إجمالي المرضى',data.patients.total],
+            ['🆕','مرضى جدد اليوم',data.patients.newToday],
+            ['📅','حجوزات اليوم',data.appointments.today],
+            ['⏳','طلبات معلقة',data.appointments.pending],
+            ['💰','إيرادات اليوم',money(data.revenue.today)],
+            ['📈','إيرادات الشهر',money(data.revenue.month)],
+            ['🧾','المبالغ المستحقة',money(data.payments.due)],
+            ['📆','حجوزات الشهر',data.appointments.month]
+        ];
 
-        if(row.returnStatus==='scheduled'){
-            statusBadge='<span class="badge blue">موعد محدد</span>';
-        }
+        $('#statsArea').innerHTML = cards.map(card => `
+            <div class="stat">
+                <span class="stat-icon">${card[0]}</span>
+                <small>${card[1]}</small>
+                <strong>${card[2]}</strong>
+            </div>
+        `).join('');
 
-        if(row.returnStatus==='attended'){
-            statusBadge='<span class="badge ok">حضر للمراجعة</span>';
-        }
-
-        if(row.returnStatus==='missed'){
-            statusBadge='<span class="badge red">لم يحضر</span>';
-        }
-
-        if(row.returnStatus==='cancelled'){
-            statusBadge='<span class="badge gray">ملغى</span>';
-        }
-
-        let actions='—';
-
-        if(row.returnStatus==='scheduled'){
-            actions=`
-                <button class="action green"
-                onclick="markReturnAttended('${safeText(row.id)}')">
-                حضر للمراجعة
-                </button>
-
-                <button class="action red"
-                onclick="cancelReturn('${safeText(row.id)}')">
-                إلغاء العودة
-                </button>
-            `;
-        }
-
-        if(row.returnStatus==='missed'||row.returnStatus==='cancelled'){
-            actions=`
-                <button class="action orange"
-                onclick="scheduleReturn('${safeText(row.id)}')">
-                تحديد موعد جديد
-                </button>
-            `;
-        }
-
-        return `
-        <tr>
-            <td>
-                <div class="patient">
-                    <span class="avatar">${safeText(row.name.slice(0,1))}</span>
-                    <span>
-                        ${safeText(row.name)}
-                        <small style="display:block;color:#8999a4">
-                            ${safeText(row.phone)}
-                        </small>
-                    </span>
+        $('#panel-dashboard').innerHTML = `
+            <div class="section">
+                <h3>ملخص النظام</h3>
+                <div class="grid">
+                    <div class="notice success">
+                        إجمالي المرضى: ${data.patients.total}
+                    </div>
+                    <div class="notice">
+                        المرضى الجدد هذا الشهر: ${data.patients.newMonth}
+                    </div>
+                    <div class="notice">
+                        العملة: ${escapeHTML(data.revenue.currency)}
+                    </div>
+                    <div class="notice warning">
+                        إجمالي المبالغ المتبقية: ${money(data.payments.remaining)}
+                    </div>
                 </div>
-            </td>
-
-            <td>${safeText(row.doctor)}</td>
-            <td>${safeText(row.date)}</td>
-            <td><b>${safeText(row.returnDate||'—')}</b></td>
-            <td>${statusBadge}</td>
-            <td>${actions}</td>
-        </tr>
+            </div>
         `;
 
-    }).join('');
-
-    if(!returnTableRows){
-        returnTableRows=`
-        <tr>
-            <td colspan="6" style="text-align:center;padding:25px;color:#81919d">
-                لا توجد مواعيد عودة مسجلة حتى الآن.
-            </td>
-        </tr>`;
+    } catch (error) {
+        panelError('dashboard',error);
     }
+}
 
-    const scheduledReturns=rows.filter(x=>x.returnStatus==='scheduled').length;
-    const attendedReturns=rows.filter(x=>x.returnStatus==='attended').length;
-    const missedReturns=rows.filter(x=>x.returnStatus==='missed').length;
-    const cancelledReturns=rows.filter(x=>x.returnStatus==='cancelled').length;
+/* =========================================
+   الحجوزات
+========================================= */
 
-    view.innerHTML=`
+async function loadAppointments() {
+    try {
+        appointmentsCache = await apiRequest('/api/appointments');
 
-    <section class="panel">
+        const role = currentUser.role;
 
-        <div class="panel-header">
+        const rows = appointmentsCache.map(row => {
+            let actions = '';
 
-            <div>
-                <h2>${admin?'لوحة مراجعة المدفوعات':'لوحة إدارة طابور العيادة'}</h2>
+            if (role === 'accountant' || role === 'manager') {
+                if (row.status === 'pending') {
+                    actions += `
+                        <button class="btn btn-success"
+                            onclick="changeAppointment('${row.id}','approved')">
+                            اعتماد
+                        </button>
+                        <button class="btn btn-danger"
+                            onclick="changeAppointment('${row.id}','cancelled')">
+                            رفض
+                        </button>
+                    `;
+                }
 
-                <p>
-                    ${admin
-                    ?'راجع سندات التحويل واعتمد الطلبات أو ارفض السند وألغِ الحجز.'
-                    :'إدارة المرضى المعتمدين ماليًا ومتابعة مواعيد العودة.'}
-                </p>
-            </div>
-
-            <div class="stats">
-
-                <div class="stat">
-                    <b>${admin?waiting.length:active.length}</b>
-                    <small>${admin?'طلبات للمراجعة':'في العيادة الآن'}</small>
-                </div>
-
-                <div class="stat">
-                    <b>${approved.length}</b>
-                    <small>بانتظار الطبيب</small>
-                </div>
-
-                <div class="stat">
-                    <b>${rows.length}</b>
-                    <small>إجمالي الطلبات</small>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="panel-grid">
-
-            <section class="card">
-
-                <div class="toolbar">
-
-                    <div>
-                        <h3>${admin?'طلبات بانتظار مراجعة الدفع':'الطابور الحالي'}</h3>
-                        <span class="hint">بيانات مباشرة من الخادم</span>
-                    </div>
-
-                    <button class="secondary"
-                    onclick="renderDashboard('${role}')">
-                    ⟳ تحديث
+                actions += `
+                    <button class="btn btn-light"
+                        onclick="viewReceipt('${row.id}')">
+                        السند
                     </button>
+                `;
 
+                actions += `
+                    <button class="btn btn-light"
+                        onclick="rescheduleAppointment('${row.id}')">
+                        إعادة جدولة
+                    </button>
+                `;
+            }
+
+            if (role === 'doctor' || role === 'manager') {
+                if (row.status === 'approved') {
+                    actions += `
+                        <button class="btn btn-primary"
+                            onclick="changeAppointment('${row.id}','in_progress')">
+                            بدء الكشف
+                        </button>
+                    `;
+                }
+
+                if (row.status === 'in_progress') {
+                    actions += `
+                        <button class="btn btn-success"
+                            onclick="changeAppointment('${row.id}','completed')">
+                            إنهاء الكشف
+                        </button>
+                    `;
+                }
+
+                if (['in_progress','completed'].includes(row.status)) {
+                    actions += `
+                        <button class="btn btn-light"
+                            onclick="scheduleReturn('${row.id}')">
+                            موعد عودة
+                        </button>
+                    `;
+                }
+
+                if (row.returnStatus === 'scheduled') {
+                    actions += `
+                        <button class="btn btn-success"
+                            onclick="returnAction('${row.id}','attended')">
+                            تسجيل حضور العودة
+                        </button>
+                    `;
+                }
+
+                if (row.returnStatus === 'attended' && !row.returnStartedAt) {
+                    actions += `
+                        <button class="btn btn-primary"
+                            onclick="returnAction('${row.id}','start')">
+                            بدء كشف العودة
+                        </button>
+                    `;
+                }
+
+                if (row.returnStatus === 'attended') {
+                    actions += `
+                        <button class="btn btn-success"
+                            onclick="returnAction('${row.id}','completed')">
+                            إنهاء العودة
+                        </button>
+                    `;
+                }
+            }
+
+            if (['manager','receptionist'].includes(role)) {
+                actions += `
+                    <button class="btn btn-warning"
+                        onclick="rescheduleAppointment('${row.id}')">
+                        تعديل الموعد
+                    </button>
+                `;
+            }
+
+            return `
+                <tr>
+                    <td>${escapeHTML(row.name)}</td>
+                    <td>${escapeHTML(row.phone)}</td>
+                    <td>${escapeHTML(row.doctor)}</td>
+                    <td>${formatDate(row.date)}</td>
+                    <td>${badge(row.status)}</td>
+                    <td>${escapeHTML(row.appointmentTime || '—')}</td>
+                    <td>${badge(row.returnStatus)}</td>
+                    <td>${actions || '—'}</td>
+                </tr>
+            `;
+        }).join('');
+
+        $('#panel-appointments').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة الحجوزات</h3>
+                    <span class="badge blue">${appointmentsCache.length} حجز</span>
                 </div>
 
                 <div class="table-wrap">
-
-                    <table class="table">
-
+                    <table>
                         <thead>
                             <tr>
-                                <th>${admin?'رقم':'الدور'}</th>
-                                <th>اسم المريض</th>
-                                <th>العيادة</th>
-                                <th>موعد الزيارة</th>
+                                <th>المريض</th>
+                                <th>الهاتف</th>
+                                <th>الطبيب</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                                <th>الوقت</th>
+                                <th>العودة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows || '<tr><td colspan="8">لا توجد حجوزات</td></tr>'}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        panelError('appointments',error);
+    }
+}
+
+async function changeAppointment(id,status) {
+    if (!confirm('هل تريد تنفيذ هذا الإجراء؟')) return;
+
+    try {
+        await apiRequest('/api/appointments/' + id, {
+            method:'PATCH',
+            body:JSON.stringify({status})
+        });
+
+        alert('تم تحديث حالة الحجز');
+        await loadAppointments();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function rescheduleAppointment(id) {
+    const date = prompt('أدخل التاريخ الجديد بصيغة YYYY-MM-DD');
+    if (!date) return;
+
+    try {
+        await apiRequest('/api/appointments/' + id + '/reschedule', {
+            method:'POST',
+            body:JSON.stringify({date})
+        });
+
+        alert('تم تغيير الموعد بنجاح');
+        loadAppointments();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function scheduleReturn(id) {
+    const date = prompt('أدخل تاريخ العودة بصيغة YYYY-MM-DD');
+    if (!date) return;
+
+    try {
+        await apiRequest('/api/appointments/' + id + '/return', {
+            method:'POST',
+            body:JSON.stringify({
+                action:'schedule',
+                date
+            })
+        });
+
+        alert('تم تحديد موعد العودة');
+        loadAppointments();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function returnAction(id,action) {
+    if (!confirm('تأكيد تنفيذ الإجراء؟')) return;
+
+    try {
+        await apiRequest('/api/appointments/' + id + '/return', {
+            method:'POST',
+            body:JSON.stringify({action})
+        });
+
+        alert('تم تنفيذ الإجراء بنجاح');
+        loadAppointments();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function viewReceipt(id) {
+    try {
+        const response = await fetch(
+            API_BASE + '/api/appointments/' + id + '/receipt',
+            {
+                headers:{
+                    Authorization:'Bearer ' + token
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('تعذر فتح سند التحويل');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const win = window.open();
+        if (!win) {
+            URL.revokeObjectURL(url);
+            throw new Error('يرجى السماح بالنوافذ المنبثقة');
+        }
+
+        win.document.write(`
+            <html>
+            <head><title>سند التحويل</title></head>
+            <body style="margin:0;background:#111;display:grid;place-items:center">
+            <img src="${url}" style="max-width:100%;max-height:100vh">
+            </body>
+            </html>
+        `);
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* =========================================
+   الأطباء
+========================================= */
+
+async function loadDoctors() {
+    try {
+        doctorsCache = await apiRequest('/api/doctors');
+
+        const rows = doctorsCache.map(d => `
+            <tr>
+                <td>${escapeHTML(d.name)}</td>
+                <td>${escapeHTML(d.specialty || '—')}</td>
+                <td>${escapeHTML(d.phone || '—')}</td>
+                <td>${badge(d.active === false ? 'cancelled' : 'approved')}</td>
+                <td>
+                    <button class="btn btn-warning"
+                        onclick="editDoctor('${d.id}')">تعديل</button>
+                    <button class="btn btn-danger"
+                        onclick="disableDoctor('${d.id}')">إيقاف</button>
+                </td>
+            </tr>
+        `).join('');
+
+        $('#panel-doctors').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة الأطباء</h3>
+                    <button class="btn btn-primary" onclick="doctorForm()">إضافة طبيب</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>التخصص</th>
+                                <th>الهاتف</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows || '<tr><td colspan="5">لا يوجد أطباء</td></tr>'}</tbody>
+                    </table>
+                </div>
+
+                <div id="doctorEditor"></div>
+            </div>
+        `;
+
+    } catch (error) {
+        panelError('doctors',error);
+    }
+}
+
+function doctorForm(doctor = null) {
+    $('#doctorEditor').innerHTML = `
+        <div class="section">
+            <h3>${doctor ? 'تعديل الطبيب' : 'إضافة طبيب جديد'}</h3>
+
+            <form id="doctorForm" class="grid">
+                <div class="field">
+                    <label>اسم الطبيب</label>
+                    <input name="name" required value="${escapeHTML(doctor?.name || '')}">
+                </div>
+
+                <div class="field">
+                    <label>التخصص</label>
+                    <input name="specialty" value="${escapeHTML(doctor?.specialty || '')}">
+                </div>
+
+                <div class="field">
+                    <label>الهاتف</label>
+                    <input name="phone" value="${escapeHTML(doctor?.phone || '')}">
+                </div>
+
+                <div class="field">
+                    <label>الحالة</label>
+                    <select name="active">
+                        <option value="true">نشط</option>
+                        <option value="false">متوقف</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary full">حفظ الطبيب</button>
+            </form>
+        </div>
+    `;
+
+    $('#doctorForm').addEventListener('submit',async event => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+
+        const body = {
+            name:form.get('name'),
+            specialty:form.get('specialty'),
+            phone:form.get('phone'),
+            active:form.get('active') === 'true'
+        };
+
+        try {
+            await apiRequest(
+                doctor ? '/api/doctors/' + doctor.id : '/api/doctors',
+                {
+                    method:doctor ? 'PATCH' : 'POST',
+                    body:JSON.stringify(body)
+                }
+            );
+
+            alert('تم حفظ بيانات الطبيب');
+            loadDoctors();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
+
+function editDoctor(id) {
+    const doctor = doctorsCache.find(d => d.id === id);
+    if (doctor) doctorForm(doctor);
+}
+
+async function disableDoctor(id) {
+    if (!confirm('هل تريد إيقاف هذا الطبيب؟')) return;
+
+    try {
+        await apiRequest('/api/doctors/' + id,{
+            method:'DELETE'
+        });
+
+        loadDoctors();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* =========================================
+   ساعات العمل
+========================================= */
+
+async function loadHours() {
+    try {
+        const data = await apiRequest('/api/clinic/hours');
+        const settings = data[0] || {};
+
+        const days = [
+            ['0','الأحد'],
+            ['1','الإثنين'],
+            ['2','الثلاثاء'],
+            ['3','الأربعاء'],
+            ['4','الخميس'],
+            ['5','الجمعة'],
+            ['6','السبت']
+        ];
+
+        $('#panel-hours').innerHTML = `
+            <div class="section">
+                <h3>إعداد ساعات العمل</h3>
+
+                <form id="hoursForm">
+
+                    <div class="grid">
+                        <div class="field">
+                            <label>الحد اليومي للحجوزات</label>
+                            <input type="number" name="maxAppointments"
+                                min="1" max="500"
+                                value="${settings.maxAppointmentsPerDoctorPerDay || 20}">
+                        </div>
+
+                        <div class="field">
+                            <label>المنطقة الزمنية</label>
+                            <input name="timezone"
+                                value="${escapeHTML(settings.timezone || 'Asia/Aden')}">
+                        </div>
+                    </div>
+
+                    <h3>الجدول الأسبوعي</h3>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>اليوم</th>
+                                    <th>الحالة</th>
+                                    <th>البداية</th>
+                                    <th>النهاية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${days.map(day => {
+                                    const slot = settings.weeklyHours?.[day[0]] || {};
+                                    return `
+                                        <tr>
+                                            <td>${day[1]}</td>
+                                            <td>
+                                                <select id="day-${day[0]}-closed">
+                                                    <option value="false" ${slot.closed === true ? '' : 'selected'}>مفتوح</option>
+                                                    <option value="true" ${slot.closed === true ? 'selected' : ''}>مغلق</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="time" id="day-${day[0]}-start"
+                                                    value="${slot.start || '09:00'}">
+                                            </td>
+                                            <td>
+                                                <input type="time" id="day-${day[0]}-end"
+                                                    value="${slot.end || '17:00'}">
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br>
+
+                    <div class="field">
+                        <label>الإجازات الرسمية (كل تاريخ في سطر)</label>
+                        <textarea name="holidays">${(settings.holidays || []).map(x => typeof x === 'string' ? x : x.date).join('\n')}</textarea>
+                    </div>
+
+                    <br>
+
+                    <div class="field">
+                        <label>أيام الإغلاق (كل تاريخ في سطر)</label>
+                        <textarea name="closedDates">${(settings.closedDates || []).join('\n')}</textarea>
+                    </div>
+
+                    <br>
+                    <button class="btn btn-primary">حفظ إعدادات العمل</button>
+                </form>
+            </div>
+        `;
+
+        $('#hoursForm').addEventListener('submit',saveHours);
+
+    } catch (error) {
+        panelError('hours',error);
+    }
+}
+
+async function saveHours(event) {
+    event.preventDefault();
+
+    const form = new FormData(event.target);
+
+    const weeklyHours = {};
+
+    for (let i=0;i<7;i++) {
+        weeklyHours[i] = {
+            closed:$('#day-' + i + '-closed').value === 'true',
+            start:$('#day-' + i + '-start').value,
+            end:$('#day-' + i + '-end').value
+        };
+    }
+
+    const body = {
+        weeklyHours,
+        holidays:form.get('holidays').split('\n').map(x => x.trim()).filter(Boolean),
+        closedDates:form.get('closedDates').split('\n').map(x => x.trim()).filter(Boolean),
+        timezone:form.get('timezone'),
+        maxAppointmentsPerDoctorPerDay:Number(form.get('maxAppointments'))
+    };
+
+    try {
+        await apiRequest('/api/clinic/hours',{
+            method:'PUT',
+            body:JSON.stringify(body)
+        });
+
+        alert('تم حفظ ساعات العمل');
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* =========================================
+   المستخدمون
+========================================= */
+
+async function loadUsers() {
+    try {
+        const users = await apiRequest('/api/users');
+
+        const rows = users.map(user => `
+            <tr>
+                <td>${escapeHTML(user.name)}</td>
+                <td>${escapeHTML(user.username)}</td>
+                <td>${escapeHTML(roleName(user.role))}</td>
+                <td>${badge(user.active === false ? 'cancelled' : 'approved')}</td>
+                <td>
+                    <button class="btn btn-warning"
+                        onclick="toggleUser('${user.id}',${user.active !== false})">
+                        ${user.active === false ? 'تفعيل' : 'تعطيل'}
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        $('#panel-users').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة المستخدمين</h3>
+                    <button class="btn btn-primary" onclick="userForm()">إضافة مستخدم</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>اسم المستخدم</th>
+                                <th>الصلاحية</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+
+                <div id="userEditor"></div>
+            </div>
+        `;
+
+    } catch (error) {
+        panelError('users',error);
+    }
+}
+
+async function userForm() {
+    try {
+        doctorsCache = await apiRequest('/api/doctors');
+    } catch (_) {}
+
+    $('#userEditor').innerHTML = `
+        <div class="section">
+            <h3>إضافة مستخدم</h3>
+
+            <form id="userForm" class="grid">
+                <div class="field">
+                    <label>الاسم الكامل</label>
+                    <input name="name" required>
+                </div>
+
+                <div class="field">
+                    <label>اسم المستخدم</label>
+                    <input name="username" required minlength="3">
+                </div>
+
+                <div class="field">
+                    <label>كلمة المرور</label>
+                    <input name="password" type="password" required minlength="12">
+                </div>
+
+                <div class="field">
+                    <label>الصلاحية</label>
+                    <select name="role" id="newUserRole">
+                        <option value="manager">مدير</option>
+                        <option value="accountant">محاسب</option>
+                        <option value="receptionist">استقبال</option>
+                        <option value="doctor">طبيب</option>
+                    </select>
+                </div>
+
+                <div class="field full hidden" id="doctorSelectField">
+                    <label>ربط حساب الطبيب</label>
+                    <select name="doctorId">
+                        ${doctorsCache.map(d => `
+                            <option value="${d.id}">${escapeHTML(d.name)}</option>
+                        `).join('')}
+                    </select>
+                </div>
+
+                <button class="btn btn-primary full">إنشاء المستخدم</button>
+            </form>
+        </div>
+    `;
+
+    $('#newUserRole').addEventListener('change',event => {
+        $('#doctorSelectField').classList.toggle(
+            'hidden',
+            event.target.value !== 'doctor'
+        );
+    });
+
+    $('#userForm').addEventListener('submit',async event => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+
+        try {
+            await apiRequest('/api/users',{
+                method:'POST',
+                body:JSON.stringify({
+                    name:form.get('name'),
+                    username:form.get('username'),
+                    password:form.get('password'),
+                    role:form.get('role'),
+                    doctorId:form.get('doctorId') || null
+                })
+            });
+
+            alert('تم إنشاء المستخدم');
+            loadUsers();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
+
+async function toggleUser(id,active) {
+    if (!confirm('هل تريد تغيير حالة المستخدم؟')) return;
+
+    try {
+        await apiRequest('/api/users/' + id,{
+            method:'PATCH',
+            body:JSON.stringify({active:!active})
+        });
+
+        loadUsers();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* =========================================
+   المرضى
+========================================= */
+
+async function loadPatients() {
+    try {
+        patientsCache = await apiRequest('/api/patients');
+
+        const rows = patientsCache.map(p => `
+            <tr>
+                <td>${escapeHTML(p.name)}</td>
+                <td>${escapeHTML(p.phone)}</td>
+                <td>${escapeHTML(p.age ?? '—')}</td>
+                <td>${escapeHTML(p.dateOfBirth || '—')}</td>
+                <td>
+                    <button class="btn btn-warning"
+                        onclick="editPatient('${p.id}')">تعديل</button>
+
+                    ${['manager','doctor'].includes(currentUser.role) ? `
+                        <button class="btn btn-primary"
+                            onclick="openMedical('${p.id}')">
+                            الملف الطبي
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join('');
+
+        $('#panel-patients').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة المرضى</h3>
+                    <button class="btn btn-primary" onclick="patientForm()">إضافة مريض</button>
+                </div>
+
+                <div class="field">
+                    <label>البحث عن مريض</label>
+                    <input id="patientSearch" placeholder="الاسم أو رقم الهاتف">
+                </div>
+
+                <br>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>الهاتف</th>
+                                <th>العمر</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsRows">${rows}</tbody>
+                    </table>
+                </div>
+
+                <div id="patientEditor"></div>
+            </div>
+        `;
+
+        $('#patientSearch').addEventListener('input',event => {
+            const q = event.target.value.toLowerCase();
+
+            $('#patientsRows').innerHTML = patientsCache
+                .filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.phone.includes(q)
+                )
+                .map(p => `
+                    <tr>
+                        <td>${escapeHTML(p.name)}</td>
+                        <td>${escapeHTML(p.phone)}</td>
+                        <td>${escapeHTML(p.age ?? '—')}</td>
+                        <td>${escapeHTML(p.dateOfBirth || '—')}</td>
+                        <td>
+                            <button class="btn btn-warning"
+                                onclick="editPatient('${p.id}')">تعديل</button>
+                            ${['manager','doctor'].includes(currentUser.role) ? `
+                                <button class="btn btn-primary"
+                                    onclick="openMedical('${p.id}')">الملف الطبي</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+        });
+
+    } catch (error) {
+        panelError('patients',error);
+    }
+}
+
+function patientForm(patient = null) {
+    $('#patientEditor').innerHTML = `
+        <div class="section">
+            <h3>${patient ? 'تعديل بيانات المريض' : 'إضافة مريض جديد'}</h3>
+
+            <form id="patientForm" class="grid">
+                <div class="field">
+                    <label>اسم المريض</label>
+                    <input name="name" required value="${escapeHTML(patient?.name || '')}">
+                </div>
+
+                <div class="field">
+                    <label>رقم الهاتف</label>
+                    <input name="phone" required value="${escapeHTML(patient?.phone || '')}">
+                </div>
+
+                <div class="field">
+                    <label>تاريخ الميلاد</label>
+                    <input type="date" name="dateOfBirth"
+                        value="${escapeHTML(patient?.dateOfBirth || '')}">
+                </div>
+
+                <div class="field">
+                    <label>العمر</label>
+                    <input type="number" name="age" min="0"
+                        value="${escapeHTML(patient?.age ?? '')}">
+                </div>
+
+                <button class="btn btn-primary full">حفظ البيانات</button>
+            </form>
+        </div>
+    `;
+
+    $('#patientForm').addEventListener('submit',async event => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+
+        const body = {
+            name:form.get('name'),
+            phone:form.get('phone'),
+            dateOfBirth:form.get('dateOfBirth') || null,
+            age:form.get('age') ? Number(form.get('age')) : null
+        };
+
+        try {
+            await apiRequest(
+                patient ? '/api/patients/' + patient.id : '/api/patients',
+                {
+                    method:patient ? 'PATCH' : 'POST',
+                    body:JSON.stringify(body)
+                }
+            );
+
+            alert('تم حفظ بيانات المريض');
+            loadPatients();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
+
+function editPatient(id) {
+    const patient = patientsCache.find(p => p.id === id);
+    if (patient) patientForm(patient);
+}
+
+/* =========================================
+   الملفات الطبية
+========================================= */
+
+async function loadMedical() {
+    $('#panel-medical').innerHTML = `
+        <div class="section">
+            <h3>الملفات الطبية</h3>
+            <p class="muted">اختر مريضًا لعرض ملفه الطبي أو إضافة سجل زيارة.</p>
+            <div class="field">
+                <label>البحث عن مريض</label>
+                <input id="medicalSearch" placeholder="اسم المريض أو رقم الهاتف">
+            </div>
+            <br>
+            <div id="medicalPatients"></div>
+        </div>
+    `;
+
+    try {
+        patientsCache = await apiRequest('/api/patients');
+        renderMedicalPatients(patientsCache);
+
+        $('#medicalSearch').addEventListener('input',event => {
+            const q = event.target.value.toLowerCase();
+
+            renderMedicalPatients(
+                patientsCache.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.phone.includes(q)
+                )
+            );
+        });
+
+    } catch (error) {
+        panelError('medical',error);
+    }
+}
+
+function renderMedicalPatients(rows) {
+    $('#medicalPatients').innerHTML = rows.map(p => `
+        <div class="waiting-card">
+            <div>
+                <strong>${escapeHTML(p.name)}</strong>
+                <div class="muted">${escapeHTML(p.phone)}</div>
+            </div>
+            <button class="btn btn-primary"
+                onclick="openMedical('${p.id}')">فتح الملف</button>
+        </div>
+    `).join('') || '<div class="empty">لا يوجد مرضى</div>';
+}
+
+async function openMedical(id) {
+    try {
+        const data = await apiRequest('/api/patients/' + id + '/medical-record');
+
+        $('#panel-medical').innerHTML = `
+            <div class="section">
+                <button class="btn btn-light" onclick="loadMedical()">رجوع</button>
+                <h3>الملف الطبي: ${escapeHTML(data.patient.name)}</h3>
+
+                <div class="notice">
+                    الهاتف: ${escapeHTML(data.patient.phone)}
+                </div>
+
+                <h3>السجل السابق</h3>
+
+                ${data.records.map(r => `
+                    <div class="section">
+                        <strong>التشخيص:</strong>
+                        <p>${escapeHTML(r.diagnosis || '—')}</p>
+                        <strong>الأدوية:</strong>
+                        <p>${escapeHTML((r.medicines || []).join('، ') || '—')}</p>
+                        <strong>الوصفة:</strong>
+                        <p>${escapeHTML(r.prescription || '—')}</p>
+                        <strong>ملاحظات:</strong>
+                        <p>${escapeHTML(r.notes || '—')}</p>
+                        <small class="muted">${escapeHTML(r.createdAt)}</small>
+                    </div>
+                `).join('') || '<div class="empty">لا توجد سجلات طبية سابقة</div>'}
+
+                <h3>إضافة سجل طبي جديد</h3>
+
+                <form id="medicalForm">
+                    <div class="field">
+                        <label>التشخيص</label>
+                        <textarea name="diagnosis"></textarea>
+                    </div>
+                    <br>
+                    <div class="field">
+                        <label>الأدوية (كل دواء في سطر)</label>
+                        <textarea name="medicines"></textarea>
+                    </div>
+                    <br>
+                    <div class="field">
+                        <label>الوصفة الطبية</label>
+                        <textarea name="prescription"></textarea>
+                    </div>
+                    <br>
+                    <div class="field">
+                        <label>ملاحظات الطبيب</label>
+                        <textarea name="notes"></textarea>
+                    </div>
+                    <br>
+                    <button class="btn btn-primary">حفظ السجل الطبي</button>
+                </form>
+            </div>
+        `;
+
+        $('#medicalForm').addEventListener('submit',async event => {
+            event.preventDefault();
+
+            const form = new FormData(event.target);
+
+            try {
+                await apiRequest('/api/patients/' + id + '/medical-record',{
+                    method:'POST',
+                    body:JSON.stringify({
+                        diagnosis:form.get('diagnosis'),
+                        medicines:form.get('medicines').split('\n').map(x => x.trim()).filter(Boolean),
+                        prescription:form.get('prescription'),
+                        notes:form.get('notes')
+                    })
+                });
+
+                alert('تم حفظ السجل الطبي');
+                openMedical(id);
+
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* =========================================
+   الفواتير والمدفوعات
+========================================= */
+
+async function loadFinance() {
+    try {
+        [invoicesCache,paymentsCache,appointmentsCache] = await Promise.all([
+            apiRequest('/api/invoices'),
+            apiRequest('/api/payments'),
+            apiRequest('/api/appointments')
+        ]);
+
+        $('#panel-finance').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة الفواتير والمدفوعات</h3>
+                    <button class="btn btn-primary" onclick="invoiceForm()">إنشاء فاتورة</button>
+                </div>
+
+                <div class="grid-3">
+                    <div class="stat">
+                        <small>عدد الفواتير</small>
+                        <strong>${invoicesCache.length}</strong>
+                    </div>
+                    <div class="stat">
+                        <small>عدد المدفوعات</small>
+                        <strong>${paymentsCache.length}</strong>
+                    </div>
+                    <div class="stat">
+                        <small>إجمالي الفواتير</small>
+                        <strong>${money(invoicesCache.reduce((s,x)=>s+Number(x.totalAmount),0))}</strong>
+                    </div>
+                </div>
+
+                <br>
+
+                <h3>الفواتير</h3>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المريض</th>
+                                <th>الإجمالي</th>
+                                <th>المدفوع</th>
+                                <th>المتبقي</th>
                                 <th>الحالة</th>
                                 <th>الإجراء</th>
                             </tr>
                         </thead>
-
-                        <tbody>${tableRows}</tbody>
-
+                        <tbody>
+                            ${invoicesCache.map(i => `
+                                <tr>
+                                    <td>${escapeHTML(i.patientName)}</td>
+                                    <td>${money(i.totalAmount)}</td>
+                                    <td>${money(i.paidAmount)}</td>
+                                    <td>${money(i.remainingAmount)}</td>
+                                    <td>${badge(i.status)}</td>
+                                    <td>
+                                        <button class="btn btn-primary"
+                                            onclick="paymentForm('${i.appointmentId}','${i.id}',${i.remainingAmount})">
+                                            تسجيل دفعة
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="6">لا توجد فواتير</td></tr>'}
+                        </tbody>
                     </table>
-
                 </div>
 
-            </section>
+                <br>
 
-            <aside class="card">
+                <h3>المدفوعات</h3>
 
-                <div class="card-title">
-                    <span class="iconbox">${admin?'▣':'✚'}</span>
-
-                    <div>
-                        <h3>${admin?'مهام المحاسب':'مهام الطبيب'}</h3>
-                        <p>صلاحيات منفصلة حسب نوع الحساب</p>
-                    </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المريض</th>
+                                <th>المبلغ</th>
+                                <th>العملة</th>
+                                <th>طريقة الدفع</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${paymentsCache.map(p => `
+                                <tr>
+                                    <td>${escapeHTML(p.patientName)}</td>
+                                    <td>${money(p.amount)}</td>
+                                    <td>${escapeHTML(p.currency)}</td>
+                                    <td>${escapeHTML(p.method)}</td>
+                                    <td>${badge(p.status)}</td>
+                                    <td>${escapeHTML(p.createdAt)}</td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="6">لا توجد مدفوعات</td></tr>'}
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="side-note">
-                    <b>${admin?'تدقيق السندات':'تنظيم أدوار المرضى'}</b>
+                <div id="financeEditor"></div>
+            </div>
+        `;
 
-                    ${admin
-                    ?'افتح صورة السند وتحقق من بيانات التحويل وقيمة 3,000 ريال قبل اعتماد الطلب. ويمكنك رفض السند وإلغاء الحجز إذا كان غير صحيح.'
-                    :'سجل حضور المريض وبدء الكشف أو تجاوزه أو إنهاء الكشف، وحدد موعد العودة عند الحاجة.'}
+    } catch (error) {
+        panelError('finance',error);
+    }
+}
+
+function invoiceForm() {
+    $('#financeEditor').innerHTML = `
+        <div class="section">
+            <h3>إنشاء فاتورة</h3>
+
+            <form id="invoiceForm" class="grid">
+                <div class="field full">
+                    <label>الحجز</label>
+                    <select name="appointmentId" required>
+                        ${appointmentsCache.map(a => `
+                            <option value="${a.id}">
+                                ${escapeHTML(a.name)} - ${escapeHTML(a.date)}
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
 
-                <div class="side-note">
-                    <b>ملاحظة مهمة</b>
-                    تنبيه أمني: لا توجد مصادقة في الباك إند الحالي؛ لا تنشر النظام قبل إضافة تسجيل دخول وصلاحيات للخادم.
+                <div class="field">
+                    <label>إجمالي الفاتورة</label>
+                    <input type="number" name="totalAmount" min="1" required>
                 </div>
 
-            </aside>
+                <div class="field">
+                    <label>العملة</label>
+                    <select name="currency">
+                        <option value="YER">YER</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
 
+                <div class="field full">
+                    <label>الوصف</label>
+                    <input name="description">
+                </div>
+
+                <button class="btn btn-primary full">حفظ الفاتورة</button>
+            </form>
         </div>
+    `;
 
-        ${!admin?`
+    $('#invoiceForm').addEventListener('submit',async event => {
+        event.preventDefault();
 
-        <section class="card return-section">
+        const form = new FormData(event.target);
 
-            <div class="return-heading">
-                <div>
-                    <h3>◷ متابعة مواعيد العودة</h3>
-                    <p>متابعة المرضى الذين حدد الطبيب لهم موعد مراجعة بعد الزيارة.</p>
-                </div>
-                <span class="badge blue">متابعة العودة</span>
-            </div>
+        try {
+            await apiRequest('/api/invoices',{
+                method:'POST',
+                body:JSON.stringify({
+                    appointmentId:form.get('appointmentId'),
+                    totalAmount:Number(form.get('totalAmount')),
+                    currency:form.get('currency'),
+                    description:form.get('description')
+                })
+            });
 
-            <div class="return-stats">
+            alert('تم إنشاء الفاتورة');
+            loadFinance();
 
-                <div class="return-stat">
-                    <b>${scheduledReturns}</b>
-                    <small>مواعيد عودة قادمة</small>
-                </div>
-
-                <div class="return-stat">
-                    <b>${attendedReturns}</b>
-                    <small>حضروا للمراجعة</small>
-                </div>
-
-                <div class="return-stat">
-                    <b>${missedReturns}</b>
-                    <small>لم يحضروا</small>
-                </div>
-
-                <div class="return-stat">
-                    <b>${cancelledReturns}</b>
-                    <small>مواعيد ملغاة</small>
-                </div>
-
-            </div>
-
-            <div class="table-wrap">
-
-                <table class="table return-table">
-
-                    <thead>
-                        <tr>
-                            <th>المريض</th>
-                            <th>العيادة</th>
-                            <th>تاريخ الزيارة</th>
-                            <th>موعد العودة</th>
-                            <th>حالة العودة</th>
-                            <th>الإجراء</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>${returnTableRows}</tbody>
-
-                </table>
-
-            </div>
-
-            <div class="return-help">
-                ملاحظة: يقترح النظام موعد العودة بعد 7 أيام من تاريخ الزيارة، ويمكن للطبيب تغييره. إذا مر الموعد دون تسجيل الحضور، تتحول الحالة تلقائيًا إلى «لم يحضر».
-            </div>
-
-        </section>
-
-        `:''}
-
-    </section>`;
-
-    window.scrollTo({top:0,behavior:'smooth'});
+        } catch (error) {
+            alert(error.message);
+        }
+    });
 }
 
-/* اعتماد الدفع */
+function paymentForm(appointmentId,invoiceId,remaining) {
+    $('#financeEditor').innerHTML = `
+        <div class="section">
+            <h3>تسجيل دفعة مالية</h3>
 
-async function approve(id){
+            <form id="paymentForm" class="grid">
+                <input type="hidden" name="appointmentId" value="${appointmentId}">
+                <input type="hidden" name="invoiceId" value="${invoiceId}">
 
-    if(!confirm('هل تأكدت من صحة سند التحويل وقيمة الرسوم؟'))return;
+                <div class="field">
+                    <label>المبلغ</label>
+                    <input type="number" name="amount" min="1"
+                        max="${remaining}" required>
+                </div>
 
-    try{
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}`,{
-            method:'PATCH',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({status:'approved'})
-        });
+                <div class="field">
+                    <label>طريقة الدفع</label>
+                    <select name="method">
+                        <option value="cash">نقدًا</option>
+                        <option value="transfer">تحويل</option>
+                        <option value="card">بطاقة</option>
+                    </select>
+                </div>
 
-        await renderDashboard('accountant');
+                <div class="field">
+                    <label>العملة</label>
+                    <select name="currency">
+                        <option value="YER">YER</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
 
-        toast('تم اعتماد الطلب وإضافته إلى طابور الطبيب');
+                <div class="field">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="paid">مدفوع</option>
+                        <option value="refunded">مسترد</option>
+                    </select>
+                </div>
 
-    }catch(error){
-        toast(error.message||'تعذر اعتماد الطلب');
+                <div class="field full">
+                    <label>رقم المرجع</label>
+                    <input name="reference">
+                </div>
+
+                <button class="btn btn-primary full">حفظ الدفعة</button>
+            </form>
+        </div>
+    `;
+
+    $('#paymentForm').addEventListener('submit',async event => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+
+        try {
+            await apiRequest('/api/payments',{
+                method:'POST',
+                body:JSON.stringify({
+                    appointmentId:form.get('appointmentId'),
+                    invoiceId:form.get('invoiceId'),
+                    amount:Number(form.get('amount')),
+                    method:form.get('method'),
+                    currency:form.get('currency'),
+                    status:form.get('status'),
+                    reference:form.get('reference')
+                })
+            });
+
+            alert('تم تسجيل الدفعة');
+            loadFinance();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
+
+/* =========================================
+   قائمة الانتظار
+========================================= */
+
+async function loadWaitlist() {
+    try {
+        const list = await apiRequest('/api/waitlist');
+
+        $('#panel-waitlist').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>قائمة الانتظار</h3>
+                    ${currentUser.role !== 'doctor' ? `
+                        <button class="btn btn-primary" onclick="waitlistForm()">
+                            إضافة منتظر
+                        </button>
+                    ` : ''}
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المريض</th>
+                                <th>الهاتف</th>
+                                <th>الطبيب</th>
+                                <th>التاريخ</th>
+                                <th>السبب</th>
+                                <th>الحالة</th>
+                                <th>الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${list.map(item => `
+                                <tr>
+                                    <td>${escapeHTML(item.name)}</td>
+                                    <td>${escapeHTML(item.phone)}</td>
+                                    <td>${escapeHTML(item.doctor)}</td>
+                                    <td>${escapeHTML(item.date)}</td>
+                                    <td>${escapeHTML(item.reason || item.note || '—')}</td>
+                                    <td>${badge(item.status)}</td>
+                                    <td>
+                                        <select onchange="updateWaitlist('${item.id}',this.value)">
+                                            <option value="">تغيير الحالة</option>
+                                            <option value="waiting">منتظر</option>
+                                            <option value="called">تم استدعاؤه</option>
+                                            <option value="served">تمت الخدمة</option>
+                                            <option value="cancelled">إلغاء</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="7">لا توجد طلبات انتظار</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="waitlistEditor"></div>
+            </div>
+        `;
+
+    } catch (error) {
+        panelError('waitlist',error);
     }
 }
 
-/* رفض السند وإلغاء الحجز */
+async function updateWaitlist(id,status) {
+    if (!status) return;
 
-async function cancelReceipt(id){
-
-    const confirmed=confirm(
-        'هل أنت متأكد من رفض سند التحويل وإلغاء الحجز؟\n\n' +
-        'سيتم إلغاء الطلب ولن ينتقل إلى طابور الطبيب.'
-    );
-
-    if(!confirmed)return;
-
-    try{
-
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}`,{
+    try {
+        await apiRequest('/api/waitlist/' + id,{
             method:'PATCH',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({status:'cancelled'})
-        });
-
-        await renderDashboard('accountant');
-
-        toast('تم رفض السند وإلغاء الحجز بنجاح');
-
-    }catch(error){
-
-        toast(error.message||'تعذر رفض السند وإلغاء الحجز');
-
-    }
-}
-
-/* إجراءات الطبيب */
-
-async function doctorAction(id,status){
-
-    try{
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}`,{
-            method:'PATCH',
-            headers:{'Content-Type':'application/json'},
             body:JSON.stringify({status})
         });
 
-        await renderDashboard('doctor');
+        loadWaitlist();
 
-        if(status==='in_progress')toast('تم تسجيل حضور المريض وبدء الكشف');
-        else if(status==='skipped')toast('تم تسجيل تجاوز الدور');
-        else toast('تم إنهاء الكشف');
-
-    }catch(error){
-        toast(error.message||'تعذر تحديث حالة المريض');
+    } catch (error) {
+        alert(error.message);
     }
 }
 
-/* تحديد موعد العودة */
+function waitlistForm() {
+    $('#waitlistEditor').innerHTML = `
+        <div class="section">
+            <h3>إضافة مريض لقائمة الانتظار</h3>
 
-async function scheduleReturn(id){
+            <form id="waitlistForm" class="grid">
+                <div class="field">
+                    <label>اسم المريض</label>
+                    <input name="name" required>
+                </div>
 
-    let rows;
+                <div class="field">
+                    <label>الهاتف</label>
+                    <input name="phone" required>
+                </div>
 
-    try{
-        rows=await loadAppointments();
-    }catch(error){
-        toast(error.message||'تعذر تحميل البيانات');
-        return;
+                <div class="field">
+                    <label>الطبيب</label>
+                    <input name="doctor" required>
+                </div>
+
+                <div class="field">
+                    <label>التاريخ</label>
+                    <input type="date" name="date" required>
+                </div>
+
+                <div class="field full">
+                    <label>ملاحظة</label>
+                    <textarea name="note"></textarea>
+                </div>
+
+                <button class="btn btn-primary full">إضافة للقائمة</button>
+            </form>
+        </div>
+    `;
+
+    $('#waitlistForm').addEventListener('submit',async event => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+
+        try {
+            await apiRequest('/api/waitlist',{
+                method:'POST',
+                body:JSON.stringify({
+                    name:form.get('name'),
+                    phone:form.get('phone'),
+                    doctor:form.get('doctor'),
+                    date:form.get('date'),
+                    note:form.get('note')
+                })
+            });
+
+            alert('تمت إضافة المريض');
+            loadWaitlist();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
+
+/* =========================================
+   الإشعارات
+========================================= */
+
+async function loadNotifications() {
+    try {
+        const [notifications,reminders] = await Promise.all([
+            apiRequest('/api/notifications'),
+            apiRequest('/api/notifications/reminders-due')
+        ]);
+
+        $('#panel-notifications').innerHTML = `
+            <div class="section">
+                <div class="section-title">
+                    <h3>إدارة الإشعارات</h3>
+                    <button class="btn btn-primary" onclick="sendReminders()">
+                        إرسال تذكيرات الغد
+                    </button>
+                </div>
+
+                <h3>المواعيد المستحقة للتذكير</h3>
+
+                ${reminders.map(r => `
+                    <div class="waiting-card">
+                        <div>
+                            <strong>${escapeHTML(r.name)}</strong>
+                            <div class="muted">${escapeHTML(r.doctor)} - ${escapeHTML(r.date)}</div>
+                        </div>
+                        <span>${escapeHTML(r.time || '—')}</span>
+                    </div>
+                `).join('') || '<div class="empty">لا توجد تذكيرات مستحقة</div>'}
+
+                <br>
+                <h3>سجل الإشعارات</h3>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الحجز</th>
+                                <th>النوع</th>
+                                <th>القناة</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${notifications.map(n => `
+                                <tr>
+                                    <td>${escapeHTML(n.appointmentId)}</td>
+                                    <td>${escapeHTML(n.type)}</td>
+                                    <td>${escapeHTML(n.channel)}</td>
+                                    <td>${badge(n.status)}</td>
+                                    <td>${escapeHTML(n.createdAt)}</td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="5">لا توجد إشعارات</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>
+
+                <h3>إرسال إشعار يدوي</h3>
+
+                <form id="notificationForm" class="grid">
+                    <div class="field">
+                        <label>الحجز</label>
+                        <select name="appointmentId">
+                            ${appointmentsCache.map(a => `
+                                <option value="${a.id}">
+                                    ${escapeHTML(a.name)} - ${escapeHTML(a.date)}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>نوع الإشعار</label>
+                        <select name="type">
+                            <option value="confirmation">تأكيد</option>
+                            <option value="reminder">تذكير</option>
+                            <option value="cancellation">إلغاء</option>
+                            <option value="rescheduled">إعادة جدولة</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary full">إرسال الإشعار</button>
+                </form>
+            </div>
+        `;
+
+        $('#notificationForm').addEventListener('submit',async event => {
+            event.preventDefault();
+
+            const form = new FormData(event.target);
+
+            try {
+                await apiRequest('/api/notifications',{
+                    method:'POST',
+                    body:JSON.stringify({
+                        appointmentId:form.get('appointmentId'),
+                        type:form.get('type')
+                    })
+                });
+
+                alert('تمت معالجة الإشعار');
+                loadNotifications();
+
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+    } catch (error) {
+        panelError('notifications',error);
     }
+}
 
-    const row=rows.find(item=>item.id===id);
+async function sendReminders() {
+    if (!confirm('هل تريد فحص مواعيد الغد وإرسال التذكيرات؟')) return;
 
-    if(!row){
-        toast('لم يتم العثور على الحجز');
-        return;
+    try {
+        const result = await apiRequest('/api/notifications/send-reminders',{
+            method:'POST'
+        });
+
+        alert(result.message);
+        loadNotifications();
+
+    } catch (error) {
+        alert(error.message);
     }
+}
 
-    if(!['in_progress','completed'].includes(row.status)){
-        toast('يمكن تحديد العودة بعد حضور المريض وبدء الكشف');
-        return;
+/* =========================================
+   سجل التدقيق
+========================================= */
+
+async function loadAudit() {
+    try {
+        const logs = await apiRequest('/api/audit-log?limit=200');
+
+        $('#panel-audit').innerHTML = `
+            <div class="section">
+                <h3>سجل العمليات والتدقيق</h3>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المستخدم</th>
+                                <th>الصلاحية</th>
+                                <th>العملية</th>
+                                <th>المسار</th>
+                                <th>النتيجة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${logs.map(log => `
+                                <tr>
+                                    <td>${escapeHTML(log.username)}</td>
+                                    <td>${escapeHTML(log.role)}</td>
+                                    <td>${escapeHTML(log.method)}</td>
+                                    <td dir="ltr">${escapeHTML(log.path)}</td>
+                                    <td>${escapeHTML(log.statusCode)}</td>
+                                    <td>${escapeHTML(log.at)}</td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="6">لا توجد عمليات مسجلة</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        panelError('audit',error);
     }
+}
 
-    const suggestedDate=addDays(row.date,7);
+/* =========================================
+   شاشة الانتظار داخل الإدارة
+========================================= */
 
-    const input=prompt(
-        'أدخل تاريخ موعد العودة للمريض:\nالتاريخ المقترح بعد 7 أيام: '+suggestedDate+'\n\nاكتب التاريخ بهذا الشكل: YYYY-MM-DD',
-        suggestedDate
+async function loadBoard() {
+    $('#panel-board').innerHTML = `
+        <div class="section">
+            <div class="section-title">
+                <h3>شاشة انتظار المرضى</h3>
+                <span class="badge green">اتصال مباشر</span>
+            </div>
+
+            <div id="adminWaiting"></div>
+        </div>
+    `;
+
+    try {
+        const data = await apiRequest('/api/waiting-room');
+
+        $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
+            <div class="waiting-card">
+                <div>
+                    <strong>${escapeHTML(row.doctor)}</strong>
+                    <div class="muted">${escapeHTML(row.time || '—')}</div>
+                </div>
+                <div>
+                    <div class="ticket">#${escapeHTML(row.ticket)}</div>
+                    ${escapeHTML(row.state)}
+                </div>
+            </div>
+        `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
+
+        startAdminWaitingStream();
+
+    } catch (error) {
+        panelError('board',error);
+    }
+}
+
+function startAdminWaitingStream() {
+    if (waitingEventSource) waitingEventSource.close();
+
+    waitingEventSource = new EventSource(
+        API_BASE + '/api/waiting-room/stream'
     );
 
-    if(input===null)return;
+    waitingEventSource.onmessage = event => {
+        try {
+            const data = JSON.parse(event.data);
 
-    const returnDate=input.trim();
+            if (!$('#adminWaiting')) return;
 
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(returnDate)){
-        toast('صيغة التاريخ غير صحيحة');
-        return;
-    }
+            $('#adminWaiting').innerHTML = (data.patients || []).map(row => `
+                <div class="waiting-card">
+                    <div>
+                        <strong>${escapeHTML(row.doctor)}</strong>
+                        <div class="muted">${escapeHTML(row.time || '—')}</div>
+                    </div>
+                    <div>
+                        <div class="ticket">#${escapeHTML(row.ticket)}</div>
+                        ${escapeHTML(row.state)}
+                    </div>
+                </div>
+            `).join('') || '<div class="empty">لا يوجد مرضى منتظرون</div>';
 
-    const parsedDate=new Date(returnDate+'T12:00:00');
-
-    if(isNaN(parsedDate.getTime())||localDateString(parsedDate)!==returnDate){
-        toast('التاريخ الذي أدخلته غير صالح');
-        return;
-    }
-
-    if(returnDate<localDateString()){
-        toast('لا يمكن تحديد موعد عودة في تاريخ سابق');
-        return;
-    }
-
-    if(returnDate<=row.date){
-        toast('يجب أن يكون موعد العودة بعد تاريخ الزيارة الأصلية');
-        return;
-    }
-
-    try{
-
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({action:'schedule',date:returnDate})
-        });
-
-        await renderDashboard('doctor');
-
-        toast('تم تحديد موعد العودة بنجاح');
-
-    }catch(error){
-        toast(error.message||'تعذر تحديد موعد العودة');
-    }
-}
-
-/* تسجيل حضور المريض للعودة */
-
-async function markReturnAttended(id){
-
-    let rows;
-
-    try{
-        rows=await loadAppointments();
-    }catch(error){
-        toast(error.message||'تعذر تحميل البيانات');
-        return;
-    }
-
-    const row=rows.find(item=>item.id===id);
-
-    if(!row||row.returnStatus!=='scheduled'){
-        toast('موعد العودة غير متاح للتسجيل');
-        return;
-    }
-
-    if(row.returnDate!==localDateString()){
-        toast('لا يمكن تسجيل الحضور إلا في تاريخ موعد العودة');
-        return;
-    }
-
-    try{
-
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({action:'attended'})
-        });
-
-        await renderDashboard('doctor');
-
-        toast('تم تسجيل حضور المريض للمراجعة');
-
-    }catch(error){
-        toast(error.message||'تعذر تسجيل الحضور');
-    }
-}
-
-/* إلغاء موعد العودة */
-
-async function cancelReturn(id){
-
-    if(!confirm('هل أنت متأكد من إلغاء موعد العودة؟'))return;
-
-    try{
-
-        await apiRequest(`/api/appointments/${encodeURIComponent(id)}/return`,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({action:'cancel'})
-        });
-
-        await renderDashboard('doctor');
-
-        toast('تم إلغاء موعد العودة دون إلغاء الحجز الأصلي');
-
-    }catch(error){
-        toast(error.message||'تعذر إلغاء موعد العودة');
-    }
-}
-
-/* سند التحويل */
-
-function viewReceipt(id){
-
-    const url=`/api/appointments/${encodeURIComponent(id)}/receipt`;
-
-    window.open(url,'_blank','noopener');
-}
-
-/* نسخ رقم الحساب */
-
-function copyAccount(){
-
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-
-        navigator.clipboard.writeText('30155444')
-        .then(()=>toast('تم نسخ رقم الحساب'))
-        .catch(()=>toast('رقم الحساب: 30155444'));
-
-    }else{
-
-        toast('رقم الحساب: 30155444');
-
-    }
-}
-
-/* التشغيل الأول */
-
-renderStatus();
-
-/* تحديث البيانات عند الرجوع للصفحة */
-
-document.addEventListener('visibilitychange',()=>{
-
-    if(!document.hidden){
-
-        renderStatus();
-
-        if(currentRole==='doctor'||currentRole==='accountant'){
-            renderDashboard(currentRole);
+        } catch (error) {
+            console.error(error);
         }
-    }
-});
+    };
+}
+
+/* =========================================
+   رسائل الأخطاء
+========================================= */
+
+function panelError(panel,error) {
+    const target = $('#panel-' + panel);
+
+    if (!target) return;
+
+    target.innerHTML = `
+        <div class="section">
+            <div class="result error">
+                ${escapeHTML(error.message)}
+            </div>
+            <button class="btn btn-primary" onclick="loadPanel('${panel}')">
+                إعادة المحاولة
+            </button>
+        </div>
+    `;
+}
+
+/* =========================================
+   تشغيل التطبيق
+========================================= */
+
+function setMinimumBookingDate() {
+    const input = document.querySelector('#bookingForm input[name="date"]');
+
+    if (!input) return;
+
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+
+    input.min = local.toISOString().slice(0,10);
+}
+
+async function startApplication() {
+    setMinimumBookingDate();
+    renderLastBooking();
+    await initializeAuth();
+    loadPublicWaiting();
+}
+
+startApplication();
 
 </script>
-
 </body>
 </html>
